@@ -1,9 +1,12 @@
 package tools.passwordmanager;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.event.ActionEvent;
+import javafx.event.Event;
 import javafx.event.EventHandler;
 import javafx.event.EventType;
 import javafx.fxml.FXML;
@@ -14,6 +17,9 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.control.cell.TextFieldTableCell;
+import javafx.scene.control.cell.TextFieldTreeCell;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
@@ -30,6 +36,7 @@ import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -71,9 +78,7 @@ public class MainController extends Application implements Initializable {
             createEmptyDefaultDataFile();
         }
         try {
-            TreeData rootData = (TreeData)c2.mainTreeView.getRoot().getValue();
-            Pair pair = new Pair("aaa", "bbb");
-            rootData.getPairs().add(pair);
+            TreeData rootData = convertTreeData((PmTreeItem)c2.mainTreeView.getRoot());
 
             try (FileOutputStream out = new FileOutputStream(DEFAULT_DATA_FILE.toFile())) {
                 JAXB.marshal(rootData, out);
@@ -83,12 +88,22 @@ public class MainController extends Application implements Initializable {
         }
     }
 
+    private TreeData convertTreeData(PmTreeItem item) {
+        TreeData treeData = item.getValue();
+        List<TreeData> childList = new ArrayList<>();
+        ObservableList<TreeItem<TreeData>> list = item.getChildren();
+        list.stream().forEach(value -> childList.add(convertTreeData((PmTreeItem)value)));
+        treeData.setChildList(childList);
+        return treeData;
+    }
+
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         loadData();
         mainTreeView.setRoot(rootItem);
         mainTreeView.getSelectionModel().selectedItemProperty().addListener(new MainTreeViewChangeListener());
         mainTreeView.getSelectionModel().selectFirst();
+        mainTreeView.setCellFactory(p -> new TextFieldTreeCellImpl());
 
         // コントローラーのフィールドとデータクラスのプロパティーを紐付ける
         colName.setCellValueFactory(new PropertyValueFactory<Pair, String>("key"));
@@ -96,6 +111,41 @@ public class MainController extends Application implements Initializable {
 
         colValue.setCellValueFactory(new PropertyValueFactory<Pair, String>("value"));
         colValue.setCellFactory(TextFieldTableCell.<Pair>forTableColumn());
+
+        /*
+        mainTableView.addEventFilter(TableColumn.CellEditEvent.ANY,
+                new EventHandler<TableColumn.CellEditEvent>(){
+                    @Override
+                    public void handle(TableColumn.CellEditEvent event) {
+
+                    }
+                });
+        */
+        /*
+        mainTableView.addEventFilter(MouseEvent.MOUSE_CLICKED,
+                new EventHandler<MouseEvent>() {
+                    @Override
+                    public void handle(MouseEvent event) {
+
+                    }
+                });
+        */
+        /*
+        mainTableView.addEventFilter(TableColumn.CellEditEvent.ANY,
+                nec EventHandler<TableColumn.CellEditEvent>(){
+
+                });
+        */
+        /*
+        mainTableView.addEventFilter(TableColumn.CellEditEvent.ANY,
+                new EventHandler<Event>() {
+                    @Override
+                    public void handle(Event event) {
+                        System.out.println("handle:"+event.toString());
+
+                    }
+                });
+        */
     }
 
     private void loadData() {
@@ -128,29 +178,23 @@ public class MainController extends Application implements Initializable {
         } catch (IOException e) {
             alert(e);
         }
-        TreeData rootData = new TreeData();
-        rootData.setName("Root");
 
-        TreeData childData = new TreeData();
-        childData.setName("Child");
-        childData.getPairs().add(new Pair("child1", "child1"));
-        rootData.addChild(childData);
-
-        return rootData;
+        return createDefaultTreeData("Root");
+    }
+    private TreeData createDefaultTreeData() {
+        return createDefaultTreeData("Group");
+    }
+    private TreeData createDefaultTreeData(String treeTitle) {
+        TreeData treeData = new TreeData();
+        treeData.setName(treeTitle);
+        treeData.addPairs(new Pair("ID", "", false, false));
+        treeData.addPairs(new Pair("Password", "", false, false));
+        treeData.addPairs(new Pair("Site", "", false, false));
+        return treeData;
     }
 
     @FXML
     public void handleMainTableViewMouseClicked(MouseEvent event) {
-        // 左ダブルクリック以外は終了
-        if (!(event.getButton()==MouseButton.PRIMARY && event.getClickCount()==2)) {
-            return ;
-        }
-
-        // 空のデータを追加して、"Name"を編集状態にする
-        ObservableList<Pair> list = mainTableView.getItems();
-        Pair pair = new Pair("", "");
-        list.add(pair);
-        mainTableView.edit(list.size()-1, colName);
     }
 
     private class MainTreeViewChangeListener implements ChangeListener {
@@ -168,20 +212,31 @@ public class MainController extends Application implements Initializable {
     }
 
     @FXML
-    public void handleTableViewNameCommeted(TableColumn.CellEditEvent<Pair, String> event) {
-        event.getRowValue().setKey(event.getNewValue());
-        removeEmptyRow(true);
+    public void handleTableViewNameStart(TableColumn.CellEditEvent<Pair, String> event) {
+        if (!event.getRowValue().isKeyEditable()) {
+            // 効かない・・・
+            event.consume();
+        }
     }
 
     @FXML
-    public void handleTableViewValueCommeted(TableColumn.CellEditEvent<Pair, String> event) {
+    public void handleTableViewNameCommited(TableColumn.CellEditEvent<Pair, String> event) {
+        event.getRowValue().setKey(event.getNewValue());
+        removeEmptyRow(true);
+        flushTableData();
+    }
+
+    @FXML
+    public void handleTableViewValueCommited(TableColumn.CellEditEvent<Pair, String> event) {
         event.getRowValue().setValue(event.getNewValue());
         removeEmptyRow(true);
+        flushTableData();
     }
 
     @FXML
     public void handleTableViewCancel(TableColumn.CellEditEvent<Pair, String> event) {
         removeEmptyRow(false);
+        flushTableData();
     }
 
     private void removeEmptyRow(boolean needConfirm) {
@@ -197,8 +252,75 @@ public class MainController extends Application implements Initializable {
         }
     }
 
-    private void flushTableData() {
+    @FXML
+    private void handleMenuClose(ActionEvent event) {
+        Platform.exit();
+    }
 
+    @FXML
+    private void handleMenuGroupNew(ActionEvent event) {
+        TreeData treeData = createDefaultTreeData();
+        PmTreeItem newTreeItem = new PmTreeItem(treeData);
+        PmTreeItem treeItem = (PmTreeItem)mainTreeView.getSelectionModel().getSelectedItem();
+        treeItem.addChildren(newTreeItem);
+    }
+
+    @FXML
+    private void handleMenuGroupEdit(ActionEvent event) {
+        mainTreeView.edit((PmTreeItem)mainTreeView.getFocusModel().getFocusedItem());
+    }
+
+    @FXML
+    private void handleMenuGroupDelete(ActionEvent event) {
+        PmTreeItem item = (PmTreeItem)mainTreeView.getFocusModel().getFocusedItem();
+        removeTreeItem(mainTreeView.getRoot(), item);
+    }
+    private void removeTreeItem(TreeItem parentItem, TreeItem item) {
+        ObservableList<TreeItem> childrens = parentItem.getChildren();
+        for (TreeItem child: childrens) {
+            if (child==item) {
+                childrens.remove(item);
+                break;
+            }
+            removeTreeItem(child, item);
+        }
+    }
+
+    @FXML
+    private void handleMenuContentsNew(ActionEvent event) {
+        // 空のデータを追加して、"Name"を編集状態にする
+        ObservableList<Pair> list = mainTableView.getItems();
+        Pair pair = new Pair("", "", true, true);
+        list.add(pair);
+        mainTableView.edit(list.size()-1, colName);
+    }
+
+    @FXML
+    private void handleMenuContentsEdit(ActionEvent event) {
+        Pair pair = (Pair)mainTableView.getSelectionModel().getSelectedItem();
+        TableColumn col = colName;
+
+        if (!pair.isKeyEditable()) {
+            col = colValue;
+        }
+
+        mainTableView.edit(mainTableView.getFocusModel().getFocusedCell().getRow(), col);
+    }
+
+    @FXML
+    private void handleMenuContentsDelete(ActionEvent event) {
+        ObservableList<Pair> list = mainTableView.getItems();
+        list.remove(mainTableView.getFocusModel().getFocusedCell().getRow());
+    }
+
+    private void flushTableData() {
+        TreeData treeData = (TreeData)((TreeItem)mainTreeView.getSelectionModel().getSelectedItem()).getValue();
+        List<Pair> flushList = new ArrayList<>();
+        ObservableList<Pair> list = mainTableView.getItems();
+
+        list.forEach(t -> flushList.add(t));
+
+        treeData.setPairs(flushList);
     }
 
     private class PmTreeItem extends TreeItem<TreeData> {
@@ -213,10 +335,74 @@ public class MainController extends Application implements Initializable {
                 list.add(new PmTreeItem(child));
             }
         }
-    }
 
+        public void addChildren(PmTreeItem newTreeItem) {
+            ObservableList list = getChildren();
+            list.add(newTreeItem);
+        }
+    }
     private void alert(Exception e) {
         e.printStackTrace();
+    }
+
+    private class TextFieldTreeCellImpl extends TreeCell<TreeData> {
+        private TextField textField;
+
+        @Override
+        public void startEdit() {
+            super.startEdit();
+
+            if (textField == null) {
+                createTextField();
+            }
+            setText(null);
+            setGraphic(textField);
+            textField.selectAll();
+        }
+
+        @Override
+        public void cancelEdit() {
+            super.cancelEdit();
+            setText((String) getItem().toString());
+            setGraphic(getTreeItem().getGraphic());
+        }
+        @Override
+        public void updateItem(TreeData item, boolean empty) {
+            super.updateItem(item, empty);
+
+            if (empty) {
+                setText(null);
+                setGraphic(null);
+            } else {
+                if (isEditing()) {
+                    if (textField != null) {
+                        textField.setText(getString());
+                    }
+                    setText(null);
+                    setGraphic(textField);
+                } else {
+                    setText(getString());
+                    setGraphic(getTreeItem().getGraphic());
+                }
+            }
+        }
+        private void createTextField() {
+            textField = new TextField(getString());
+            textField.setOnKeyReleased((KeyEvent t) -> {
+                if (t.getCode() == KeyCode.ENTER && !textField.getText().trim().equals("")) {
+                    TreeData d = getItem();
+                    d.setName(textField.getText());
+                    commitEdit(d);
+                } else if (t.getCode() == KeyCode.ESCAPE) {
+                    cancelEdit();
+                }
+            });
+        }
+
+        private String getString() {
+            return getItem() == null ? "" : getItem().toString();
+        }
+
     }
 }
 

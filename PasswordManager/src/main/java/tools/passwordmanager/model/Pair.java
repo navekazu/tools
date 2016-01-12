@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 public class Pair {
     private String key;
     private String value;
+    private boolean keyEditable;
+    private boolean orderChangeable;
+
     public boolean isBlank() {
         if (key==null && value==null) {
             return true;

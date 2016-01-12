@@ -10,12 +10,25 @@
         <menus>
           <Menu mnemonicParsing="false" text="File">
             <items>
-              <MenuItem mnemonicParsing="false" text="Close" />
+              <MenuItem mnemonicParsing="false" onAction="#handleMenuClose" text="Close" />
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Edit">
             <items>
-              <MenuItem mnemonicParsing="false" text="Delete" />
+                  <Menu mnemonicParsing="false" text="Group">
+                    <items>
+                      <MenuItem mnemonicParsing="false" onAction="#handleMenuGroupNew" text="New" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleMenuGroupEdit" text="Edit" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleMenuGroupDelete" text="Delete" />
+                    </items>
+                  </Menu>
+                  <Menu mnemonicParsing="false" text="Contents">
+                     <items>
+                        <MenuItem mnemonicParsing="false" onAction="#handleMenuContentsNew" text="New" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleMenuContentsEdit" text="Edit" />
+                        <MenuItem mnemonicParsing="false" onAction="#handleMenuContentsDelete" text="Delete" />
+                     </items>
+                  </Menu>
             </items>
           </Menu>
           <Menu mnemonicParsing="false" text="Help">
@@ -31,7 +44,7 @@
         <items>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
                <children>
-                  <TreeView id="mainTreeView" fx:id="mainTreeView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                  <TreeView id="mainTreeView" fx:id="mainTreeView" editable="true" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                </children>
             </AnchorPane>
           <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="160.0" prefWidth="100.0">
@@ -39,8 +52,8 @@
                   <TableView id="mainTableView" fx:id="mainTableView" editable="true" onMouseClicked="#handleMainTableViewMouseClicked" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                     <columns>
                       <TableColumn id="colCommand" prefWidth="50.0" resizable="false" sortable="false" />
-                      <TableColumn fx:id="colName" onEditCancel="#handleTableViewCancel" onEditCommit="#handleTableViewNameCommeted" prefWidth="150.0" sortable="false" text="Name" />
-                        <TableColumn fx:id="colValue" onEditCancel="#handleTableViewCancel" onEditCommit="#handleTableViewValueCommeted" prefWidth="150.0" sortable="false" text="Value" />
+                      <TableColumn fx:id="colName" onEditCancel="#handleTableViewCancel" onEditCommit="#handleTableViewNameCommited" onEditStart="#handleTableViewNameStart" prefWidth="150.0" sortable="false" text="Name" />
+                        <TableColumn fx:id="colValue" onEditCancel="#handleTableViewCancel" onEditCommit="#handleTableViewValueCommited" prefWidth="250.0" sortable="false" text="Value" />
                     </columns>
                   </TableView>
                </children>

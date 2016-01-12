@@ -16,8 +16,8 @@ public class TreeData {
     private List<TreeData> childList = new ArrayList<>();
     private List<Pair> pairs = new ArrayList<>();
 
-    public void addPairs(String key, String value) {
-        addPairs(new Pair(key, value));
+    public void addPairs(String key, String value, boolean keyEditable, boolean orderChangeable) {
+        addPairs(new Pair(key, value, keyEditable, orderChangeable));
     }
 
     public void addPairs(Pair pair) {
