@@ -112,5 +112,8 @@ public class MainController extends Application implements Initializable {
             e.printStackTrace();
             errorLabel.setText(e.toString());
         }
+
+        // 入力したSearch wordを全選択に
+        searchWordTextField.selectAll();
     }
 }
