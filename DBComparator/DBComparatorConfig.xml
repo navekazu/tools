@@ -1,0 +1,23 @@
+<tools.dbcomparator.entity.ComparatorConfig>
+  <showGUIProgress>true</showGUIProgress>
+  <targetList>
+    <tools.dbcomparator.entity.CompareTarget>
+      <dbInfoList>
+        <tools.dbcomparator.entity.DBInfo>
+          <libraryPath>sqlite-jdbc-3.7.15.jar</libraryPath>
+          <driver>org.sqlite.JDBC</driver>
+          <url>jdbc:sqlite:C:/foo_db1</url>
+          <user></user>
+          <password></password>
+        </tools.dbcomparator.entity.DBInfo>
+        <tools.dbcomparator.entity.DBInfo>
+          <libraryPath>sqlite-jdbc-3.7.15.jar</libraryPath>
+          <driver>org.sqlite.JDBC</driver>
+          <url>jdbc:sqlite:C:/foo_db2</url>
+          <user></user>
+          <password></password>
+        </tools.dbcomparator.entity.DBInfo>
+      </dbInfoList>
+    </tools.dbcomparator.entity.CompareTarget>
+  </targetList>
+</tools.dbcomparator.entity.ComparatorConfig>
