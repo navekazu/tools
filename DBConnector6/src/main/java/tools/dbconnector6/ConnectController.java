@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class ConnectController implements Initializable {
+public class ConnectController extends Application implements Initializable {
 
     @FXML
     private TableView connectTableView;
@@ -62,7 +62,29 @@ public class ConnectController implements Initializable {
     private Button testButton;
 
     @Override
+    public void start(Stage primaryStage) throws Exception {
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
+        Parent root = loader.load();
+        Scene scene = new Scene(root);
+        primaryStage.setTitle("Connect");
+        primaryStage.setScene(scene);
+        primaryStage.show();
+
+    }
+
+    @Override
     public void initialize(URL location, ResourceBundle resources) {
-        String s = "";
+        Stage stage = new Stage();
+        Parent root = null;
+        try {
+            root = FXMLLoader.load(getClass().getResource("/fxml/Connect.fxml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        stage.setScene(new Scene(root));
+        stage.setTitle("My modal window");
+        stage.initModality(Modality.WINDOW_MODAL);
+        stage.initOwner(null);
+        stage.show();
     }
 }

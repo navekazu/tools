@@ -117,16 +117,6 @@
                     <MenuItem mnemonicParsing="false" text="Delete" />
                   </items>
                 </Menu>
-                  <Menu mnemonicParsing="false" text="Database">
-                    <items>
-                      <MenuItem mnemonicParsing="false" onAction="#onConnect" text="Connect" />
-                        <MenuItem mnemonicParsing="false" onAction="#onDisconnect" text="Disconnect" />
-                        <SeparatorMenuItem mnemonicParsing="false" />
-                        <MenuItem mnemonicParsing="false" onAction="#onCommit" text="Commit" />
-                        <MenuItem mnemonicParsing="false" onAction="#onRollback" text="Rollback" />
-                        <MenuItem mnemonicParsing="false" onAction="#onCancel" text="Cancel" />
-                    </items>
-                  </Menu>
                 <Menu mnemonicParsing="false" text="Help">
                   <items>
                     <MenuItem mnemonicParsing="false" text="About" />
