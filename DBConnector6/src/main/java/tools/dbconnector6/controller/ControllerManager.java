@@ -17,6 +17,7 @@ import java.util.Map;
 
 public class ControllerManager {
     private static final ControllerManager singleton = new ControllerManager();
+
     private static final Map<String, StageDefine> stageDefinedMap = new HashMap<>();
     static {
         stageDefinedMap.put("main", StageDefine.builder().fxml("/fxml/Main.fxml").title("DBConnector6").build());
@@ -30,9 +31,8 @@ public class ControllerManager {
     private Stage primaryStage;
 
     public Stage getMainStage(Stage primaryStage) throws IOException {
-        StageDefine stageDefine = getStageDefine("main");
-
         this.primaryStage = primaryStage;
+        StageDefine stageDefine = getStageDefine("main");
 
         FXMLLoader loader = new FXMLLoader(getClass().getResource(stageDefine.getFxml()));
         Parent root = loader.load();
@@ -59,11 +59,11 @@ public class ControllerManager {
         return subStage;
     }
 
+    @AllArgsConstructor
     @Data
     @NoArgsConstructor
-    @AllArgsConstructor
     @Builder
-    private class StageDefine {
+    private static class StageDefine {
         private String fxml;
         private String title;
     }
