@@ -1,6 +1,7 @@
 package tools.dbconnector6;
 
 import javafx.application.Application;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -10,6 +11,7 @@ import javafx.scene.control.*;
 import javafx.stage.Stage;
 import tools.dbconnector6.controller.ControllerManager;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.ResourceBundle;
 
@@ -65,4 +67,95 @@ public class MainController extends Application implements Initializable {
     public void initialize(URL location, ResourceBundle resources) {
 
     }
+
+    @FXML
+    private void onClose(ActionEvent event) {
+    }
+
+    @FXML
+    private void onUndo(ActionEvent event) {
+    }
+
+    @FXML
+    private void onRedo(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCut(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCopy(ActionEvent event) {
+    }
+
+    @FXML
+    private void onPaste(ActionEvent event) {
+    }
+
+    @FXML
+    private void onSettingSqlEditor(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCallSqlEditor(ActionEvent event) {
+    }
+
+    @FXML
+    private void onConnect(ActionEvent event) throws IOException {
+        FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("connect");
+        ControllerManager.getControllerManager().getSubStage(loader, "connect").showAndWait();
+    }
+
+    @FXML
+    private void onDisconnect(ActionEvent event) {
+    }
+
+    @FXML
+    private void onExecuteQuery(ActionEvent event) {
+    }
+
+    @FXML
+    private void onPasteAndExecuteQuery(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCancelQuery(ActionEvent event) {
+    }
+
+    @FXML
+    private void onQueryScript(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCommit(ActionEvent event) {
+    }
+
+    @FXML
+    private void onRollback(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCheckIsolation(ActionEvent event) {
+    }
+
+    @FXML
+    private void onEvidenceMode(ActionEvent event) {
+    }
+
+    @FXML
+    private void onIncludeHeader(ActionEvent event) {
+    }
+
+    @FXML
+    private void onEvidenceDelimiterTab(ActionEvent event) {
+    }
+
+    @FXML
+    private void onEvidenceDelimiterComma(ActionEvent event) {
+    }
+
+    @FXML
+    private void onEvidenceDelimiterSpace(ActionEvent event) {
+    }
+
 }

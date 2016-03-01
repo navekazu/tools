@@ -63,5 +63,6 @@ public class ConnectController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        String s = location.toString();
     }
 }
