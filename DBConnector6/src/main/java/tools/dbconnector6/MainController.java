@@ -17,10 +17,10 @@ import tools.dbconnector6.entity.Connect;
 
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 public class MainController extends Application implements Initializable, MessageInterface {
     private static SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
@@ -36,6 +36,7 @@ public class MainController extends Application implements Initializable, Messag
 
     @FXML
     private TreeView dbStructureTreeView;
+    private TreeItem<String> dbStructurRootItem;
 
     @FXML
     private TabPane tableStructureTabPane;
@@ -60,6 +61,7 @@ public class MainController extends Application implements Initializable, Messag
 
     private Connection connection;
     private QueryResultUpdateService queryResultUpdateService;
+    private DbStructureTreeViewUpdateService dbStructureTreeViewUpdateService;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -77,9 +79,13 @@ public class MainController extends Application implements Initializable, Messag
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        dbStructurRootItem = new TreeItem<String>("DB");
+        dbStructureTreeView.setRoot(dbStructurRootItem);
         queryResultUpdateService = new QueryResultUpdateService();
         queryResultUpdateService.setRecordProperty(queryResultTableView.getItems());
         queryResultUpdateService.setColumnProperty(queryResultTableView.getColumns());
+        dbStructureTreeViewUpdateService = new DbStructureTreeViewUpdateService();
+
     }
 
     @FXML
@@ -132,6 +138,7 @@ public class MainController extends Application implements Initializable, Messag
         connection = controller.getConnection();
         if (connection!=null) {
             writeLog("Connected.");
+            dbStructureTreeViewUpdateService.restart();
         }
 
         stage.close();
@@ -201,6 +208,74 @@ public class MainController extends Application implements Initializable, Messag
         logTextArea.setText(logTextArea.getText() + logText + "\n");
     }
 
+    public class DbStructureTreeViewUpdateService extends Service {
+
+        @Override
+        protected Task createTask() {
+            return new DbStructureTreeViewUpdateTask();
+        }
+    }
+
+    public class DbStructureTreeViewUpdateTask extends Task {
+
+        @Override
+        protected Object call() throws Exception {
+            if (connection==null) {
+                dbStructurRootItem.setValue("DB");
+                return null;
+            }
+
+            ObservableList<TreeItem<String>> subList = dbStructurRootItem.getChildren();
+            DatabaseMetaData meta = connection.getMetaData();
+
+            ResultSet resultSet = meta.getTableTypes();
+            try {
+                while (resultSet.next()) {
+                    subList.add(createSubItem(meta.getTables("", "", "", new String[]{resultSet.getString("TABLE_TYPE")})
+                            , "TABLE_NAME", resultSet.getString("TABLE_TYPE"), DbStructureTreeItem.ItemType.TABLE));
+                }
+                resultSet.close();
+            } catch(SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                subList.add(createSubItem(meta.getFunctions("", "", "")
+                        , "FUNCTION_NAME", "Function", DbStructureTreeItem.ItemType.FUNCTION));
+            } catch(SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                subList.add(createSubItem(meta.getProcedures("", "", "")
+                        , "PROCEDURE_NAME", "Procedure", DbStructureTreeItem.ItemType.PROCEDURE));
+            } catch(SQLException e) {
+                e.printStackTrace();
+            }
+
+            try {
+                subList.add(createSubItem(meta.getSchemas("", "")
+                        , "TABLE_SCHEM", "Schema", DbStructureTreeItem.ItemType.SCHEMA));
+            } catch(SQLException e) {
+                e.printStackTrace();
+            }
+
+            return null;
+        }
+
+        private TreeItem<String> createSubItem(ResultSet resultSet, String colName, String name, DbStructureTreeItem.ItemType itemType) throws SQLException {
+            TreeItem tableItem = new TreeItem<>(name);
+            ObservableList<TreeItem<String>> tableList = tableItem.getChildren();
+
+            while (resultSet.next()) {
+                tableList.add(new DbStructureTreeItem(itemType, resultSet.getString(colName)));
+            }
+
+            resultSet.close();
+            return tableItem;
+        }
+    }
+
     public class QueryResultUpdateService extends Service {
         private ObjectProperty<ObservableList<TableColumn<String,String>>> columnProperty = new SimpleObjectProperty();
         private ObjectProperty<ObservableList<Map<String, String>>> recordProperty = new SimpleObjectProperty();
@@ -225,6 +300,15 @@ public class MainController extends Application implements Initializable, Messag
             return new Task<Void>() {
                 @Override
                 protected Void call() {
+                    Statement statement = null;
+                    try {
+                        statement = connection.createStatement();
+                        statement.executeQuery(queryTextArea.getText());
+                        connection.commit();
+
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
 //                    ObservableList<TableColumn<String,String>> colList = columnProperty.get();
                     colList.clear();
                     colList.add(new TableColumn("test1"));
@@ -232,12 +316,13 @@ public class MainController extends Application implements Initializable, Messag
 //                    colList.add(new TableColumn("test3"));
 
                     recordList.clear();
+/*
                     for (int loop = 0; loop<10; loop++) {
                         Map<String, String> l = new HashMap<>();
                         l.put("test1", "data "+loop);
                         recordList.add(l);
                     }
-
+*/
 //                    ObservableList<Connect> list = recordProperty.get();
 //                    list.add(Connect.builder().libraryPath("aaaa").build());
 
