@@ -13,9 +13,15 @@ import tools.dbconnector6.controller.ControllerManager;
 
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.ResourceBundle;
 
-public class MainController extends Application implements Initializable {
+public class MainController extends Application implements Initializable, MessageInterface {
+    private static SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+
     @FXML
     private TextField filterTextField;
 
@@ -48,6 +54,8 @@ public class MainController extends Application implements Initializable {
 
     @FXML
     private TextArea logTextArea;
+
+    private Connection connection;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -101,13 +109,35 @@ public class MainController extends Application implements Initializable {
     }
 
     @FXML
-    private void onConnect(ActionEvent event) throws IOException {
+    private void onConnect(ActionEvent event) throws IOException, SQLException {
+
+        if (connection!=null) {
+            connection.close();
+            connection = null;
+        }
+
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("connect");
-        ControllerManager.getControllerManager().getSubStage(loader, "connect").showAndWait();
+        Stage stage = ControllerManager.getControllerManager().getSubStage(loader, "connect");
+
+        ConnectController controller = loader.getController();
+        controller.setMessageInterface(this);
+        stage.showAndWait();
+
+        connection = controller.getConnection();
+        if (connection!=null) {
+            writeLog("Connected.");
+        }
+
+        stage.close();
     }
 
     @FXML
-    private void onDisconnect(ActionEvent event) {
+    private void onDisconnect(ActionEvent event) throws SQLException {
+        if (connection!=null) {
+            connection.close();
+            connection = null;
+            writeLog("Disconnected.");
+        }
     }
 
     @FXML
@@ -156,6 +186,11 @@ public class MainController extends Application implements Initializable {
 
     @FXML
     private void onEvidenceDelimiterSpace(ActionEvent event) {
+    }
+
+    public void writeLog(String message) {
+        String logText = logDateFormat.format(new Date())+" "+message;
+        logTextArea.setText(logTextArea.getText() + logText + "\n");
     }
 
 }

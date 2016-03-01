@@ -10,6 +10,7 @@ import static org.junit.Assert.assertEquals;
 public class MapperBaseTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
+        MapperBase.testFileName = "_test";
     }
 
     @AfterClass

@@ -12,6 +12,7 @@ public abstract class MapperBase<T> {
     protected abstract String getArchiveFileName();
     protected abstract T unboxing(String line);
     protected abstract String autoboxing(T t);
+    protected static String testFileName = "";
 
     protected String blankToOneSpace(String s) {
         if (s==null || "".equals(s.trim())) {
@@ -45,6 +46,6 @@ public abstract class MapperBase<T> {
     }
 
     protected Path getArchiveFilePath() {
-        return Paths.get(System.getProperty("user.home"), ".DBConnector6", "config", getArchiveFileName());
+        return Paths.get(System.getProperty("user.home"), ".DBConnector6", "config", getArchiveFileName()+testFileName);
     }
 }

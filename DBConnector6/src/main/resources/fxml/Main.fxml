@@ -99,7 +99,7 @@
                         </SplitPane>
                      </center>
                      <bottom>
-                        <TextArea fx:id="logTextArea" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                        <TextArea fx:id="logTextArea" editable="false" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
                      </bottom>
                   </BorderPane>
               </items>

@@ -12,6 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class ConnectMapperTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
+        MapperBase.testFileName = "_test";
     }
 
     @AfterClass
