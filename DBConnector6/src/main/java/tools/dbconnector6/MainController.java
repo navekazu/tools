@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
+import tools.dbconnector6.controller.ControllerManager;
 
 import java.net.URL;
 import java.util.ResourceBundle;
@@ -48,12 +49,8 @@ public class MainController extends Application implements Initializable {
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
-        Parent root = loader.load();
-        Scene scene = new Scene(root);
-        primaryStage.setTitle("DBConnector6");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("main");
+        ControllerManager.getControllerManager().getMainStage(loader, primaryStage).show();
 
         // 初期フォーカスを検索ワード入力欄に（initializeの中ではフォーカス移動できない）
         MainController c = loader.getController();
