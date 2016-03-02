@@ -1,8 +1,11 @@
 package tools.dbconnector6;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
@@ -11,9 +14,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import tools.dbconnector6.controller.ControllerManager;
-import tools.dbconnector6.entity.Connect;
+import tools.dbconnector6.entity.TableColumnTab;
+import tools.dbconnector6.entity.TablePropertyTab;
 
 import java.io.IOException;
 import java.net.URL;
@@ -22,6 +27,8 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
+import static tools.dbconnector6.DbStructureTreeItem.ItemType.DATABASE;
+
 public class MainController extends Application implements Initializable, MessageInterface {
     private static SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 
@@ -29,14 +36,14 @@ public class MainController extends Application implements Initializable, Messag
     private TextField filterTextField;
 
     @FXML
-    private TextField searchTextField;
+    private TextField schemaTextField;
 
     @FXML
     private Button searchButton;
 
     @FXML
     private TreeView dbStructureTreeView;
-    private TreeItem<String> dbStructurRootItem;
+    private DbStructureTreeItem dbStructurRootItem;
 
     @FXML
     private TabPane tableStructureTabPane;
@@ -45,10 +52,49 @@ public class MainController extends Application implements Initializable, Messag
     private Tab tablePropertyTab;
 
     @FXML
+    private TableView tablePropertyTableView;
+    @FXML
+    private TableColumn<TablePropertyTab, String> keyTableColumn;
+    @FXML
+    private TableColumn<TablePropertyTab, String> valueTableColumn;
+
+    @FXML
     private Tab tableColumnTab;
 
     @FXML
+    private TableView tableColumnTableView;
+    @FXML
+    private TableColumn<TableColumnTab, String> nameTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, String> typeTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, Integer> sizeTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, Integer> decimalDigitsTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, String> nullableTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, Integer> primaryKeyTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, String> remarksTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, String> columnDefaultTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, String> autoincrementTableColumn;
+    @FXML
+    private TableColumn<TableColumnTab, String> generatedColumnTableColumn;
+
+    @FXML
     private Tab tableIndexTab;
+
+    @FXML
+    private ComboBox tableIndexComboBox;
+    @FXML
+    private TextField tablePrimaryKeyTextField;
+    @FXML
+    private TextField tableUniqueKeyTextField;
+    @FXML
+    private ListView tableIndexListView;
 
     @FXML
     private TextArea queryTextArea;
@@ -60,8 +106,10 @@ public class MainController extends Application implements Initializable, Messag
     private TextArea logTextArea;
 
     private Connection connection;
-    private QueryResultUpdateService queryResultUpdateService;
-    private DbStructureTreeViewUpdateService dbStructureTreeViewUpdateService;
+    private BackgroundCallback queryResultUpdateService;
+    private BackgroundCallback dbStructureTreeViewUpdateService;
+    private BackgroundCallback tableStructureTreeViewUpdateService;
+    private BackgroundCallback tableStructureTabPaneUpdateService;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -79,17 +127,43 @@ public class MainController extends Application implements Initializable, Messag
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        dbStructurRootItem = new TreeItem<String>("DB");
+        dbStructurRootItem = new DbStructureTreeItem(DATABASE, DATABASE.getName(), null);
         dbStructureTreeView.setRoot(dbStructurRootItem);
-        queryResultUpdateService = new QueryResultUpdateService();
-        queryResultUpdateService.setRecordProperty(queryResultTableView.getItems());
-        queryResultUpdateService.setColumnProperty(queryResultTableView.getColumns());
-        dbStructureTreeViewUpdateService = new DbStructureTreeViewUpdateService();
+        dbStructureTreeView.getSelectionModel().selectedItemProperty().addListener(new DbStructureTreeViewChangeListener());
 
+        dbStructureTreeViewUpdateService = new BackgroundCallback(new DbStructureTreeViewUpdate());
+        tableStructureTreeViewUpdateService = new BackgroundCallback(new TableStructureTreeViewUpdate());
+        tableStructureTabPaneUpdateService = new BackgroundCallback(new TableStructureTabPaneUpdate());
+
+        keyTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("key"));
+        valueTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("value"));
+
+        nameTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("name"));
+        typeTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("type"));
+        sizeTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, Integer>("size"));
+        decimalDigitsTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, Integer>("decimalDigits"));
+        nullableTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("nullable"));
+        primaryKeyTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, Integer>("primaryKey"));
+        remarksTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("remarks"));
+        columnDefaultTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("columnDefault"));
+        autoincrementTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("autoincrement"));
+        generatedColumnTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("generatedColumn"));
+
+        queryResultUpdateService = new BackgroundCallback(new QueryResultUpdate());
+
+        dbStructureTreeViewUpdateService.restart();
+        tableStructureTreeViewUpdateService.restart();
+        tableStructureTabPaneUpdateService.restart();
+
+        queryResultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
     }
 
     @FXML
-    private void onClose(ActionEvent event) {
+    private void onClose(ActionEvent event) throws SQLException {
+        if (connection!=null) {
+            connection.close();
+            connection = null;
+        }
     }
 
     @FXML
@@ -203,79 +277,285 @@ public class MainController extends Application implements Initializable, Messag
     private void onEvidenceDelimiterSpace(ActionEvent event) {
     }
 
+    @FXML
+    private void onSearchButton(ActionEvent event) {
+        if (connection!=null) {
+            dbStructureTreeViewUpdateService.restart();
+        }
+    }
+
     public void writeLog(String message) {
         String logText = logDateFormat.format(new Date())+" "+message;
         logTextArea.setText(logTextArea.getText() + logText + "\n");
     }
 
-    public class DbStructureTreeViewUpdateService extends Service {
-
+    public class DbStructureTreeViewUpdate implements BackgroundCallbackInterface {
         @Override
-        protected Task createTask() {
-            return new DbStructureTreeViewUpdateTask();
-        }
-    }
-
-    public class DbStructureTreeViewUpdateTask extends Task {
-
-        @Override
-        protected Object call() throws Exception {
+        public void run() throws SQLException {
             if (connection==null) {
-                dbStructurRootItem.setValue("DB");
-                return null;
+                dbStructurRootItem.setValue(dbStructurRootItem.getItemType().getName());
+                return ;
             }
 
             ObservableList<TreeItem<String>> subList = dbStructurRootItem.getChildren();
             DatabaseMetaData meta = connection.getMetaData();
+            DbStructureTreeItem.ItemType itemType;
 
+            // サポートされていないAPIを呼ぶと例外が発生するので、そのときは握りつぶして次を呼び出す
             ResultSet resultSet = meta.getTableTypes();
             try {
+                itemType = DbStructureTreeItem.ItemType.TABLE;
                 while (resultSet.next()) {
-                    subList.add(createSubItem(meta.getTables("", "", "", new String[]{resultSet.getString("TABLE_TYPE")})
-                            , "TABLE_NAME", resultSet.getString("TABLE_TYPE"), DbStructureTreeItem.ItemType.TABLE));
+                    subList.add(createGroupItem(meta.getTables(null, getSchemaTextFieldParamValue(), getFilterTextFieldParamValue(), new String[]{resultSet.getString("TABLE_TYPE")})
+                            , "TABLE_NAME", "TABLE_SCHEM", resultSet.getString("TABLE_TYPE"), itemType));
                 }
                 resultSet.close();
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
+            } catch(Throwable e) {}
 
             try {
-                subList.add(createSubItem(meta.getFunctions("", "", "")
-                        , "FUNCTION_NAME", "Function", DbStructureTreeItem.ItemType.FUNCTION));
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
+                itemType = DbStructureTreeItem.ItemType.FUNCTION;
+                subList.add(createGroupItem(meta.getFunctions(null, getSchemaTextFieldParamValue(), getFilterTextFieldParamValue())
+                        , "FUNCTION_NAME", "FUNCTION_SCHEM", itemType.getName(), itemType));
+            } catch(Throwable e) {}
 
             try {
-                subList.add(createSubItem(meta.getProcedures("", "", "")
-                        , "PROCEDURE_NAME", "Procedure", DbStructureTreeItem.ItemType.PROCEDURE));
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
+                itemType = DbStructureTreeItem.ItemType.PROCEDURE;
+                subList.add(createGroupItem(meta.getProcedures(null, getSchemaTextFieldParamValue(), getFilterTextFieldParamValue())
+                        , "PROCEDURE_NAME", "PROCEDURE_SCHEM", itemType.getName(), itemType));
+            } catch(Throwable e) {}
 
             try {
-                subList.add(createSubItem(meta.getSchemas("", "")
-                        , "TABLE_SCHEM", "Schema", DbStructureTreeItem.ItemType.SCHEMA));
-            } catch(SQLException e) {
-                e.printStackTrace();
-            }
+                itemType = DbStructureTreeItem.ItemType.SCHEMA;
+                subList.add(createGroupItem(meta.getSchemas(null, getSchemaTextFieldParamValue())
+                        , "TABLE_SCHEM", "TABLE_SCHEM", itemType.getName(), itemType));
+            } catch(Throwable e) {}
 
-            return null;
+            dbStructurRootItem.setExpanded(true);
         }
 
-        private TreeItem<String> createSubItem(ResultSet resultSet, String colName, String name, DbStructureTreeItem.ItemType itemType) throws SQLException {
-            TreeItem tableItem = new TreeItem<>(name);
-            ObservableList<TreeItem<String>> tableList = tableItem.getChildren();
+        private DbStructureTreeItem createGroupItem(ResultSet resultSet, String colName, String schemaName, String name, DbStructureTreeItem.ItemType itemType) throws SQLException {
+            DbStructureTreeItem tableItem = new DbStructureTreeItem(DbStructureTreeItem.ItemType.GROUP, name, null);
 
+            List<DbStructureTreeItem> l = new ArrayList<>();
             while (resultSet.next()) {
-                tableList.add(new DbStructureTreeItem(itemType, resultSet.getString(colName)));
+                l.add(new DbStructureTreeItem(itemType, resultSet.getString(colName), resultSet.getString(schemaName)));
             }
+            Collections.sort(l);
+
+            ObservableList<TreeItem<String>> tableList = tableItem.getChildren();
+            tableList.addAll(l);
 
             resultSet.close();
             return tableItem;
         }
     }
 
+    private String getFilterTextFieldParamValue() {
+        return getTextFieldParamValue(filterTextField);
+    }
+    private String getSchemaTextFieldParamValue() {
+        return getTextFieldParamValue(schemaTextField);
+    }
+    private String getTextFieldParamValue(TextField textField) {
+        return "".equals(textField.getText())? null: String.format("%%%s%%", textField.getText());
+    }
+
+    public class DbStructureTreeViewChangeListener implements ChangeListener {
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            tableStructureTreeViewUpdateService.restart();
+        }
+    }
+
+    public class TableStructureTreeViewUpdate implements BackgroundCallbackInterface {
+        @Override
+        public void run() {
+            DbStructureTreeItem tableItem = (DbStructureTreeItem)dbStructureTreeView.getSelectionModel().getSelectedItem();
+            if (tableItem==null || connection==null) {
+                tablePropertyTab.setDisable(true);
+                tableColumnTab.setDisable(true);
+                tableIndexTab.setDisable(true);
+            } else {
+                switch (tableItem.getItemType()) {
+                    case DATABASE:
+                        tablePropertyTab.setDisable(false);
+                        tableColumnTab.setDisable(true);
+                        tableIndexTab.setDisable(true);
+                        break;
+                    case TABLE:
+                        tablePropertyTab.setDisable(false);
+                        tableColumnTab.setDisable(false);
+                        tableIndexTab.setDisable(false);
+                        break;
+                    default:
+                        tablePropertyTab.setDisable(true);
+                        tableColumnTab.setDisable(true);
+                        tableIndexTab.setDisable(true);
+                        break;
+                }
+            }
+
+            tableStructureTabPaneUpdateService.restart();
+//            tableStructureTabPane.getSelectionModel().select(tablePropertyTab);
+        }
+    }
+
+    public class TableStructureTabPaneUpdate implements BackgroundCallbackInterface {
+        @Override
+        public void run() throws SQLException {
+            DbStructureTreeItem tableItem = (DbStructureTreeItem)dbStructureTreeView.getSelectionModel().getSelectedItem();
+            if (tableItem==null || connection==null) {
+                return ;
+            }
+
+            ObservableList<TablePropertyTab> tablePropertyList = tablePropertyTableView.getItems();
+            ObservableList<TableColumnTab> tableColumnList = tableColumnTableView.getItems();
+
+            tablePropertyList.clear();
+            tableColumnList.clear();
+
+            DatabaseMetaData metaData = connection.getMetaData();
+
+            switch (tableItem.getItemType()) {
+                case DATABASE:
+                    updateTablePropertyFromDatabase(metaData, tablePropertyList);
+                    break;
+                case TABLE:
+                    updateTablePropertyFromTable(tableItem, metaData, tablePropertyList);
+                    updateTableColumnFromTable(tableItem, metaData, tableColumnList);
+                    break;
+            }
+
+        }
+
+        private void updateTablePropertyFromDatabase(DatabaseMetaData metaData, ObservableList<TablePropertyTab> list) throws SQLException {
+
+            list.add(TablePropertyTab.builder().key("Database product version").value(metaData.getDatabaseProductVersion()).build());
+            list.add(TablePropertyTab.builder().key("Database major version").value(Integer.toString(metaData.getDatabaseMajorVersion())).build());
+            list.add(TablePropertyTab.builder().key("Database minor version").value(Integer.toString(metaData.getDatabaseMinorVersion())).build());
+
+            list.add(TablePropertyTab.builder().key("Driver product name").value(metaData.getDriverName()).build());
+            list.add(TablePropertyTab.builder().key("Driver product version").value(metaData.getDriverVersion()).build());
+            list.add(TablePropertyTab.builder().key("Driver major version").value(Integer.toString(metaData.getDriverMajorVersion())).build());
+            list.add(TablePropertyTab.builder().key("Driver minor version").value(Integer.toString(metaData.getDriverMinorVersion())).build());
+
+            list.add(TablePropertyTab.builder().key("JDBC major version").value(Integer.toString(metaData.getJDBCMajorVersion())).build());
+            list.add(TablePropertyTab.builder().key("JDBC minor version").value(Integer.toString(metaData.getJDBCMinorVersion())).build());
+
+            list.add(TablePropertyTab.builder().key("Numeric functions").value(metaData.getNumericFunctions()).build());
+            list.add(TablePropertyTab.builder().key("String functions").value(metaData.getStringFunctions()).build());
+            list.add(TablePropertyTab.builder().key("System functions").value(metaData.getSystemFunctions()).build());
+            list.add(TablePropertyTab.builder().key("Time date functions").value(metaData.getTimeDateFunctions()).build());
+
+            list.add(TablePropertyTab.builder().key("Extra name characters").value(metaData.getExtraNameCharacters()).build());
+            list.add(TablePropertyTab.builder().key("Identifier quote string").value(metaData.getIdentifierQuoteString()).build());
+
+            list.add(TablePropertyTab.builder().key("Max binary literal length").value(Integer.toString(metaData.getMaxBinaryLiteralLength())).build());
+            list.add(TablePropertyTab.builder().key("Max char literal length").value(Integer.toString(metaData.getMaxCharLiteralLength())).build());
+            list.add(TablePropertyTab.builder().key("Max column name length").value(Integer.toString(metaData.getMaxColumnNameLength())).build());
+            list.add(TablePropertyTab.builder().key("Max column name length").value(Integer.toString(metaData.getMaxColumnNameLength())).build());
+            list.add(TablePropertyTab.builder().key("Max columns in group by").value(Integer.toString(metaData.getMaxColumnsInGroupBy())).build());
+            list.add(TablePropertyTab.builder().key("Max columns in index").value(Integer.toString(metaData.getMaxColumnsInIndex())).build());
+            list.add(TablePropertyTab.builder().key("Max columns in order by").value(Integer.toString(metaData.getMaxColumnsInOrderBy())).build());
+            list.add(TablePropertyTab.builder().key("Max columns in select").value(Integer.toString(metaData.getMaxColumnsInSelect())).build());
+            list.add(TablePropertyTab.builder().key("Max columns in table").value(Integer.toString(metaData.getMaxColumnsInTable())).build());
+            list.add(TablePropertyTab.builder().key("Max connections").value(Integer.toString(metaData.getMaxConnections())).build());
+            list.add(TablePropertyTab.builder().key("Max cursor name length").value(Integer.toString(metaData.getMaxCursorNameLength())).build());
+            list.add(TablePropertyTab.builder().key("Max index length").value(Integer.toString(metaData.getMaxIndexLength())).build());
+            list.add(TablePropertyTab.builder().key("Max procedure name length").value(Integer.toString(metaData.getMaxProcedureNameLength())).build());
+            list.add(TablePropertyTab.builder().key("Max row size").value(Integer.toString(metaData.getMaxRowSize())).build());
+            list.add(TablePropertyTab.builder().key("Max schema name length").value(Integer.toString(metaData.getMaxSchemaNameLength())).build());
+            list.add(TablePropertyTab.builder().key("Max statement length").value(Integer.toString(metaData.getMaxStatementLength())).build());
+            list.add(TablePropertyTab.builder().key("Max statements").value(Integer.toString(metaData.getMaxStatements())).build());
+            list.add(TablePropertyTab.builder().key("Max table name length").value(Integer.toString(metaData.getMaxTableNameLength())).build());
+            list.add(TablePropertyTab.builder().key("Max tables in select").value(Integer.toString(metaData.getMaxTablesInSelect())).build());
+            list.add(TablePropertyTab.builder().key("Max user name length").value(Integer.toString(metaData.getMaxUserNameLength())).build());
+        }
+
+        private void updateTablePropertyFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, ObservableList<TablePropertyTab> list) throws SQLException {
+            showResultSet(metaData.getTables(null, tableItem.getSchema(), tableItem.getValue(), null), list);
+        }
+
+        private void showResultSet(ResultSet resultSet, ObservableList<TablePropertyTab> list) throws SQLException {
+            ResultSetMetaData metaData = resultSet.getMetaData();
+            int columnCount = metaData.getColumnCount();
+
+            while(resultSet.next()) {
+                for (int loop=0; loop<columnCount; loop++) {
+                    list.add(TablePropertyTab.builder().key(metaData.getColumnName(loop + 1)).value(resultSet.getString(loop + 1)).build());
+                }
+            }
+            resultSet.close();
+        }
+
+        private void updateTableColumnFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, ObservableList<TableColumnTab> tableColumnList) throws SQLException {
+            ResultSet resultSet = metaData.getColumns(null, tableItem.getSchema(), tableItem.getValue(), null);
+
+            while (resultSet.next()) {
+                TableColumnTab data = TableColumnTab.builder()
+                    .name(getStringForce(resultSet, "COLUMN_NAME"))
+                    .type(getStringForce(resultSet, "TYPE_NAME"))
+                    .size(getIntForce(resultSet,"COLUMN_SIZE"))
+                    .decimalDigits(getIntForce(resultSet, "DECIMAL_DIGITS"))
+                    .nullable(getStringForce(resultSet, "NULLABLE"))
+//                    .primaryKey(getStringForce(resultSet, "TYPE_NAME"))
+                    .remarks(getStringForce(resultSet, "REMARKS"))
+                    .columnDefault(getStringForce(resultSet, "COLUMN_DEF"))
+                    .autoincrement(getStringForce(resultSet, "IS_AUTOINCREMENT"))
+                    .generatedColumn(getStringForce(resultSet, "IS_GENERATEDCOLUMN"))
+                        .build();
+
+                tableColumnList.add(data);
+            }
+            resultSet.close();
+        }
+
+        private String getStringForce(ResultSet resultSet, String columnName) {
+            try {
+                return resultSet.getString(columnName);
+            } catch (Exception e) {
+                return "";
+            }
+        }
+
+        private int getIntForce(ResultSet resultSet, String columnName) {
+            try {
+                return resultSet.getInt(columnName);
+            } catch (Exception e) {
+                return 0;
+            }
+        }
+
+    }
+
+    public class QueryResultUpdate implements BackgroundCallbackInterface {
+        @Override
+        public void run() {
+            ObservableList<TableColumn<String,String>> columnList = queryResultTableView.getColumns();
+            ObservableList<Map<String, String>> recordList = queryResultTableView.getItems();
+
+            columnList.clear();
+            for (int loop = 0; loop<1000; loop++) {
+                final int l = loop;
+//                Platform.runLater(new Runnable() {
+//                    @Override
+//                    public void run() {
+                        columnList.add(new TableColumn("test"+l));
+                        System.out.println(l);
+//                    }
+//                });
+            }
+
+            /*
+            recordList.clear();
+            for (int loop = 0; loop<1000000; loop++) {
+                Map<String, String> l = new HashMap<>();
+                l.put("test1", "data "+loop);
+                recordList.add(l);
+            }
+            */
+        }
+    }
     public class QueryResultUpdateService extends Service {
         private ObjectProperty<ObservableList<TableColumn<String,String>>> columnProperty = new SimpleObjectProperty();
         private ObjectProperty<ObservableList<Map<String, String>>> recordProperty = new SimpleObjectProperty();
