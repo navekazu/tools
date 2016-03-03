@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
@@ -16,7 +17,9 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 import tools.dbconnector6.controller.ControllerManager;
+import tools.dbconnector6.entity.QueryResult;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
 
@@ -284,9 +287,11 @@ public class MainController extends Application implements Initializable, Messag
         }
     }
 
-    public void writeLog(String message) {
+    public synchronized void writeLog(String message) {
         String logText = logDateFormat.format(new Date())+" "+message;
-        logTextArea.setText(logTextArea.getText() + logText + "\n");
+//        logTextArea.setText(logTextArea.getText() + logText + "\n");
+//        logTextArea.setScrollTop(Double.MAX_VALUE);
+        logTextArea.appendText(logText + "\n");
     }
 
     public class DbStructureTreeViewUpdate implements BackgroundCallbackInterface {
@@ -531,20 +536,20 @@ public class MainController extends Application implements Initializable, Messag
     public class QueryResultUpdate implements BackgroundCallbackInterface {
         @Override
         public void run() {
-            ObservableList<TableColumn<String,String>> columnList = queryResultTableView.getColumns();
+            ObservableList<TableColumn<String, String>> columnList = queryResultTableView.getColumns();
             ObservableList<Map<String, String>> recordList = queryResultTableView.getItems();
 
             columnList.clear();
-            for (int loop = 0; loop<1000; loop++) {
-                final int l = loop;
+//            for (int loop = 0; loop<1000; loop++) {
+//                final int l = loop;
 //                Platform.runLater(new Runnable() {
 //                    @Override
 //                    public void run() {
-                        columnList.add(new TableColumn("test"+l));
-                        System.out.println(l);
+//                        columnList.add(new TableColumn("test"+l));
+//                        System.out.println(l);
 //                    }
 //                });
-            }
+//            }
 
             /*
             recordList.clear();
@@ -554,6 +559,84 @@ public class MainController extends Application implements Initializable, Messag
                 recordList.add(l);
             }
             */
+/*
+            ObservableList<TableColumn<String,String>> colList = queryResultTableView.getColumns();
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    colList.add(new TableColumn("test1"));
+                }
+            });
+
+            // 1件ずつ書き込み
+            ObservableList<Map<String, String>> recordProperty = queryResultTableView.getItems();
+            List<Integer> list = new ArrayList<>();
+            for (int loop = 0; loop<100000; loop++) {
+                list.add(loop);
+
+                if (list.size()>=100) {
+                    final List<Integer> dispatchList = new ArrayList<>(list);
+                    list.clear();
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (Integer i : dispatchList) {
+//                                writeLog("test " + i);
+                                Map<String, String> l = new HashMap<>();
+                                l.put("test1", "test "+i);
+                                recordProperty.add(l);
+                            }
+                        }
+                    });
+                }
+            }
+*/
+
+            List<TableColumn<QueryResult, String>> colList = new ArrayList<>();
+            for (int loop = 0; loop < 10; loop++) {
+                TableColumn<QueryResult, String> col = new TableColumn<QueryResult, String>("列" + loop);
+                final String key = "列" + loop;
+                col.setCellValueFactory(
+                        new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
+                            @Override
+                            public ObservableValue<String> call(TableColumn.CellDataFeatures<QueryResult, String> p) {
+                                // 列名をキーに、値を返す。
+                                return new SimpleStringProperty(p.getValue().getData(key));
+                            }
+                        });
+                colList.add(col);
+            }
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    queryResultTableView.getColumns().addAll(colList);
+                }
+            });
+
+            List<Map<String, String>> rowList = new ArrayList<>();
+            for (int row=0; row<20000; row++) {
+                Map<String, String> data = new HashMap<String, String>();
+                for (int i = 0; i < 10; i++) {
+                    data.put("列" + i, "" + row);
+                }
+                rowList.add(data);
+
+                if (rowList.size()>=1000) {
+                    final List<Map<String, String>> dispatchList = new ArrayList<>(rowList);
+                    rowList.clear();
+                    Platform.runLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            for (Map<String, String> m: dispatchList) {
+                                QueryResult r = new QueryResult();
+                                r.setData(m);
+                                queryResultTableView.getItems().add(r);
+                                queryResultTableView.scrollTo(1000000);
+                            }
+                        }
+                    });
+                }
+            }
         }
     }
     public class QueryResultUpdateService extends Service {
