@@ -18,7 +18,7 @@
                            <top>
                               <BorderPane BorderPane.alignment="CENTER">
                                  <right>
-                                    <Button fx:id="searchButton" mnemonicParsing="false" text="Search" BorderPane.alignment="CENTER">
+                                    <Button fx:id="searchButton" mnemonicParsing="false" onAction="#onSearchButton" text="Search" BorderPane.alignment="CENTER">
                                        <BorderPane.margin>
                                           <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
                                        </BorderPane.margin>
@@ -50,7 +50,7 @@
                                       </rowConstraints>
                                        <children>
                                           <TextField fx:id="filterTextField" />
-                                          <TextField fx:id="searchTextField" GridPane.rowIndex="1" />
+                                          <TextField fx:id="schemaTextField" GridPane.rowIndex="1" />
                                        </children>
                                     </GridPane>
                                  </center>
@@ -62,19 +62,100 @@
                         </BorderPane>
                         <TabPane fx:id="tableStructureTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
                           <tabs>
-                            <Tab fx:id="tablePropertyTab" text="Property">
+                            <Tab fx:id="tablePropertyTab" closable="false" text="Property">
                               <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <TableView fx:id="tablePropertyTableView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                              <TableColumn fx:id="keyTableColumn" prefWidth="75.0" text="Key" />
+                                              <TableColumn fx:id="valueTableColumn" prefWidth="75.0" text="Value" />
+                                            </columns>
+                                          </TableView>
+                                       </children></AnchorPane>
                               </content>
                             </Tab>
                             <Tab fx:id="tableColumnTab" text="Column">
                               <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                <AnchorPane minHeight="0.0" minWidth="0.0">
+                                       <children>
+                                          <TableView fx:id="tableColumnTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                            <columns>
+                                              <TableColumn fx:id="nameTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Name" />
+                                              <TableColumn fx:id="typeTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Type" />
+                                                <TableColumn fx:id="sizeTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Size" />
+                                                <TableColumn fx:id="decimalDigitsTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Decimal digits" />
+                                                <TableColumn fx:id="nullableTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Nullable" />
+                                                <TableColumn fx:id="primaryKeyTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Primary key" />
+                                                <TableColumn fx:id="remarksTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Remarks" />
+                                                <TableColumn fx:id="columnDefaultTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Default" />
+                                                <TableColumn fx:id="autoincrementTableColumn" editable="false" prefWidth="75.0" sortable="false" text="Autoincrement" />
+                                                <TableColumn fx:id="generatedColumnTableColumn" editable="false" prefWidth="75.0" sortable="false" text="GeneratedColumn" />
+                                            </columns>
+                                          </TableView>
+                                       </children></AnchorPane>
                               </content>
                             </Tab>
                               <Tab fx:id="tableIndexTab" text="Index">
                                 <content>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
+                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                       <children>
+                                          <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                             <top>
+                                                <BorderPane BorderPane.alignment="CENTER">
+                                                   <left>
+                                                      <GridPane BorderPane.alignment="CENTER">
+                                                        <columnConstraints>
+                                                          <ColumnConstraints hgrow="SOMETIMES" />
+                                                        </columnConstraints>
+                                                        <rowConstraints>
+                                                          <RowConstraints vgrow="SOMETIMES" />
+                                                          <RowConstraints vgrow="SOMETIMES" />
+                                                          <RowConstraints vgrow="SOMETIMES" />
+                                                        </rowConstraints>
+                                                         <children>
+                                                            <Label text="Name">
+                                                               <GridPane.margin>
+                                                                  <Insets right="3.0" />
+                                                               </GridPane.margin>
+                                                            </Label>
+                                                            <Label text="Primary key" GridPane.rowIndex="1">
+                                                               <GridPane.margin>
+                                                                  <Insets right="3.0" />
+                                                               </GridPane.margin>
+                                                            </Label>
+                                                            <Label text="Unique key" GridPane.rowIndex="2">
+                                                               <GridPane.margin>
+                                                                  <Insets right="3.0" />
+                                                               </GridPane.margin>
+                                                            </Label>
+                                                         </children>
+                                                      </GridPane>
+                                                   </left>
+                                                   <center>
+                                                      <GridPane BorderPane.alignment="CENTER">
+                                                        <columnConstraints>
+                                                          <ColumnConstraints hgrow="SOMETIMES" />
+                                                        </columnConstraints>
+                                                        <rowConstraints>
+                                                          <RowConstraints vgrow="SOMETIMES" />
+                                                          <RowConstraints vgrow="SOMETIMES" />
+                                                          <RowConstraints vgrow="SOMETIMES" />
+                                                        </rowConstraints>
+                                                         <children>
+                                                            <ComboBox fx:id="tableIndexNameComboBox" prefWidth="150.0" />
+                                                            <TextField fx:id="tableIndexPrimaryKeyTextField" editable="false" GridPane.rowIndex="1" />
+                                                            <TextField fx:id="tableIndexUniqueKeyTextField" editable="false" GridPane.rowIndex="2" />
+                                                         </children>
+                                                      </GridPane>
+                                                   </center>
+                                                </BorderPane>
+                                             </top>
+                                             <center>
+                                                <ListView fx:id="tableIndexListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                                             </center>
+                                          </BorderPane>
+                                       </children></AnchorPane>
                                 </content>
                               </Tab>
                           </tabs>
