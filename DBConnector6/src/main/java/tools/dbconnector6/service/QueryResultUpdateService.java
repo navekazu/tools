@@ -10,12 +10,15 @@ import tools.dbconnector6.BackgroundCallbackInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.QueryResult;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.sql.*;
+import java.text.DecimalFormat;
+import java.util.*;
 
 public class QueryResultUpdateService implements BackgroundCallbackInterface<List<TableColumn<QueryResult, String>>, List<Map<String, String>>> {
+    private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
+    private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
+    private static final int FLUSH_ROW_COUNT = 1000;
+
     private MainControllerInterface mainControllerInterface;
     public QueryResultUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
@@ -23,39 +26,92 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
 
     @Override
     public void run() throws Exception {
-        // 実行するSQLを取得
-        String sql = getSql();
-
-
-
-        List<TableColumn<QueryResult, String>> colList = new ArrayList<>();
-        for (int loop = 0; loop < 10; loop++) {
-            TableColumn<QueryResult, String> col = new TableColumn<QueryResult, String>("列" + loop);
-            final String key = "列" + loop;
-            col.setCellValueFactory(
-                    new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
-                        @Override
-                        public ObservableValue<String> call(TableColumn.CellDataFeatures<QueryResult, String> p) {
-                            // 列名をキーに、値を返す。
-                            return new SimpleStringProperty(p.getValue().getData(key));
-                        }
-                    });
-            colList.add(col);
+        if (mainControllerInterface.getConnection()==null) {
+            mainControllerInterface.writeLog("No connect.");
+            return ;
         }
-        updateUIPreparation(colList);
 
-        List<Map<String, String>> rowList = new ArrayList<>();
-        for (int row=0; row<10000; row++) {
-            Map<String, String> data = new HashMap<String, String>();
-            for (int i = 0; i < 10; i++) {
-                data.put("列" + i, "" + row);
-            }
-            rowList.add(data);
+        // 実行するSQLを取得
+        String[] sqls = splitSql(getSql());
 
-            if (rowList.size()>=10) {
-                updateUI(rowList);
-                rowList.clear();
+        // 個々のSQLを実行
+        int executeQueryCount = 0;
+        try {
+            for (String sql : sqls) {
+                executeSql(sql);
+                executeQueryCount++;
             }
+
+            if (sqls.length >= 2) {
+                mainControllerInterface.writeLog("Total query count: %d", executeQueryCount);
+            }
+        } catch(SQLException e) {
+            mainControllerInterface.writeLog(e.getMessage());
+            // 複数クエリの場合、実行出来たクエリ数を出力
+            if (sqls.length >= 2) {
+                mainControllerInterface.writeLog("Succeeded query count: %d", executeQueryCount);
+            }
+        }
+    }
+
+    private void executeSql(String sql) throws Exception {
+        Connection connection = mainControllerInterface.getConnection();
+        long startTime, endTime;
+
+        try (Statement statement = connection.createStatement()) {
+            mainControllerInterface.writeLog("Executing...");
+            startTime = System.currentTimeMillis();
+            boolean executeResult = statement.execute(sql);
+            endTime = System.currentTimeMillis();
+            mainControllerInterface.writeLog("Response time: %s sec", RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
+
+            if (executeResult) {
+                // 結果あり
+                startTime = System.currentTimeMillis();
+                try (ResultSet resultSet = statement.getResultSet()) {
+                    // カラム情報を取得
+                    ResultSetMetaData metaData = resultSet.getMetaData();
+                    List<TableColumn<QueryResult, String>> colList = new ArrayList<>();
+
+                    for (int loop=0; loop<metaData.getColumnCount(); loop++) {
+                        TableColumn<QueryResult, String> col = new TableColumn<>(metaData.getColumnName(loop+1));
+                        final String key = Integer.toString(loop);
+                        col.setCellValueFactory(
+                                new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
+                                    @Override
+                                    public ObservableValue<String> call(TableColumn.CellDataFeatures<QueryResult, String> p) {
+                                        return new SimpleStringProperty(p.getValue().getData(key));
+                                    }
+                                });
+                        colList.add(col);
+                    }
+                    updateUIPreparation(colList);
+
+                    // 結果を取得
+                    List<Map<String, String>> rowList = new ArrayList<>();
+                    long rowCount = 0;
+                    while (resultSet.next()) {
+                        Map<String, String> data = new HashMap<String, String>();
+                        for (int loop=0; loop<metaData.getColumnCount(); loop++) {
+                            data.put(Integer.toString(loop), resultSet.getString(loop+1));
+                        }
+                        rowList.add(data);
+                        rowCount++;
+
+                        if (rowList.size() >= FLUSH_ROW_COUNT) {
+                            updateUI(rowList);
+                            rowList.clear();
+                        }
+                    }
+                    updateUI(rowList);
+                    endTime = System.currentTimeMillis();
+                    mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
+                }
+            } else {
+                // 結果なし
+                mainControllerInterface.writeLog("Success. count: %S", NUMBER_FORMAT.format(statement.getUpdateCount()));
+            }
+
         }
     }
 
@@ -68,6 +124,8 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                 ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
                 columnList.clear();
                 columnList.addAll(dispatchParam);
+                mainControllerInterface.getQueryParam().queryResultTableView.getItems().clear();
+                mainControllerInterface.getQueryParam().queryResultTableView.scrollTo(0);
             }
         });
 
@@ -98,6 +156,21 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
     }
 
     protected String[] splitSql(String sql) {
-        return sql.trim().split(";\n");
+        String[] split = sql.trim().split("(;\n|/\n)");
+        return Arrays.stream(split)
+                .map(s -> {
+                    return s.trim();
+                })
+                .map(s -> {
+                    return s.endsWith(";")? s.substring(0, s.length()-1): s;
+                })
+                .map(s -> {
+                    return s.endsWith("/")? s.substring(0, s.length()-1): s;
+                })
+                .map(s -> {
+                    return s.trim();
+                })
+                .filter(s -> s.length()>=1)
+                .toArray(String[]::new);
     }
 }

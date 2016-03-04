@@ -245,10 +245,26 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCommit(ActionEvent event) {
+        if (connection==null) {
+            writeLog("No connect.");
+        }
+        try {
+            connection.commit();
+        } catch(Exception e) {
+            writeLog(e.getMessage());
+        }
     }
 
     @FXML
     private void onRollback(ActionEvent event) {
+        if (connection==null) {
+            writeLog("No connect.");
+        }
+        try {
+            connection.rollback();
+        } catch(Exception e) {
+            writeLog(e.getMessage());
+        }
     }
 
     @FXML
@@ -282,10 +298,8 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    public synchronized void writeLog(String message) {
-        String logText = logDateFormat.format(new Date())+" "+message;
-//        logTextArea.setText(logTextArea.getText() + logText + "\n");
-//        logTextArea.setScrollTop(Double.MAX_VALUE);
+    public synchronized void writeLog(String message, Object... args) {
+        String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
         logTextArea.appendText(logText + "\n");
     }
 

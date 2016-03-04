@@ -8,7 +8,7 @@ import tools.dbconnector6.entity.TablePropertyTab;
 import java.sql.Connection;
 
 public interface MainControllerInterface {
-    public void writeLog(String message);
+    public void writeLog(String message, Object... args);
     public Connection getConnection();
 
     public BackgroundCallback getDbStructureUpdateService();
