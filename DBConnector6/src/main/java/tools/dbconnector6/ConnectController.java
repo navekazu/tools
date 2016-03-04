@@ -11,13 +11,11 @@ import tools.dbconnector6.mapper.ConnectMapper;
 
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Properties;
@@ -82,10 +80,10 @@ public class ConnectController implements Initializable {
     @FXML
     private Button testButton;
 
-    private MessageInterface messageInterface;
+    private MainControllerInterface messageInterface;
     private Connection connection;
 
-    public void setMessageInterface(MessageInterface messageInterface) {
+    public void setMessageInterface(MainControllerInterface messageInterface) {
         this.messageInterface = messageInterface;
     }
 

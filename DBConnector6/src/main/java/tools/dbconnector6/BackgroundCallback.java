@@ -18,20 +18,7 @@ public class BackgroundCallback extends Service {
         return new Task() {
             @Override
             protected Object call() throws Exception {
-/*
-                Platform.runLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            bci.run();
-                        } catch (SQLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
-*/
                 bci.run();
-
                 return null;
 
             }
