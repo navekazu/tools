@@ -80,11 +80,11 @@ public class ConnectController implements Initializable {
     @FXML
     private Button testButton;
 
-    private MainControllerInterface messageInterface;
+    private MainControllerInterface mainControllerInterface;
     private Connection connection;
 
-    public void setMessageInterface(MainControllerInterface messageInterface) {
-        this.messageInterface = messageInterface;
+    public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
+        this.mainControllerInterface = this.mainControllerInterface;
     }
 
     @Override

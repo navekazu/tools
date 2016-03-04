@@ -9,14 +9,13 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import tools.dbconnector6.controller.ControllerManager;
+import tools.dbconnector6.entity.ReservedWord;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
-import tools.dbconnector6.service.DbStructureUpdateService;
-import tools.dbconnector6.service.QueryResultUpdateService;
-import tools.dbconnector6.service.TableStructureUpdateService;
-import tools.dbconnector6.service.TableStructureTabPaneUpdateService;
+import tools.dbconnector6.service.*;
 
 import java.io.IOException;
 import java.net.URL;
@@ -29,6 +28,8 @@ import static tools.dbconnector6.DbStructureTreeItem.ItemType.DATABASE;
 
 public class MainController extends Application implements Initializable, MainControllerInterface {
     private static SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+
+    private Stage primaryStage;
 
     @FXML
     private TextField filterTextField;
@@ -108,6 +109,11 @@ public class MainController extends Application implements Initializable, MainCo
     private BackgroundCallback tableStructureTabPaneUpdateService;
     private BackgroundCallback tableStructureUpdateService;
     private BackgroundCallback queryResultUpdateService;
+    private BackgroundCallback reservedWordUpdateService;
+
+    private Stage reservedWordStage;
+    private ReservedWordController reservedWordController;
+    private List<ReservedWord> reservedWordList = new ArrayList<>();
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -115,8 +121,9 @@ public class MainController extends Application implements Initializable, MainCo
         ControllerManager.getControllerManager().getMainStage(loader, primaryStage).show();
 
         // 初期フォーカスを検索ワード入力欄に（initializeの中ではフォーカス移動できない）
-        MainController c = loader.getController();
-        c.focusQueryTextArea();
+        MainController controller = loader.getController();
+        controller.focusQueryTextArea();
+        controller.primaryStage = primaryStage;
     }
 
     public void focusQueryTextArea() {
@@ -148,12 +155,25 @@ public class MainController extends Application implements Initializable, MainCo
         generatedColumnTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("generatedColumn"));
 
         queryResultUpdateService = new BackgroundCallback(new QueryResultUpdateService(this));
+        reservedWordUpdateService = new BackgroundCallback(new ReservedWordUpdateService(this, reservedWordList));
 
         dbStructureUpdateService.restart();
         tableStructureTabPaneUpdateService.restart();
         tableStructureUpdateService.restart();
 
         queryResultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+
+        // Controllerの読み込み
+        FXMLLoader loader;
+        loader = ControllerManager.getControllerManager().getLoarder("reservedWord");
+        try {
+            reservedWordStage = ControllerManager.getControllerManager().getTransparentSubStage(loader, "reservedWord");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        reservedWordController = loader.getController();
+        reservedWordController.setMainControllerInterface(this);
+        reservedWordController.setRservedWordList(reservedWordList);
     }
 
     @FXML
@@ -204,13 +224,14 @@ public class MainController extends Application implements Initializable, MainCo
         Stage stage = ControllerManager.getControllerManager().getSubStage(loader, "connect");
 
         ConnectController controller = loader.getController();
-        controller.setMessageInterface(this);
+        controller.setMainControllerInterface(this);
         stage.showAndWait();
 
         connection = controller.getConnection();
         if (connection!=null) {
             writeLog("Connected.");
             dbStructureUpdateService.restart();
+            reservedWordUpdateService.restart();
         }
 
         stage.close();
@@ -376,6 +397,29 @@ public class MainController extends Application implements Initializable, MainCo
         @Override
         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
             tableStructureTabPaneUpdateService.restart();
+        }
+    }
+
+    @FXML
+    public void onQueryTextAreaKeyPressed(KeyEvent event) {
+        if (reservedWordController.notifyKeyPressed(event)) {
+            reservedWordStage.hide();
+        }
+    }
+
+    @FXML
+    public void onQueryTextAreaKeyReleased(KeyEvent event) {
+    }
+
+    @FXML
+    public void onQueryTextAreaKeyTyped(KeyEvent event) {
+        if (reservedWordController.notifyQueryInput(event, queryTextArea.getText())) {
+            reservedWordStage.setX(0.0);
+            reservedWordStage.setY(0.0);
+            reservedWordStage.show();
+            primaryStage.requestFocus();
+        } else {
+            reservedWordStage.hide();
         }
     }
 
