@@ -54,6 +54,7 @@ public class ReservedWordController implements Initializable {
         ObservableList<ReservedWord> items = reservedWordListView.getItems();
         items.clear();
         items.addAll(list);
+        reservedWordListView.getSelectionModel().select(0);
         return true;
     }
 

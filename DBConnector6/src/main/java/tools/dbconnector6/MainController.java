@@ -9,6 +9,7 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import tools.dbconnector6.controller.ControllerManager;
@@ -24,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
+import static javafx.scene.input.KeyCode.*;
 import static tools.dbconnector6.DbStructureTreeItem.ItemType.DATABASE;
 
 public class MainController extends Application implements Initializable, MainControllerInterface {
@@ -398,7 +400,37 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     public void onQueryTextAreaKeyPressed(KeyEvent event) {
-        if (reservedWordController.notifyKeyPressed(event)) {
+        if (reservedWordStage.isShowing() && isChangeFocusForReservedWordStage(event.getCode())) {
+            event.consume();
+            reservedWordStage.requestFocus();
+            return;
+        }
+
+        if (!isTextInput(event.getCode())) {
+            reservedWordStage.hide();
+            return;
+        }
+
+        int caret = queryTextArea.getCaretPosition();
+        String inputText = event.getText();
+        String text = (new StringBuilder(queryTextArea.getText())).insert(caret, inputText).toString();
+        StringBuilder caretForward = new StringBuilder(text.substring(0, caret + inputText.length()));      // キャレットより前の入力
+        caretForward = caretForward.reverse();
+
+        StringBuilder inputKeyword = new StringBuilder();
+        for (int loop=0; loop<caretForward.length(); loop++){
+            if (isInputSpace(caretForward.charAt(loop))) {
+                break;
+            }
+            inputKeyword.insert(0, caretForward.charAt(loop));
+        }
+
+        if (reservedWordController.notifyQueryInput(event, inputKeyword.toString())) {
+            reservedWordStage.setX(0.0);
+            reservedWordStage.setY(0.0);
+            reservedWordStage.show();
+            primaryStage.requestFocus();
+        } else {
             reservedWordStage.hide();
         }
     }
@@ -409,6 +441,12 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     public void onQueryTextAreaKeyTyped(KeyEvent event) {
+/*
+        int caret = queryTextArea.getCaretPosition();
+        String t = event.getText();
+        String text = queryTextArea.getText()+t;
+        String input = text.substring(caret);
+
         if (reservedWordController.notifyQueryInput(event, queryTextArea.getText())) {
             reservedWordStage.setX(0.0);
             reservedWordStage.setY(0.0);
@@ -417,6 +455,77 @@ public class MainController extends Application implements Initializable, MainCo
         } else {
             reservedWordStage.hide();
         }
+*/
+    }
+
+    private boolean isChangeFocusForReservedWordStage(KeyCode code) {
+        switch (code) {
+            case TAB:
+            case DOWN:
+                return true;
+        }
+
+        return false;
+    }
+    private boolean isInputSpace(char c) {
+        switch(c) {
+            case ' ':
+            case '\t':
+            case '\n':
+            case '　':
+                return true;
+        }
+        return false;
+    }
+
+    private boolean isTextInput(KeyCode code) {
+        switch (code) {
+            case A:
+            case B:
+            case C:
+            case D:
+            case E:
+            case F:
+            case G:
+            case H:
+            case I:
+            case J:
+            case K:
+            case L:
+            case M:
+            case N:
+            case O:
+            case P:
+            case Q:
+            case R:
+            case S:
+            case T:
+            case U:
+            case V:
+            case W:
+            case X:
+            case Y:
+            case Z:
+            case NUMPAD0:
+            case NUMPAD1:
+            case NUMPAD2:
+            case NUMPAD3:
+            case NUMPAD4:
+            case NUMPAD5:
+            case NUMPAD6:
+            case NUMPAD7:
+            case NUMPAD8:
+            case NUMPAD9:
+            case DOLLAR:
+            case UNDERSCORE:
+            case PLUS:
+            case MINUS:
+            case SLASH:
+            case ASTERISK:
+                return true;
+        }
+
+        return false;
     }
 
 }
