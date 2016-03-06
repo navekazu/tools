@@ -7,10 +7,7 @@ import tools.dbconnector6.entity.ReservedWord;
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class ReservedWordUpdateService implements BackgroundCallbackInterface<Void, Void> {
 
@@ -41,25 +38,14 @@ public class ReservedWordUpdateService implements BackgroundCallbackInterface<Vo
     }
 
     private void addSQLReservedWord() {
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "select"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "from"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "where"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "group by"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "order by"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "asc"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "desc"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "having"));
+        String[] words = new String[]{
+                "select", "from", "where", "group by", "order by", "asc", "desc", "having",
+                "update", "set",
+                "insert into", "values",
+                "create", "drop", "table", "index",
+        };
 
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "update"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "set"));
-
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "insert into"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "values"));
-
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "create"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "drop"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "table"));
-        reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, "index"));
+        Arrays.stream(words).forEach(word -> reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, word)));
     }
 
     @Override

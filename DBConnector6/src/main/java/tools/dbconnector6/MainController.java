@@ -25,7 +25,6 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
-import static javafx.scene.input.KeyCode.*;
 import static tools.dbconnector6.DbStructureTreeItem.ItemType.DATABASE;
 
 public class MainController extends Application implements Initializable, MainControllerInterface {
@@ -414,25 +413,31 @@ public class MainController extends Application implements Initializable, MainCo
         int caret = queryTextArea.getCaretPosition();
         String inputText = event.getText();
         String text = (new StringBuilder(queryTextArea.getText())).insert(caret, inputText).toString();
-        StringBuilder caretForward = new StringBuilder(text.substring(0, caret + inputText.length()));      // キャレットより前の入力
+        String inputKeyword = inputWord(text, caret + inputText.length());       // キャレットより前の単語を取得
+
+        if (reservedWordController.notifyQueryInput(event, inputKeyword)) {
+            reservedWordStage.setX(0.0);
+            reservedWordStage.setY(0.0);
+            reservedWordStage.show();
+            primaryStage.requestFocus();    // フォーカスは移動させない
+        } else {
+            reservedWordStage.hide();
+        }
+    }
+
+    private String inputWord(String text, int caret) {
+        StringBuilder caretForward = new StringBuilder(text.substring(0, caret));
         caretForward = caretForward.reverse();
 
         StringBuilder inputKeyword = new StringBuilder();
         for (int loop=0; loop<caretForward.length(); loop++){
-            if (isInputSpace(caretForward.charAt(loop))) {
+            if (isSpaceInput(caretForward.charAt(loop))) {
                 break;
             }
             inputKeyword.insert(0, caretForward.charAt(loop));
         }
 
-        if (reservedWordController.notifyQueryInput(event, inputKeyword.toString())) {
-            reservedWordStage.setX(0.0);
-            reservedWordStage.setY(0.0);
-            reservedWordStage.show();
-            primaryStage.requestFocus();
-        } else {
-            reservedWordStage.hide();
-        }
+        return inputKeyword.toString();
     }
 
     @FXML
@@ -441,21 +446,21 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     public void onQueryTextAreaKeyTyped(KeyEvent event) {
-/*
-        int caret = queryTextArea.getCaretPosition();
-        String t = event.getText();
-        String text = queryTextArea.getText()+t;
-        String input = text.substring(caret);
+    }
 
-        if (reservedWordController.notifyQueryInput(event, queryTextArea.getText())) {
-            reservedWordStage.setX(0.0);
-            reservedWordStage.setY(0.0);
-            reservedWordStage.show();
-            primaryStage.requestFocus();
-        } else {
-            reservedWordStage.hide();
-        }
-*/
+    @Override
+    public void selectReservedWord(String word) {
+        reservedWordStage.hide();
+
+        int caret = queryTextArea.getCaretPosition();
+        String text = queryTextArea.getText();
+        String inputKeyword = inputWord(text, caret);       // キャレットより前の単語を取得
+
+        // キャレットより前の単語を削除
+        queryTextArea.deleteText(caret-inputKeyword.length(), caret);
+
+        // キャレット位置に選択した単語を挿入
+        queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
     }
 
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {
@@ -467,7 +472,7 @@ public class MainController extends Application implements Initializable, MainCo
 
         return false;
     }
-    private boolean isInputSpace(char c) {
+    private boolean isSpaceInput(char c) {
         switch(c) {
             case ' ':
             case '\t':

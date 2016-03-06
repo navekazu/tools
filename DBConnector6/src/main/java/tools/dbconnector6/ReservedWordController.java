@@ -6,6 +6,7 @@ import javafx.fxml.Initializable;
 import javafx.scene.control.ListView;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import tools.dbconnector6.entity.ReservedWord;
 
@@ -65,6 +66,9 @@ public class ReservedWordController implements Initializable {
 
     @FXML
     public void onKeyPressed(KeyEvent event){
+        if (event.getCode()==KeyCode.ENTER) {
+            selected();
+        }
     }
 
     @FXML
@@ -77,6 +81,19 @@ public class ReservedWordController implements Initializable {
 
     @FXML
     public void onMouseClicked(MouseEvent event){
+        if (event.getClickCount()>=2 && event.getButton()== MouseButton.PRIMARY) {
+            selected();
+        }
     }
 
+    private void selected() {
+        int index = reservedWordListView.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            return;
+        }
+
+        ObservableList<ReservedWord> items = reservedWordListView.getItems();
+        mainControllerInterface.selectReservedWord(items.get(index).getWord());
+    }
 }
+

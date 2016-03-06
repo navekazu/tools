@@ -10,6 +10,7 @@ import java.sql.Connection;
 public interface MainControllerInterface {
     public void writeLog(String message, Object... args);
     public Connection getConnection();
+    public void selectReservedWord(String word);
 
     public BackgroundCallback getDbStructureUpdateService();
     public BackgroundCallback getTableStructureTabPaneUpdateService();
