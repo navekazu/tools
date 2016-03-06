@@ -1,23 +1,39 @@
 package tools.dbconnector6;
 
+import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 
 public class DbStructureTreeItem extends TreeItem<String> implements Comparable {
     public enum ItemType {
-        DATABASE("DATABASE"),
-        GROUP("Group"),
-        TABLE("TABLE"),
-        FUNCTION("FUNCTION"),
-        PROCEDURE("PROCEDURE"),
-        SCHEMA("SCHEMA");
+        DATABASE("DATABASE", "image/database.png"),
+        GROUP("Group", null),
+        TABLE("TABLE", "image/table.png"),
+        FUNCTION("FUNCTION", "image/function.png"),
+        PROCEDURE("PROCEDURE", "image/procedure.png"),
+        SCHEMA("SCHEMA", "image/schema.png");
 
         private String name;
-        ItemType(String name) {
+        private String imagePath;
+        ItemType(String name, String imagePath) {
             this.name = name;
+            this.imagePath = imagePath;
         }
 
         public String getName() {
             return name;
+        }
+
+        public final Node getImage() {
+            if (imagePath==null) {
+                return null;
+            }
+
+            Image image = new Image(imagePath);
+            ImageView iv1 = new ImageView();
+            iv1.setImage(image);
+            return iv1;
         }
     }
 
@@ -27,6 +43,7 @@ public class DbStructureTreeItem extends TreeItem<String> implements Comparable 
         super(value);
         this.itemType = type;
         this.schema = schema;
+        setGraphic(itemType.getImage());
 
     }
     public ItemType getItemType() {
@@ -40,5 +57,4 @@ public class DbStructureTreeItem extends TreeItem<String> implements Comparable 
     public int compareTo(Object o) {
         return getValue().compareTo(((TreeItem<String>)o).getValue());
     }
-
 }

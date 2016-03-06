@@ -35,9 +35,6 @@ public class MainController extends Application implements Initializable, MainCo
     private TextField filterTextField;
 
     @FXML
-    private TextField schemaTextField;
-
-    @FXML
     private Button searchButton;
 
     @FXML
@@ -347,7 +344,6 @@ public class MainController extends Application implements Initializable, MainCo
     public DbStructureParam getDbStructureParam() {
         MainControllerInterface.DbStructureParam param = new MainControllerInterface.DbStructureParam();
         param.filterTextField = filterTextField;
-        param.schemaTextField = schemaTextField;
         param.dbStructureTreeView = dbStructureTreeView;
         param.dbStructurRootItem = dbStructurRootItem;
         return param;

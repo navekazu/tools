@@ -22,7 +22,6 @@ public interface MainControllerInterface {
 
     public class DbStructureParam {
         public TextField filterTextField;
-        public TextField schemaTextField;
         public TreeView dbStructureTreeView;
         public DbStructureTreeItem dbStructurRootItem;
     }
