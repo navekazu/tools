@@ -1,9 +1,7 @@
 package tools.dbconnector6.mapper;
 
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.nio.file.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -11,11 +9,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public abstract class MapperBase<T> {
-    protected abstract String getArchiveFileName();
+public abstract class MapperBase<T> extends DataSerializer {
     protected abstract T unboxing(String line);
     protected abstract String autoboxing(T t);
-    protected static String testFileName = "";
     protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss");
 
     protected String blankToOneSpace(String s) {
@@ -32,12 +28,16 @@ public abstract class MapperBase<T> {
             return new ArrayList<>();
         }
 
-        return Files.readAllLines(path).stream().map(s -> unboxing(s)).collect(Collectors.toList());
+        return Files.readAllLines(path).stream()
+                .map(s -> unboxing(s))
+                .collect(Collectors.toList());
     }
 
     public void save(List<T> list) throws IOException {
         Path path = getArchiveFilePath();
-        List<String> stringList = list.stream().map(t -> autoboxing(t)).collect(Collectors.toList());
+        List<String> stringList = list.stream()
+                .map(t -> autoboxing(t))
+                .collect(Collectors.toList());
         Files.createDirectories(path.getParent());
         Files.write(path, stringList);
     }
@@ -50,7 +50,7 @@ public abstract class MapperBase<T> {
     }
 
     protected Path getArchiveFilePath() {
-        return Paths.get(System.getProperty("user.home"), ".DBConnector6", "config", getArchiveFileName()+testFileName);
+        return getArchiveFilePath("config");
     }
 
     protected String dateToString(Date date) {
