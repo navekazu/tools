@@ -25,34 +25,10 @@
                                     </Button>
                                  </right>
                                  <left>
-                                    <GridPane prefWidth="50.0" BorderPane.alignment="CENTER">
-                                      <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                                      </columnConstraints>
-                                      <rowConstraints>
-                                        <RowConstraints vgrow="SOMETIMES" />
-                                        <RowConstraints vgrow="SOMETIMES" />
-                                      </rowConstraints>
-                                       <children>
-                                          <Label text="Filter" />
-                                          <Label text="Schema" GridPane.rowIndex="1" />
-                                       </children>
-                                    </GridPane>
+                                    <Label text="Filter" BorderPane.alignment="CENTER" />
                                  </left>
                                  <center>
-                                    <GridPane BorderPane.alignment="CENTER">
-                                      <columnConstraints>
-                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
-                                      </columnConstraints>
-                                      <rowConstraints>
-                                        <RowConstraints vgrow="SOMETIMES" />
-                                        <RowConstraints vgrow="SOMETIMES" />
-                                      </rowConstraints>
-                                       <children>
-                                          <TextField fx:id="filterTextField" />
-                                          <TextField fx:id="schemaTextField" GridPane.rowIndex="1" />
-                                       </children>
-                                    </GridPane>
+                                    <TextField fx:id="filterTextField" BorderPane.alignment="CENTER" />
                                  </center>
                               </BorderPane>
                            </top>
@@ -168,7 +144,7 @@
                           <items>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
                                  <children>
-                                    <TextArea fx:id="queryTextArea" layoutX="-27.0" layoutY="-49.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                                    <TextArea fx:id="queryTextArea" layoutX="-27.0" layoutY="-49.0" onKeyPressed="#onQueryTextAreaKeyPressed" onKeyReleased="#onQueryTextAreaKeyReleased" onKeyTyped="#onQueryTextAreaKeyTyped" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
                                  </children>
                               </AnchorPane>
                             <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
