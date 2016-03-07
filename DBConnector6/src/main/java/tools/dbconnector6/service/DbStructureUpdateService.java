@@ -15,7 +15,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class DbStructureUpdateService implements BackgroundCallbackInterface<Void, List<TreeItem<String>>> {
+public class DbStructureUpdateService implements BackgroundCallbackInterface<Void, List<DbStructureTreeItem>> {
     private MainControllerInterface mainControllerInterface;
     public DbStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
@@ -24,44 +24,68 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
     @Override
     public void run() throws Exception {
         if (mainControllerInterface.getConnection()==null) {
-            updateUI(new ArrayList<>());
+            updateUI(new ArrayList<DbStructureTreeItem>());
             return ;
         }
 
-        List<TreeItem<String>> subList = new ArrayList<>();
         DatabaseMetaData meta = mainControllerInterface.getConnection().getMetaData();
-        DbStructureTreeItem.ItemType itemType;
+        List<DbStructureTreeItem> schemaList = getSchemaList(meta);
 
-        // サポートされていないAPIを呼ぶと例外が発生するので、そのときは握りつぶして次を呼び出す
-        ResultSet resultSet = meta.getTableTypes();
-        try {
-            itemType = DbStructureTreeItem.ItemType.TABLE;
-            while (resultSet.next()) {
-                subList.add(createGroupItem(meta.getTables(null, getSchemaTextFieldParamValue(), getFilterTextFieldParamValue(), new String[]{resultSet.getString("TABLE_TYPE")})
-                        , "TABLE_NAME", "TABLE_SCHEM", resultSet.getString("TABLE_TYPE"), itemType));
+        for (DbStructureTreeItem item: schemaList) {
+            List<DbStructureTreeItem> subList = new ArrayList<>();
+            DbStructureTreeItem.ItemType itemType;
+
+            // サポートされていないAPIを呼ぶと例外が発生するので、そのときは握りつぶして次を呼び出す
+            ResultSet resultSet = meta.getTableTypes();
+            try {
+                itemType = DbStructureTreeItem.ItemType.TABLE;
+                while (resultSet.next()) {
+                    subList.add(createGroupItem(meta.getTables(null, item.getSchema(), getFilterTextFieldParamValue(), new String[]{resultSet.getString("TABLE_TYPE")})
+                            , "TABLE_NAME", "TABLE_SCHEM", resultSet.getString("TABLE_TYPE"), itemType));
+                }
+                resultSet.close();
+            } catch (Throwable e) {
             }
-            resultSet.close();
-        } catch(Throwable e) {}
+
+            try {
+                itemType = DbStructureTreeItem.ItemType.FUNCTION;
+                subList.add(createGroupItem(meta.getFunctions(null, item.getSchema(), getFilterTextFieldParamValue())
+                        , "FUNCTION_NAME", "FUNCTION_SCHEM", itemType.getName(), itemType));
+            } catch (Throwable e) {
+            }
+
+            try {
+                itemType = DbStructureTreeItem.ItemType.PROCEDURE;
+                subList.add(createGroupItem(meta.getProcedures(null, item.getSchema(), getFilterTextFieldParamValue())
+                        , "PROCEDURE_NAME", "PROCEDURE_SCHEM", itemType.getName(), itemType));
+            } catch (Throwable e) {
+            }
+            item.getChildren().addAll(subList);
+        }
+
+        updateUI(schemaList);
+    }
+
+    private List<DbStructureTreeItem> getSchemaList(DatabaseMetaData meta) {
+        List<DbStructureTreeItem> schemaList = new ArrayList<>();
 
         try {
-            itemType = DbStructureTreeItem.ItemType.FUNCTION;
-            subList.add(createGroupItem(meta.getFunctions(null, getSchemaTextFieldParamValue(), getFilterTextFieldParamValue())
-                    , "FUNCTION_NAME", "FUNCTION_SCHEM", itemType.getName(), itemType));
-        } catch(Throwable e) {}
+            ResultSet resultSet = meta.getSchemas();
 
-        try {
-            itemType = DbStructureTreeItem.ItemType.PROCEDURE;
-            subList.add(createGroupItem(meta.getProcedures(null, getSchemaTextFieldParamValue(), getFilterTextFieldParamValue())
-                    , "PROCEDURE_NAME", "PROCEDURE_SCHEM", itemType.getName(), itemType));
-        } catch(Throwable e) {}
+            while(resultSet.next()) {
+                schemaList.add(new DbStructureTreeItem(DbStructureTreeItem.ItemType.SCHEMA
+                        , resultSet.getString("TABLE_SCHEM"), resultSet.getString("TABLE_SCHEM")));
+            }
+        } catch(Throwable e) {
+            schemaList.clear();
+        }
 
-        try {
-            itemType = DbStructureTreeItem.ItemType.SCHEMA;
-            subList.add(createGroupItem(meta.getSchemas(null, getSchemaTextFieldParamValue())
-                    , "TABLE_SCHEM", "TABLE_SCHEM", itemType.getName(), itemType));
-        } catch(Throwable e) {}
+        // 空ならダミーのアイテムを入れる
+        if (schemaList.isEmpty()) {
+            schemaList.add(new DbStructureTreeItem(DbStructureTreeItem.ItemType.SCHEMA, "(none schema)", ""));
+        }
 
-        updateUI(subList);
+        return schemaList;
     }
 
     @Override
@@ -69,7 +93,7 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
     }
 
     @Override
-    public void updateUI(List<TreeItem<String>> uiParam) throws Exception {
+    public void updateUI(List<DbStructureTreeItem> uiParam) throws Exception {
         final List<TreeItem<String>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
@@ -101,10 +125,6 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
 
     private String getFilterTextFieldParamValue() {
         return getTextFieldParamValue(mainControllerInterface.getDbStructureParam().filterTextField);
-    }
-
-    private String getSchemaTextFieldParamValue() {
-        return getTextFieldParamValue(mainControllerInterface.getDbStructureParam().schemaTextField);
     }
 
     private String getTextFieldParamValue(TextField textField) {

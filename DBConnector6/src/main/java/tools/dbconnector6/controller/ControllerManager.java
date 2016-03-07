@@ -3,6 +3,7 @@ package tools.dbconnector6.controller;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.paint.Color;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -32,6 +33,7 @@ public class ControllerManager {
     static {
         stageDefinedMap.put("main", StageDefine.builder().fxml("/fxml/Main.fxml").title("DBConnector6").build());
         stageDefinedMap.put("connect", StageDefine.builder().fxml("/fxml/Connect.fxml").title("Connect").build());
+        stageDefinedMap.put("reservedWord", StageDefine.builder().fxml("/fxml/ReservedWord.fxml").title("ReservedWord").build());
     }
 
     /**
@@ -85,6 +87,28 @@ public class ControllerManager {
         subStage.initOwner(primaryStage);
         subStage.initModality(Modality.APPLICATION_MODAL);
         subStage.setTitle(stageDefine.getTitle());
+
+        return subStage;
+    }
+
+    /**
+     * アプリケーション起動時のステージを親に持つ透明な子のステージを取得する
+     * @param loader FXMLを指定したFXMLLoader
+     * @param name ステージ定義のマップ名
+     * @return 子のステージ
+     * @throws IOException FXML読み込みに失敗した場合
+     */
+    public Stage getTransparentSubStage(FXMLLoader loader, String name) throws IOException {
+        StageDefine stageDefine = getStageDefine(name);
+
+        loader.load();
+        Parent root = loader.getRoot();
+        Scene scene = new Scene(root, Color.TRANSPARENT);
+        Stage subStage = new Stage(StageStyle.UTILITY);
+        subStage.initStyle(StageStyle.TRANSPARENT);
+        subStage.setScene(scene);
+        subStage.initOwner(primaryStage);
+        subStage.initModality(Modality.NONE);
 
         return subStage;
     }

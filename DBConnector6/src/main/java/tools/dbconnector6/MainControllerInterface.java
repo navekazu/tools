@@ -10,6 +10,9 @@ import java.sql.Connection;
 public interface MainControllerInterface {
     public void writeLog(String message, Object... args);
     public Connection getConnection();
+    public void selectReservedWord(String word);
+    public void mainControllerRequestFocus();
+    public void hideReservedWordStage();
 
     public BackgroundCallback getDbStructureUpdateService();
     public BackgroundCallback getTableStructureTabPaneUpdateService();
@@ -22,7 +25,6 @@ public interface MainControllerInterface {
 
     public class DbStructureParam {
         public TextField filterTextField;
-        public TextField schemaTextField;
         public TreeView dbStructureTreeView;
         public DbStructureTreeItem dbStructurRootItem;
     }
