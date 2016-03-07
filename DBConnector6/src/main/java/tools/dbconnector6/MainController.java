@@ -8,7 +8,11 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
+import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.InputMethodRequests;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
@@ -18,12 +22,15 @@ import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
 import tools.dbconnector6.service.*;
 
+import java.awt.*;
+import java.awt.im.spi.InputMethod;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
+import java.util.List;
 
 import static tools.dbconnector6.DbStructureTreeItem.ItemType.DATABASE;
 
@@ -399,25 +406,37 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     public void onQueryTextAreaKeyPressed(KeyEvent event) {
+        // フォーカス移動
         if (reservedWordStage.isShowing() && isChangeFocusForReservedWordStage(event.getCode())) {
             event.consume();
             reservedWordStage.requestFocus();
             return;
         }
 
-        if (!isTextInput(event.getCode())) {
+        // 非表示
+        if (event.isAltDown() || event.isControlDown() || !isTextInput(event.getCode())) {
             reservedWordStage.hide();
             return;
         }
 
         int caret = queryTextArea.getCaretPosition();
         String inputText = event.getText();
+
+        // シフトを押していてキャプスロックがOFFの場合、大文字に変換する
+        // シフトを押さずにキャプスロックがONの場合、大文字に変換する
+        if ((event.isShiftDown() && !Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))
+                ||(!event.isShiftDown() && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))) {
+            inputText = inputText.toUpperCase();
+        }
+
         String text = (new StringBuilder(queryTextArea.getText())).insert(caret, inputText).toString();
         String inputKeyword = inputWord(text, caret + inputText.length());       // キャレットより前の単語を取得
 
         if (reservedWordController.notifyQueryInput(event, inputKeyword)) {
-            reservedWordStage.setX(0.0);
-            reservedWordStage.setY(0.0);
+            // キャレット位置に選択画面を出す
+            InputMethodRequests imr = queryTextArea.getInputMethodRequests();
+            reservedWordStage.setX(imr.getTextLocation(0).getX());
+            reservedWordStage.setY(imr.getTextLocation(0).getY());
             reservedWordStage.show();
             primaryStage.requestFocus();    // フォーカスは移動させない
         } else {
@@ -450,8 +469,6 @@ public class MainController extends Application implements Initializable, MainCo
 
     @Override
     public void selectReservedWord(String word) {
-        reservedWordStage.hide();
-
         int caret = queryTextArea.getCaretPosition();
         String text = queryTextArea.getText();
         String inputKeyword = inputWord(text, caret);       // キャレットより前の単語を取得
@@ -461,6 +478,16 @@ public class MainController extends Application implements Initializable, MainCo
 
         // キャレット位置に選択した単語を挿入
         queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
+    }
+
+    @Override
+    public void mainControllerRequestFocus() {
+        primaryStage.requestFocus();
+    }
+
+    @Override
+    public void hideReservedWordStage() {
+        reservedWordStage.hide();
     }
 
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {

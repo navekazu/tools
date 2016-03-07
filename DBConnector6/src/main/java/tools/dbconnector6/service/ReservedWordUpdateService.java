@@ -14,6 +14,14 @@ public class ReservedWordUpdateService implements BackgroundCallbackInterface<Vo
     private MainControllerInterface mainControllerInterface;
     private List<ReservedWord> reservedWordList;
 
+    private static final String[] PRESET_RESERVED_WORD = new String[]{
+            "select", "from", "where", "group by", "order by", "asc", "desc", "having",
+            "update", "set",
+            "delete",
+            "insert into", "values",
+            "create", "drop", "table", "index",
+    };
+
     public ReservedWordUpdateService(MainControllerInterface mainControllerInterface, List<ReservedWord> reservedWordList) {
         this.mainControllerInterface = mainControllerInterface;
         this.reservedWordList = reservedWordList;
@@ -38,14 +46,7 @@ public class ReservedWordUpdateService implements BackgroundCallbackInterface<Vo
     }
 
     private void addSQLReservedWord() {
-        String[] words = new String[]{
-                "select", "from", "where", "group by", "order by", "asc", "desc", "having",
-                "update", "set",
-                "insert into", "values",
-                "create", "drop", "table", "index",
-        };
-
-        Arrays.stream(words).forEach(word -> reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, word)));
+        Arrays.stream(PRESET_RESERVED_WORD).forEach(word -> reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, word)));
     }
 
     @Override
