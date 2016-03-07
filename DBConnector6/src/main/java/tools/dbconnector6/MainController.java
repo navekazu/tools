@@ -257,6 +257,8 @@ public class MainController extends Application implements Initializable, MainCo
             connection.close();
             connection = null;
             writeLog("Disconnected.");
+            dbStructureUpdateService.restart();
+            reservedWordUpdateService.restart();
         }
     }
 
