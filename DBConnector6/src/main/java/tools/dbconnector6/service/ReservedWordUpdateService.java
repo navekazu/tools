@@ -32,9 +32,12 @@ public class ReservedWordUpdateService implements BackgroundCallbackInterface<Vo
     public void run() throws Exception {
         reservedWordList.clear();
         addSQLReservedWord();
-        DatabaseMetaData dmd =mainControllerInterface.getConnection().getMetaData();
-        addMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, dmd.getTables(null,  null, null, null), "TABLE_NAME");
-        addMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, dmd.getColumns(null, null, null, null), "COLUMN_NAME");
+
+        if (mainControllerInterface.getConnection()!=null) {
+            DatabaseMetaData dmd = mainControllerInterface.getConnection().getMetaData();
+            addMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, dmd.getTables(null, null, null, null), "TABLE_NAME");
+            addMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, dmd.getColumns(null, null, null, null), "COLUMN_NAME");
+        }
     }
 
     private void addMetadataReservedWord(ReservedWord.ReservedWordType reservedWordType, ResultSet resultSet, String name) throws SQLException {
