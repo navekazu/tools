@@ -1,9 +1,11 @@
 package tools.dbconnector6;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -16,6 +18,7 @@ import javafx.scene.input.InputMethodRequests;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import tools.dbconnector6.controller.ControllerManager;
 import tools.dbconnector6.entity.ReservedWord;
 import tools.dbconnector6.entity.TableColumnTab;
@@ -23,6 +26,7 @@ import tools.dbconnector6.entity.TablePropertyTab;
 import tools.dbconnector6.service.*;
 
 import java.awt.*;
+import java.awt.event.WindowListener;
 import java.awt.im.spi.InputMethod;
 import java.io.IOException;
 import java.net.URL;
@@ -122,6 +126,9 @@ public class MainController extends Application implements Initializable, MainCo
 
     @Override
     public void start(Stage primaryStage) throws Exception {
+        primaryStage.setOnShown(new MainWindowShownHandler());
+        primaryStage.setOnCloseRequest(new MainWindowCloseRequestHandler());
+
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("main");
         ControllerManager.getControllerManager().getMainStage(loader, primaryStage).show();
 
@@ -179,6 +186,8 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordController = loader.getController();
         reservedWordController.setMainControllerInterface(this);
         reservedWordController.setRservedWordList(reservedWordList);
+
+
     }
 
     @FXML
@@ -490,6 +499,32 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordStage.hide();
     }
 
+    private class MainWindowShownHandler implements EventHandler<WindowEvent> {
+        @Override
+        public void handle(WindowEvent event) {
+/*
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        onConnect(null);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+*/
+        }
+    }
+
+    private class MainWindowCloseRequestHandler implements EventHandler<WindowEvent> {
+        @Override
+        public void handle(WindowEvent event) {
+
+        }
+    }
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {
         switch (code) {
             case TAB:
