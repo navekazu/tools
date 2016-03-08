@@ -24,6 +24,7 @@ import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ReservedWord;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
+import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 
 import java.awt.*;
@@ -128,14 +129,16 @@ public class MainController extends Application implements Initializable, MainCo
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setOnShown(new MainWindowShownHandler());
-        primaryStage.setOnCloseRequest(new MainWindowCloseRequestHandler());
-
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("main");
-        ControllerManager.getControllerManager().getMainStage(loader, primaryStage).show();
+        ControllerManager.getControllerManager().getMainStage(loader, primaryStage);
+
+        MainController controller = loader.getController();
+        primaryStage.setOnShown(new MainWindowShownHandler(controller));
+        primaryStage.setOnCloseRequest(new MainWindowCloseRequestHandler(controller));
+
+        primaryStage.show();
 
         // 初期フォーカスを検索ワード入力欄に（initializeの中ではフォーカス移動できない）
-        MainController controller = loader.getController();
         controller.focusQueryTextArea();
         controller.primaryStage = primaryStage;
     }
@@ -192,13 +195,20 @@ public class MainController extends Application implements Initializable, MainCo
 
     }
 
-    @FXML
-    private void onClose(ActionEvent event) throws SQLException {
+    private void closeConnection() throws SQLException {
         if (connection!=null) {
             connection.close();
             connection = null;
             connectParam = null;
+            writeLog("Disconnected.");
         }
+        dbStructureUpdateService.restart();
+        reservedWordUpdateService.restart();
+    }
+
+    @FXML
+    private void onClose(ActionEvent event) throws SQLException {
+        closeConnection();
     }
 
     @FXML
@@ -232,11 +242,7 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML
     private void onConnect(ActionEvent event) throws IOException, SQLException {
 
-        if (connection!=null) {
-            connection.close();
-            connection = null;
-            connectParam = null;
-        }
+        closeConnection();
 
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("connect");
         Stage stage = ControllerManager.getControllerManager().getSubStage(loader, "connect");
@@ -249,22 +255,16 @@ public class MainController extends Application implements Initializable, MainCo
         connectParam = controller.getConnect();
         if (connection!=null) {
             writeLog("Connected.");
-            dbStructureUpdateService.restart();
-            reservedWordUpdateService.restart();
         }
+        dbStructureUpdateService.restart();
+        reservedWordUpdateService.restart();
 
         stage.close();
     }
 
     @FXML
     private void onDisconnect(ActionEvent event) throws SQLException {
-        if (connection!=null) {
-            connection.close();
-            connection = null;
-            writeLog("Disconnected.");
-            dbStructureUpdateService.restart();
-            reservedWordUpdateService.restart();
-        }
+        closeConnection();
     }
 
     @FXML
@@ -289,6 +289,7 @@ public class MainController extends Application implements Initializable, MainCo
     private void onCommit(ActionEvent event) {
         if (connection==null) {
             writeLog("No connect.");
+            return ;
         }
         try {
             connection.commit();
@@ -301,6 +302,7 @@ public class MainController extends Application implements Initializable, MainCo
     private void onRollback(ActionEvent event) {
         if (connection==null) {
             writeLog("No connect.");
+            return ;
         }
         try {
             connection.rollback();
@@ -511,8 +513,21 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     private class MainWindowShownHandler implements EventHandler<WindowEvent> {
+        private MainController controller;
+        public MainWindowShownHandler(MainController controller) {
+            this.controller = controller;
+
+        }
+
         @Override
         public void handle(WindowEvent event) {
+            try {
+                WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
+                controller.queryTextArea.setText(workingQuerySerializer.readText());
+                controller.queryTextArea.positionCaret(controller.queryTextArea.getText().length());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 /*
             Platform.runLater(new Runnable() {
                 @Override
@@ -531,9 +546,25 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     private class MainWindowCloseRequestHandler implements EventHandler<WindowEvent> {
+        private MainController controller;
+        public MainWindowCloseRequestHandler(MainController controller) {
+            this.controller = controller;
+
+        }
+
         @Override
         public void handle(WindowEvent event) {
-
+            try {
+                controller.closeConnection();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
+                workingQuerySerializer.updateText(controller.queryTextArea.getText());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {

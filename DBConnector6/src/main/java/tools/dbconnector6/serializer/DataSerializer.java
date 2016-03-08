@@ -21,7 +21,7 @@ public abstract class DataSerializer {
         writeText(text, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
     public void updateText(String text) throws IOException {
-        writeText(text, StandardOpenOption.WRITE);
+        writeText(text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
     }
     private void writeText(String text, OpenOption... options) throws IOException {
         Path path = getArchiveFilePath();
@@ -36,7 +36,6 @@ public abstract class DataSerializer {
                         out.print(text.charAt(loop));
                     }
                 }
-                out.println();
             }
         } catch(IOException e) {
             e.printStackTrace();
@@ -48,6 +47,10 @@ public abstract class DataSerializer {
         Path path = getArchiveFilePath();
         Files.createDirectories(path.getParent());
         StringBuilder stringBuilder = new StringBuilder();
+
+        if (!Files.exists(path)) {
+            return "";
+        }
 
         Files.readAllLines(path).stream()
                 .forEach(s -> {

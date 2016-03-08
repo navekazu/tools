@@ -321,6 +321,7 @@ public class ConnectController implements Initializable {
 //            Class.forName(entity.getDriver());
             conn = DriverManager.getConnection(urlTextField.getText(), info);
         }
+        conn.setAutoCommit(false);
 
         // 接続に成功したら、履歴に追加する
         ConnectHistory history = ConnectHistory.builder()
