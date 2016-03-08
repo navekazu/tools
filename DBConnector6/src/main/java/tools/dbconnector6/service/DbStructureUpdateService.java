@@ -92,7 +92,7 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
             updateUI(item);
             return null;
         }
-    };
+    }
 
     private List<DbStructureTreeItem> getSchemaList(DatabaseMetaData meta) {
         List<DbStructureTreeItem> schemaList = new ArrayList<>();
