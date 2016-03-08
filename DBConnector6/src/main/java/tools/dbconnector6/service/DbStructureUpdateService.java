@@ -42,48 +42,57 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
             Service service = new Service() {
                 @Override
                 protected Task createTask() {
-                    return new Task() {
-                        @Override
-                        protected Object call() throws Exception {
-                            List<DbStructureTreeItem> subList = new ArrayList<>();
-                            DbStructureTreeItem.ItemType itemType;
-
-                            // サポートされていないAPIを呼ぶと例外が発生するので、そのときは握りつぶして次を呼び出す
-                            try {
-                                ResultSet resultSet = meta.getTableTypes();
-                                itemType = DbStructureTreeItem.ItemType.TABLE;
-                                while (resultSet.next()) {
-                                    subList.add(createGroupItem(meta.getTables(null, item.getSchema(), getFilterTextFieldParamValue(), new String[]{resultSet.getString("TABLE_TYPE")})
-                                            , "TABLE_NAME", "TABLE_SCHEM", resultSet.getString("TABLE_TYPE"), itemType));
-                                }
-                                resultSet.close();
-                            } catch (Throwable e) {
-                            }
-
-                            try {
-                                itemType = DbStructureTreeItem.ItemType.FUNCTION;
-                                subList.add(createGroupItem(meta.getFunctions(null, item.getSchema(), getFilterTextFieldParamValue())
-                                        , "FUNCTION_NAME", "FUNCTION_SCHEM", itemType.getName(), itemType));
-                            } catch (Throwable e) {
-                            }
-
-                            try {
-                                itemType = DbStructureTreeItem.ItemType.PROCEDURE;
-                                subList.add(createGroupItem(meta.getProcedures(null, item.getSchema(), getFilterTextFieldParamValue())
-                                        , "PROCEDURE_NAME", "PROCEDURE_SCHEM", itemType.getName(), itemType));
-                            } catch (Throwable e) {
-                            }
-                            item.getChildren().addAll(subList);
-
-                            updateUI(item);
-                            return null;
-                        }
-                    };
+                    return new SchemaSearchTask(meta, item);
                 }
             };
             service.restart();
         }
     }
+
+    private class  SchemaSearchTask extends Task {
+        DatabaseMetaData meta;
+        DbStructureTreeItem item;
+        public SchemaSearchTask(DatabaseMetaData meta, DbStructureTreeItem item) {
+            this.meta = meta;
+            this.item = item;
+
+        }
+        @Override
+        protected Object call() throws Exception {
+            List<DbStructureTreeItem> subList = new ArrayList<>();
+            DbStructureTreeItem.ItemType itemType;
+
+            // サポートされていないAPIを呼ぶと例外が発生するので、そのときは握りつぶして次を呼び出す
+            try {
+                ResultSet resultSet = meta.getTableTypes();
+                itemType = DbStructureTreeItem.ItemType.TABLE;
+                while (resultSet.next()) {
+                    subList.add(createGroupItem(meta.getTables(null, item.getSchema(), getFilterTextFieldParamValue(), new String[]{resultSet.getString("TABLE_TYPE")})
+                            , "TABLE_NAME", "TABLE_SCHEM", resultSet.getString("TABLE_TYPE"), itemType));
+                }
+                resultSet.close();
+            } catch (Throwable e) {
+            }
+
+            try {
+                itemType = DbStructureTreeItem.ItemType.FUNCTION;
+                subList.add(createGroupItem(meta.getFunctions(null, item.getSchema(), getFilterTextFieldParamValue())
+                        , "FUNCTION_NAME", "FUNCTION_SCHEM", itemType.getName(), itemType));
+            } catch (Throwable e) {
+            }
+
+            try {
+                itemType = DbStructureTreeItem.ItemType.PROCEDURE;
+                subList.add(createGroupItem(meta.getProcedures(null, item.getSchema(), getFilterTextFieldParamValue())
+                        , "PROCEDURE_NAME", "PROCEDURE_SCHEM", itemType.getName(), itemType));
+            } catch (Throwable e) {
+            }
+            item.getChildren().addAll(subList);
+
+            updateUI(item);
+            return null;
+        }
+    };
 
     private List<DbStructureTreeItem> getSchemaList(DatabaseMetaData meta) {
         List<DbStructureTreeItem> schemaList = new ArrayList<>();
