@@ -87,6 +87,7 @@ public class ConnectController implements Initializable {
 
     private MainControllerInterface mainControllerInterface;
     private Connection connection;
+    private Connect connect;
 
     public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = this.mainControllerInterface;
@@ -99,6 +100,9 @@ public class ConnectController implements Initializable {
         urlTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("url"));
         userTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("user"));
         passwordTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("passeord"));
+
+        connection = null;
+        connect = null;
 
         try {
             ObservableList<Connect> tableList = connectTableView.getItems();
@@ -129,6 +133,10 @@ public class ConnectController implements Initializable {
         }
     }
 
+    public Connect getConnect() {
+        return connect;
+    }
+
     private class HistoryComboBoxChangeListener implements ChangeListener {
         @Override
         public void changed(ObservableValue observable, Object oldValue, Object newValue) {
@@ -154,19 +162,23 @@ public class ConnectController implements Initializable {
             return ;
         }
 
-        Connect connect = Connect.builder()
-                .libraryPath(libraryPathTextField.getText().trim())
-                .driver(driverTextField.getText().trim())
-                .url(urlTextField.getText().trim())
-                .user(userTextField.getText().trim())
-                .password(passwordTextField.getText().trim())
-                .build();
+        Connect connect = createConnect();
 
         ObservableList<Connect> tableList = connectTableView.getItems();
         tableList.add(connect);
         connectTableView.getSelectionModel().select(tableList.size()-1);
 
         saveConnectList();
+    }
+
+    private Connect createConnect() {
+        return  Connect.builder()
+                .libraryPath(libraryPathTextField.getText().trim())
+                .driver(driverTextField.getText().trim())
+                .url(urlTextField.getText().trim())
+                .user(userTextField.getText().trim())
+                .password(passwordTextField.getText().trim())
+                .build();
     }
 
     @FXML
@@ -180,13 +192,7 @@ public class ConnectController implements Initializable {
             return ;
         }
 
-        Connect connect = Connect.builder()
-                .libraryPath(libraryPathTextField.getText().trim())
-                .driver(driverTextField.getText().trim())
-                .url(urlTextField.getText().trim())
-                .user(userTextField.getText().trim())
-                .password(passwordTextField.getText().trim())
-                .build();
+        Connect connect = createConnect();
 
         ObservableList<Connect> tableList = connectTableView.getItems();
         tableList.remove(index);
@@ -270,12 +276,15 @@ public class ConnectController implements Initializable {
     @FXML
     private void onOk(ActionEvent event) throws Exception {
         this.connection = connectDatabase();
+        this.connect = createConnect();
+
         connectTableView.getScene().getWindow().hide();
     }
 
     @FXML
     private void onCancel(ActionEvent event) {
         this.connection = null;
+        this.connect = null;
         connectTableView.getScene().getWindow().hide();
     }
 

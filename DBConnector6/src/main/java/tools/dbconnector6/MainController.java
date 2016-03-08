@@ -20,6 +20,7 @@ import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import tools.dbconnector6.controller.ControllerManager;
+import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ReservedWord;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
@@ -114,6 +115,7 @@ public class MainController extends Application implements Initializable, MainCo
     private TextArea logTextArea;
 
     private Connection connection;
+    private Connect connectParam;
     private BackgroundCallback dbStructureUpdateService;
     private BackgroundCallback tableStructureTabPaneUpdateService;
     private BackgroundCallback tableStructureUpdateService;
@@ -195,6 +197,7 @@ public class MainController extends Application implements Initializable, MainCo
         if (connection!=null) {
             connection.close();
             connection = null;
+            connectParam = null;
         }
     }
 
@@ -232,6 +235,7 @@ public class MainController extends Application implements Initializable, MainCo
         if (connection!=null) {
             connection.close();
             connection = null;
+            connectParam = null;
         }
 
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("connect");
@@ -242,6 +246,7 @@ public class MainController extends Application implements Initializable, MainCo
         stage.showAndWait();
 
         connection = controller.getConnection();
+        connectParam = controller.getConnect();
         if (connection!=null) {
             writeLog("Connected.");
             dbStructureUpdateService.restart();
@@ -343,6 +348,10 @@ public class MainController extends Application implements Initializable, MainCo
     public Connection getConnection() {
         return connection;
     }
+    public Connect getConnectParam() {
+        return connectParam;
+    }
+
 
     public BackgroundCallback getDbStructureUpdateService() {
         return dbStructureUpdateService;

@@ -1,12 +1,12 @@
-package tools.dbconnector6.mapper;
+package tools.dbconnector6.serializer;
 
-import tools.dbconnector6.mapper.DataSerializer;
+import tools.dbconnector6.serializer.DataSerializer;
 
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-public class QueryHistorySerializer extends DataSerializer {
+public class WorkingQuerySerializer extends DataSerializer {
     protected static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyyMMdd");
 
     @Override
@@ -16,6 +16,6 @@ public class QueryHistorySerializer extends DataSerializer {
 
     @Override
     protected Path getArchiveFilePath() {
-        return getArchiveFilePath("query_history");
+        return getArchiveFilePath("working_history");
     }
 }

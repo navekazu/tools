@@ -8,20 +8,27 @@ import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 import tools.dbconnector6.BackgroundCallbackInterface;
 import tools.dbconnector6.MainControllerInterface;
+import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.QueryResult;
+import tools.dbconnector6.serializer.QueryHistorySerializer;
 
 import java.sql.*;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.Date;
 
 public class QueryResultUpdateService implements BackgroundCallbackInterface<List<TableColumn<QueryResult, String>>, List<Map<String, String>>> {
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
     private static final int FLUSH_ROW_COUNT = 1000;
+    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+    private QueryHistorySerializer queryHistorySerializer;
 
     private MainControllerInterface mainControllerInterface;
     public QueryResultUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
+        this.queryHistorySerializer = new QueryHistorySerializer();
     }
 
     @Override
@@ -32,36 +39,37 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
         }
 
         // 実行するSQLを取得
-        String[] sqls = splitSql(getSql());
+        String[] queries = splitQuery(getQuery());
 
         // 個々のSQLを実行
         int executeQueryCount = 0;
         try {
-            for (String sql : sqls) {
-                executeSql(sql);
+            for (String query: queries) {
+                queryHistorySerializer.appendText(createQueryHistory(query));
+                executeQuery(query);
                 executeQueryCount++;
             }
 
-            if (sqls.length >= 2) {
+            if (queries.length >= 2) {
                 mainControllerInterface.writeLog("Total query count: %d", executeQueryCount);
             }
         } catch(SQLException e) {
             mainControllerInterface.writeLog(e.getMessage());
             // 複数クエリの場合、実行出来たクエリ数を出力
-            if (sqls.length >= 2) {
+            if (queries.length >= 2) {
                 mainControllerInterface.writeLog("Succeeded query count: %d", executeQueryCount);
             }
         }
     }
 
-    private void executeSql(String sql) throws Exception {
+    private void executeQuery(String query) throws Exception {
         Connection connection = mainControllerInterface.getConnection();
         long startTime, endTime;
 
         try (Statement statement = connection.createStatement()) {
             mainControllerInterface.writeLog("Executing...");
             startTime = System.currentTimeMillis();
-            boolean executeResult = statement.execute(sql);
+            boolean executeResult = statement.execute(query);
             endTime = System.currentTimeMillis();
             mainControllerInterface.writeLog("Response time: %s sec", RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
 
@@ -146,7 +154,7 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
         });
     }
 
-    protected String getSql() {
+    protected String getQuery() {
         //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
         String sql = mainControllerInterface.getQueryParam().queryTextArea.getSelectedText();
         if (sql.length()<=0) {
@@ -155,7 +163,7 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
         return sql;
     }
 
-    protected String[] splitSql(String sql) {
+    protected String[] splitQuery(String sql) {
         String[] split = sql.trim().split("(;\n|/\n)");
         return Arrays.stream(split)
                 .map(s -> {
@@ -172,5 +180,23 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                 })
                 .filter(s -> s.length()>=1)
                 .toArray(String[]::new);
+    }
+
+    private String createQueryHistory(String query) {
+        Connect connect = mainControllerInterface.getConnectParam();
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("====================================================================================================\n");
+        builder.append(String.format("%s Lib[%s] Dir[%s] URL[%s] Use[%s]\n"
+                , DATE_FORMAT.format(new Date())
+                , (connect.getLibraryPath()==null? "": connect.getLibraryPath())
+                , (connect.getDriver()==null? "": connect.getDriver())
+                , (connect.getUrl()==null? "": connect.getUrl())
+                , (connect.getUser()==null? "": connect.getUser())));
+        builder.append("----------------------------------------------------------------------------------------------------\n");
+        builder.append(query);
+        builder.append("\n");
+
+        return builder.toString();
     }
 }
