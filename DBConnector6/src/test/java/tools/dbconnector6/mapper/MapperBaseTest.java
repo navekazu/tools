@@ -2,7 +2,6 @@ package tools.dbconnector6.mapper;
 
 import org.junit.*;
 
-import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.Assert.assertEquals;
@@ -10,7 +9,7 @@ import static org.junit.Assert.assertEquals;
 public class MapperBaseTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
-        MapperBase.testFileName = "_test";
+        MapperBase.setUtMode(true);
     }
 
     @AfterClass

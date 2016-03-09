@@ -1,12 +1,20 @@
 package tools.dbconnector6;
 
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
 import tools.dbconnector6.entity.Connect;
+import tools.dbconnector6.entity.ConnectHistory;
+import tools.dbconnector6.mapper.ConnectHistoryMapper;
 import tools.dbconnector6.mapper.ConnectMapper;
 
 import java.io.File;
@@ -16,10 +24,8 @@ import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Properties;
-import java.util.ResourceBundle;
+import java.sql.SQLException;
+import java.util.*;
 
 public class ConnectController implements Initializable {
 
@@ -82,28 +88,72 @@ public class ConnectController implements Initializable {
 
     private MainControllerInterface mainControllerInterface;
     private Connection connection;
+    private Connect connect;
 
     public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
-        this.mainControllerInterface = this.mainControllerInterface;
+        this.mainControllerInterface = mainControllerInterface;
     }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        ConnectMapper mapper = new ConnectMapper();
-        ObservableList<Connect> tableList = connectTableView.getItems();
-        tableList.clear();
-
         libraryPathTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("libraryPath"));
         driverTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("driver"));
         urlTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("url"));
         userTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("user"));
         passwordTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("passeord"));
 
+        connection = null;
+        connect = null;
+
         try {
+            ObservableList<Connect> tableList = connectTableView.getItems();
+            tableList.clear();
+            ConnectMapper mapper = new ConnectMapper();
             List<Connect> list = mapper.selectAll();
             tableList.addAll(list);
         } catch (IOException e) {
-            e.printStackTrace();
+            mainControllerInterface.writeLog(e);
+        }
+
+
+        try {
+            ObservableList<ConnectHistory> connectHistoryList = historyComboBox.getItems();
+            connectHistoryList.clear();
+            ConnectHistoryMapper mapper = new ConnectHistoryMapper();
+            List<ConnectHistory> list = mapper.selectAll();
+            Collections.reverse(list);
+            connectHistoryList.addAll(list);
+
+            historyComboBox.getSelectionModel().selectedItemProperty().addListener(new HistoryComboBoxChangeListener());
+            if (list.size()>=1) {
+                historyComboBox.getSelectionModel().select(0);
+            }
+
+        } catch (IOException e) {
+            mainControllerInterface.writeLog(e);
+        }
+    }
+
+    public Connect getConnect() {
+        return connect;
+    }
+
+    private class HistoryComboBoxChangeListener implements ChangeListener {
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            int index = historyComboBox.getSelectionModel().getSelectedIndex();
+            if (index==-1) {
+                return;
+            }
+
+            List<ConnectHistory> list = historyComboBox.getItems();
+            ConnectHistory history = list.get(index);
+            libraryPathTextField.setText(history.getLibraryPath());
+            driverTextField.setText(history.getDriver());
+            urlTextField.setText(history.getUrl());
+            userTextField.setText(history.getUser());
+            passwordTextField.setText(history.getPassword());
+
         }
     }
 
@@ -113,19 +163,23 @@ public class ConnectController implements Initializable {
             return ;
         }
 
-        Connect connect = Connect.builder()
-                .libraryPath(libraryPathTextField.getText().trim())
-                .driver(driverTextField.getText().trim())
-                .url(urlTextField.getText().trim())
-                .user(userTextField.getText().trim())
-                .password(passwordTextField.getText().trim())
-                .build();
+        Connect connect = createConnect();
 
         ObservableList<Connect> tableList = connectTableView.getItems();
         tableList.add(connect);
         connectTableView.getSelectionModel().select(tableList.size()-1);
 
         saveConnectList();
+    }
+
+    private Connect createConnect() {
+        return  Connect.builder()
+                .libraryPath(libraryPathTextField.getText().trim())
+                .driver(driverTextField.getText().trim())
+                .url(urlTextField.getText().trim())
+                .user(userTextField.getText().trim())
+                .password(passwordTextField.getText().trim())
+                .build();
     }
 
     @FXML
@@ -139,13 +193,7 @@ public class ConnectController implements Initializable {
             return ;
         }
 
-        Connect connect = Connect.builder()
-                .libraryPath(libraryPathTextField.getText().trim())
-                .driver(driverTextField.getText().trim())
-                .url(urlTextField.getText().trim())
-                .user(userTextField.getText().trim())
-                .password(passwordTextField.getText().trim())
-                .build();
+        Connect connect = createConnect();
 
         ObservableList<Connect> tableList = connectTableView.getItems();
         tableList.remove(index);
@@ -186,12 +234,31 @@ public class ConnectController implements Initializable {
         try {
             mapper.save(list);
         } catch (IOException e) {
-            e.printStackTrace();
+            mainControllerInterface.writeLog(e);
+        }
+    }
+
+    @FXML
+    private void onKeyPressConnectTableView(KeyEvent event) {
+        if (event.getCode()==KeyCode.ENTER) {
+            event.consume();
+            selectConnection();
+        }
+    }
+
+    @FXML
+    private void onMouseClickConnectTableView(MouseEvent event) {
+        if (event.getClickCount()>=2 && event.getButton()== MouseButton.PRIMARY) {
+            selectConnection();
         }
     }
 
     @FXML
     private void onLoad(ActionEvent event) {
+        selectConnection();
+    }
+
+    private void selectConnection() {
         int index = connectTableView.getSelectionModel().getSelectedIndex();
         if (index==-1) {
             return ;
@@ -209,20 +276,30 @@ public class ConnectController implements Initializable {
 
     @FXML
     private void onOk(ActionEvent event) throws Exception {
-        this.connection = connectDatabase();
-        connectTableView.getScene().getWindow().hide();
+        Connection conn = connectDatabase();
+
+        if (conn!=null) {
+            this.connection = connectDatabase();
+            this.connect = createConnect();
+
+            connectTableView.getScene().getWindow().hide();
+        }
     }
 
     @FXML
     private void onCancel(ActionEvent event) {
         this.connection = null;
+        this.connect = null;
         connectTableView.getScene().getWindow().hide();
     }
 
     @FXML
     private void onTest(ActionEvent event) throws Exception {
         Connection conn = connectDatabase();
-        conn.close();
+        if (conn!=null) {
+            mainControllerInterface.showAlertDialog("Connect success.", "");
+            conn.close();
+        }
     }
 
     private Connection connectDatabase() throws Exception {
@@ -231,26 +308,46 @@ public class ConnectController implements Initializable {
         }
 
         Connection conn = null;
-        Properties info = new Properties();
+        try {
+            Properties info = new Properties();
 
-        if (!isEmptyString(userTextField.getText())) {
-            info.setProperty("user", userTextField.getText());
-        }
-        if (!isEmptyString(passwordTextField.getText())) {
-            info.setProperty("password", passwordTextField.getText());
-        }
+            if (!isEmptyString(userTextField.getText())) {
+                info.setProperty("user", userTextField.getText());
+            }
+            if (!isEmptyString(passwordTextField.getText())) {
+                info.setProperty("password", passwordTextField.getText());
+            }
 
-        if (!(isEmptyString(libraryPathTextField.getText())&&isEmptyString(driverTextField.getText()))) {
-            // ドライバ指定あり
-            URL[] lib = { new File(libraryPathTextField.getText()).toURI().toURL() };
-            URLClassLoader loader = URLClassLoader.newInstance(lib);
-            Class<Driver> cd = (Class<Driver>) loader.loadClass(driverTextField.getText());
-            Driver driver = cd.newInstance();
-            conn = driver.connect(urlTextField.getText(), info);
-        } else {
-            // ドライバ指定なし
-//            Class.forName(entity.getDriver());
-            conn = DriverManager.getConnection(urlTextField.getText(), info);
+            if (!(isEmptyString(libraryPathTextField.getText()) && isEmptyString(driverTextField.getText()))) {
+                // ドライバ指定あり
+                URL[] lib = {new File(libraryPathTextField.getText()).toURI().toURL()};
+                URLClassLoader loader = URLClassLoader.newInstance(lib);
+                Class<Driver> cd = (Class<Driver>) loader.loadClass(driverTextField.getText());
+                Driver driver = cd.newInstance();
+                conn = driver.connect(urlTextField.getText(), info);
+            } else {
+                // ドライバ指定なし
+//              Class.forName(entity.getDriver());
+                conn = DriverManager.getConnection(urlTextField.getText(), info);
+            }
+            conn.setAutoCommit(false);
+
+            // 接続に成功したら、履歴に追加する
+            ConnectHistory history = ConnectHistory.builder()
+                    .connectedDate(new Date())
+                    .libraryPath(libraryPathTextField.getText())
+                    .driver(driverTextField.getText())
+                    .url(urlTextField.getText())
+                    .user(userTextField.getText())
+                    .password(passwordTextField.getText())
+                    .build();
+            ConnectHistoryMapper mapper = new ConnectHistoryMapper();
+            List<ConnectHistory> list = mapper.selectAll();
+            list.add(history);
+            mapper.save(list);
+
+        } catch (Exception e) {
+            mainControllerInterface.showAlertDialog("Connect failed.", e.toString());
         }
 
         return conn;

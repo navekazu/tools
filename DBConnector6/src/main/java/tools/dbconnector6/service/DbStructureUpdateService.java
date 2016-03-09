@@ -1,7 +1,10 @@
 package tools.dbconnector6.service;
 
 import javafx.application.Platform;
+import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Service;
+import javafx.concurrent.Task;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
 import tools.dbconnector6.BackgroundCallbackInterface;
@@ -13,18 +16,22 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
-public class DbStructureUpdateService implements BackgroundCallbackInterface<Void, List<DbStructureTreeItem>> {
+import static tools.dbconnector6.DbStructureTreeItem.ItemType.DATABASE;
+
+public class DbStructureUpdateService implements BackgroundCallbackInterface<Void, DbStructureTreeItem> {
     private MainControllerInterface mainControllerInterface;
     public DbStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }
 
     @Override
-    public void run() throws Exception {
+    public void run(Task task) throws Exception {
+        updateUIPreparation(null);
+
         if (mainControllerInterface.getConnection()==null) {
-            updateUI(new ArrayList<DbStructureTreeItem>());
             return ;
         }
 
@@ -32,12 +39,39 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
         List<DbStructureTreeItem> schemaList = getSchemaList(meta);
 
         for (DbStructureTreeItem item: schemaList) {
+            Service service = new Service() {
+                @Override
+                protected Task createTask() {
+                    return new SchemaSearchTask(meta, item);
+                }
+            };
+            service.restart();
+        }
+    }
+
+    @Override
+    public void cancel() throws Exception {
+
+    }
+
+    private class  SchemaSearchTask extends Task {
+        DatabaseMetaData meta;
+        DbStructureTreeItem item;
+        public SchemaSearchTask(DatabaseMetaData meta, DbStructureTreeItem item) {
+            this.meta = meta;
+            this.item = item;
+
+        }
+        @Override
+        protected Object call() throws Exception {
             List<DbStructureTreeItem> subList = new ArrayList<>();
             DbStructureTreeItem.ItemType itemType;
 
+            mainControllerInterface.writeLog("Schema parsing...(%s)", item.getSchema());
+
             // サポートされていないAPIを呼ぶと例外が発生するので、そのときは握りつぶして次を呼び出す
-            ResultSet resultSet = meta.getTableTypes();
             try {
+                ResultSet resultSet = meta.getTableTypes();
                 itemType = DbStructureTreeItem.ItemType.TABLE;
                 while (resultSet.next()) {
                     subList.add(createGroupItem(meta.getTables(null, item.getSchema(), getFilterTextFieldParamValue(), new String[]{resultSet.getString("TABLE_TYPE")})
@@ -61,9 +95,12 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
             } catch (Throwable e) {
             }
             item.getChildren().addAll(subList);
-        }
 
-        updateUI(schemaList);
+            mainControllerInterface.writeLog("Schema parsed. (%s)", item.getSchema());
+
+            updateUI(item);
+            return null;
+        }
     }
 
     private List<DbStructureTreeItem> getSchemaList(DatabaseMetaData meta) {
@@ -90,18 +127,32 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
 
     @Override
     public void updateUIPreparation(Void uiParam) throws Exception {
-    }
-
-    @Override
-    public void updateUI(List<DbStructureTreeItem> uiParam) throws Exception {
-        final List<TreeItem<String>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 mainControllerInterface.getDbStructureParam().dbStructurRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructurRootItem.getItemType().getName());
                 ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructurRootItem.getChildren();
                 subList.clear();
-                subList.addAll(dispatchParam);
+                mainControllerInterface.getDbStructureParam().dbStructurRootItem.setExpanded(true);
+            }
+        });
+    }
+
+    @Override
+    public void updateUI(DbStructureTreeItem uiParam) throws Exception {
+        final TreeItem<String> dispatchParam = uiParam;
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.getDbStructureParam().dbStructurRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructurRootItem.getItemType().getName());
+                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructurRootItem.getChildren();
+                subList.add(dispatchParam);
+                FXCollections.sort(subList, new Comparator<TreeItem<String>>() {
+                    @Override
+                    public int compare(TreeItem<String> o1, TreeItem<String> o2) {
+                        return o1.getValue().compareTo(o2.getValue());
+                    }
+                });
                 mainControllerInterface.getDbStructureParam().dbStructurRootItem.setExpanded(true);
             }
         });

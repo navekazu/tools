@@ -158,5 +158,6 @@ public class ReservedWordController implements Initializable {
         ObservableList<ReservedWord> items = reservedWordListView.getItems();
         mainControllerInterface.selectReservedWord(items.get(index).getWord());
     }
+
 }
 

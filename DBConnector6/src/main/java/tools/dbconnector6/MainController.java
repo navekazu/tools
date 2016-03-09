@@ -1,9 +1,11 @@
 package tools.dbconnector6;
 
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
@@ -16,13 +18,18 @@ import javafx.scene.input.InputMethodRequests;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 import tools.dbconnector6.controller.ControllerManager;
+import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ReservedWord;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
+import tools.dbconnector6.serializer.ApplicationLogSerializer;
+import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 
 import java.awt.*;
+import java.awt.event.WindowListener;
 import java.awt.im.spi.InputMethod;
 import java.io.IOException;
 import java.net.URL;
@@ -110,6 +117,7 @@ public class MainController extends Application implements Initializable, MainCo
     private TextArea logTextArea;
 
     private Connection connection;
+    private Connect connectParam;
     private BackgroundCallback dbStructureUpdateService;
     private BackgroundCallback tableStructureTabPaneUpdateService;
     private BackgroundCallback tableStructureUpdateService;
@@ -120,13 +128,24 @@ public class MainController extends Application implements Initializable, MainCo
     private ReservedWordController reservedWordController;
     private List<ReservedWord> reservedWordList = new ArrayList<>();
 
+    private Stage alertDialogStage;
+    private AlertController alertDialogController;
+
+    private Stage connectStage;
+    private ConnectController connectController;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("main");
-        ControllerManager.getControllerManager().getMainStage(loader, primaryStage).show();
+        ControllerManager.getControllerManager().getMainStage(loader, primaryStage);
+
+        MainController controller = loader.getController();
+        primaryStage.setOnShown(new MainWindowShownHandler(controller));
+        primaryStage.setOnCloseRequest(new MainWindowCloseRequestHandler(controller));
+
+        primaryStage.show();
 
         // 初期フォーカスを検索ワード入力欄に（initializeの中ではフォーカス移動できない）
-        MainController controller = loader.getController();
         controller.focusQueryTextArea();
         controller.primaryStage = primaryStage;
     }
@@ -170,6 +189,15 @@ public class MainController extends Application implements Initializable, MainCo
 
         // Controllerの読み込み
         FXMLLoader loader;
+        loader = ControllerManager.getControllerManager().getLoarder("connect");
+        try {
+            connectStage = ControllerManager.getControllerManager().getSubStage(loader, "connect");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        connectController = loader.getController();
+        connectController.setMainControllerInterface(this);
+
         loader = ControllerManager.getControllerManager().getLoarder("reservedWord");
         try {
             reservedWordStage = ControllerManager.getControllerManager().getTransparentSubStage(loader, "reservedWord");
@@ -179,14 +207,31 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordController = loader.getController();
         reservedWordController.setMainControllerInterface(this);
         reservedWordController.setRservedWordList(reservedWordList);
+
+        loader = ControllerManager.getControllerManager().getLoarder("alertDialog");
+        try {
+            alertDialogStage = ControllerManager.getControllerManager().getSubStage(loader, "alertDialog");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        alertDialogController = loader.getController();
+        alertDialogController.setMainControllerInterface(this);
+    }
+
+    private void closeConnection() throws SQLException {
+        if (connection!=null) {
+            connection.close();
+            connection = null;
+            connectParam = null;
+            writeLog("Disconnected.");
+        }
+        dbStructureUpdateService.restart();
+        reservedWordUpdateService.restart();
     }
 
     @FXML
     private void onClose(ActionEvent event) throws SQLException {
-        if (connection!=null) {
-            connection.close();
-            connection = null;
-        }
+        closeConnection();
     }
 
     @FXML
@@ -220,35 +265,24 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML
     private void onConnect(ActionEvent event) throws IOException, SQLException {
 
-        if (connection!=null) {
-            connection.close();
-            connection = null;
-        }
+        closeConnection();
 
-        FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("connect");
-        Stage stage = ControllerManager.getControllerManager().getSubStage(loader, "connect");
+        connectStage.showAndWait();
 
-        ConnectController controller = loader.getController();
-        controller.setMainControllerInterface(this);
-        stage.showAndWait();
-
-        connection = controller.getConnection();
+        connection = connectController.getConnection();
+        connectParam = connectController.getConnect();
         if (connection!=null) {
             writeLog("Connected.");
-            dbStructureUpdateService.restart();
-            reservedWordUpdateService.restart();
         }
+        dbStructureUpdateService.restart();
+        reservedWordUpdateService.restart();
 
-        stage.close();
+        connectStage.hide();
     }
 
     @FXML
     private void onDisconnect(ActionEvent event) throws SQLException {
-        if (connection!=null) {
-            connection.close();
-            connection = null;
-            writeLog("Disconnected.");
-        }
+        closeConnection();
     }
 
     @FXML
@@ -263,6 +297,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCancelQuery(ActionEvent event) {
+        queryResultUpdateService.cancel();
     }
 
     @FXML
@@ -273,6 +308,7 @@ public class MainController extends Application implements Initializable, MainCo
     private void onCommit(ActionEvent event) {
         if (connection==null) {
             writeLog("No connect.");
+            return ;
         }
         try {
             connection.commit();
@@ -285,6 +321,7 @@ public class MainController extends Application implements Initializable, MainCo
     private void onRollback(ActionEvent event) {
         if (connection==null) {
             writeLog("No connect.");
+            return ;
         }
         try {
             connection.rollback();
@@ -324,14 +361,36 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    public synchronized void writeLog(String message, Object... args) {
-        String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
-        logTextArea.appendText(logText + "\n");
+    public void writeLog(String message, Object... args) {
+        final String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                logTextArea.appendText(logText + "\n");
+            }
+        });
     }
+
+    public void writeLog(Exception e) {
+        ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
+        try {
+            e.printStackTrace();
+            applicationLogSerializer.appendText(e.getMessage());
+        } catch (IOException e1) {
+            writeLog(e1.getMessage());
+            e1.printStackTrace();
+        }
+        writeLog(e.getMessage());
+    }
+
 
     public Connection getConnection() {
         return connection;
     }
+    public Connect getConnectParam() {
+        return connectParam;
+    }
+
 
     public BackgroundCallback getDbStructureUpdateService() {
         return dbStructureUpdateService;
@@ -490,6 +549,67 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordStage.hide();
     }
 
+    @Override
+    public void showAlertDialog(String message, String detail) {
+        alertDialogController.setContents(message, detail);
+        alertDialogStage.showAndWait();
+    }
+
+    private class MainWindowShownHandler implements EventHandler<WindowEvent> {
+        private MainController controller;
+        public MainWindowShownHandler(MainController controller) {
+            this.controller = controller;
+
+        }
+
+        @Override
+        public void handle(WindowEvent event) {
+            try {
+                WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
+                controller.queryTextArea.setText(workingQuerySerializer.readText());
+                controller.queryTextArea.positionCaret(controller.queryTextArea.getText().length());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+/*
+            Platform.runLater(new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        onConnect(null);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+*/
+        }
+    }
+
+    private class MainWindowCloseRequestHandler implements EventHandler<WindowEvent> {
+        private MainController controller;
+        public MainWindowCloseRequestHandler(MainController controller) {
+            this.controller = controller;
+
+        }
+
+        @Override
+        public void handle(WindowEvent event) {
+            try {
+                controller.closeConnection();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            try {
+                WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
+                workingQuerySerializer.updateText(controller.queryTextArea.getText());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {
         switch (code) {
             case TAB:
