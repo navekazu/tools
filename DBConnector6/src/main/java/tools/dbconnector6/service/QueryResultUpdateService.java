@@ -4,6 +4,7 @@ import javafx.application.Platform;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 import tools.dbconnector6.BackgroundCallbackInterface;
@@ -32,7 +33,7 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
     }
 
     @Override
-    public void run() throws Exception {
+    public void run(Task task) throws Exception {
         if (mainControllerInterface.getConnection()==null) {
             mainControllerInterface.writeLog("No connect.");
             return ;
@@ -46,11 +47,17 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
         try {
             for (String query: queries) {
                 queryHistorySerializer.appendText(createQueryHistory(query));
-                executeQuery(query);
+                executeQuery(task, query);
+                if (task.isCancelled()) {
+                    break;
+                }
+
                 executeQueryCount++;
             }
 
-            if (queries.length >= 2) {
+            if (task.isCancelled()) {
+                mainControllerInterface.writeLog("Query cancelled.");
+            } else if (queries.length >= 2) {
                 mainControllerInterface.writeLog("Total query count: %d", executeQueryCount);
             }
         } catch(SQLException e) {
@@ -62,7 +69,12 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
         }
     }
 
-    private void executeQuery(String query) throws Exception {
+    @Override
+    public void cancel() throws Exception {
+        mainControllerInterface.writeLog("Query cancelling...");
+    }
+
+    private void executeQuery(Task task, String query) throws Exception {
         Connection connection = mainControllerInterface.getConnection();
         long startTime, endTime;
 
@@ -72,6 +84,10 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
             boolean executeResult = statement.execute(query);
             endTime = System.currentTimeMillis();
             mainControllerInterface.writeLog("Response time: %s sec", RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
+
+            if (task.isCancelled()) {
+                return;
+            }
 
             if (executeResult) {
                 // 結果あり
@@ -95,6 +111,10 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                     }
                     updateUIPreparation(colList);
 
+                    if (task.isCancelled()) {
+                        return;
+                    }
+
                     // 結果を取得
                     List<Map<String, String>> rowList = new ArrayList<>();
                     long rowCount = 0;
@@ -106,11 +126,20 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                         rowList.add(data);
                         rowCount++;
 
+                        if (task.isCancelled()) {
+                            return;
+                        }
+
                         if (rowList.size() >= FLUSH_ROW_COUNT) {
                             updateUI(rowList);
                             rowList.clear();
                         }
                     }
+
+                    if (task.isCancelled()) {
+                        return;
+                    }
+
                     updateUI(rowList);
                     endTime = System.currentTimeMillis();
                     mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));

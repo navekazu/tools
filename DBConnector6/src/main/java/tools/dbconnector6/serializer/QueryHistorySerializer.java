@@ -11,7 +11,7 @@ public class QueryHistorySerializer extends DataSerializer {
 
     @Override
     protected String getArchiveFileName() {
-        return "query_history_"+DATE_FORMAT.format(new Date());
+        return "query_history_"+DATE_FORMAT.format(new Date())+".log";
     }
 
     @Override

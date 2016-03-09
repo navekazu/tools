@@ -1,6 +1,7 @@
 package tools.dbconnector6.service;
 
 import javafx.collections.ObservableList;
+import javafx.concurrent.Task;
 import tools.dbconnector6.BackgroundCallbackInterface;
 import tools.dbconnector6.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
@@ -19,7 +20,7 @@ public class TableStructureUpdateService implements BackgroundCallbackInterface<
     }
 
     @Override
-    public void run() throws SQLException {
+    public void run(Task task) throws SQLException {
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
         if (tableItem==null || mainControllerInterface.getConnection()==null) {
             return ;
@@ -42,6 +43,11 @@ public class TableStructureUpdateService implements BackgroundCallbackInterface<
                 updateTableColumnFromTable(tableItem, metaData, tableColumnList);
                 break;
         }
+
+    }
+
+    @Override
+    public void cancel() throws Exception {
 
     }
 

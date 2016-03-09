@@ -111,7 +111,7 @@ public class ConnectController implements Initializable {
             List<Connect> list = mapper.selectAll();
             tableList.addAll(list);
         } catch (IOException e) {
-            e.printStackTrace();
+            mainControllerInterface.writeLog(e);
         }
 
 
@@ -129,7 +129,7 @@ public class ConnectController implements Initializable {
             }
 
         } catch (IOException e) {
-            e.printStackTrace();
+            mainControllerInterface.writeLog(e);
         }
     }
 
@@ -233,7 +233,7 @@ public class ConnectController implements Initializable {
         try {
             mapper.save(list);
         } catch (IOException e) {
-            e.printStackTrace();
+            mainControllerInterface.writeLog(e);
         }
     }
 

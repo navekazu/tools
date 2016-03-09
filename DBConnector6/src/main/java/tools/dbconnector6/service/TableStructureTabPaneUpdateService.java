@@ -1,6 +1,7 @@
 package tools.dbconnector6.service;
 
 import javafx.application.Platform;
+import javafx.concurrent.Task;
 import tools.dbconnector6.BackgroundCallbackInterface;
 import tools.dbconnector6.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
@@ -26,7 +27,7 @@ public class TableStructureTabPaneUpdateService implements BackgroundCallbackInt
     }
 
     @Override
-    public void run() throws Exception {
+    public void run(Task task) throws Exception {
         TabDisableProperty property = new TabDisableProperty();
 
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
@@ -55,6 +56,11 @@ public class TableStructureTabPaneUpdateService implements BackgroundCallbackInt
         }
 
         updateUI(property);
+    }
+
+    @Override
+    public void cancel() throws Exception {
+
     }
 
     @Override

@@ -10,6 +10,7 @@ import java.sql.Connection;
 
 public interface MainControllerInterface {
     public void writeLog(String message, Object... args);
+    public void writeLog(Exception e);
     public Connection getConnection();
     public Connect getConnectParam();
     public void selectReservedWord(String word);

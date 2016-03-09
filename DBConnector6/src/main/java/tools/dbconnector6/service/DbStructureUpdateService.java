@@ -28,7 +28,7 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
     }
 
     @Override
-    public void run() throws Exception {
+    public void run(Task task) throws Exception {
         updateUIPreparation(null);
 
         if (mainControllerInterface.getConnection()==null) {
@@ -49,6 +49,11 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
         }
     }
 
+    @Override
+    public void cancel() throws Exception {
+
+    }
+
     private class  SchemaSearchTask extends Task {
         DatabaseMetaData meta;
         DbStructureTreeItem item;
@@ -61,6 +66,8 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
         protected Object call() throws Exception {
             List<DbStructureTreeItem> subList = new ArrayList<>();
             DbStructureTreeItem.ItemType itemType;
+
+            mainControllerInterface.writeLog("Schema parsing...(%s)", item.getSchema());
 
             // サポートされていないAPIを呼ぶと例外が発生するので、そのときは握りつぶして次を呼び出す
             try {
@@ -88,6 +95,8 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
             } catch (Throwable e) {
             }
             item.getChildren().addAll(subList);
+
+            mainControllerInterface.writeLog("Schema parsed. (%s)", item.getSchema());
 
             updateUI(item);
             return null;

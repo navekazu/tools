@@ -24,6 +24,7 @@ import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ReservedWord;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
+import tools.dbconnector6.serializer.ApplicationLogSerializer;
 import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 
@@ -279,6 +280,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCancelQuery(ActionEvent event) {
+        queryResultUpdateService.cancel();
     }
 
     @FXML
@@ -342,10 +344,28 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    public synchronized void writeLog(String message, Object... args) {
-        String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
-        logTextArea.appendText(logText + "\n");
+    public void writeLog(String message, Object... args) {
+        final String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                logTextArea.appendText(logText + "\n");
+            }
+        });
     }
+
+    public void writeLog(Exception e) {
+        ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
+        try {
+            e.printStackTrace();
+            applicationLogSerializer.appendText(e.getMessage());
+        } catch (IOException e1) {
+            writeLog(e1.getMessage());
+            e1.printStackTrace();
+        }
+        writeLog(e.getMessage());
+    }
+
 
     public Connection getConnection() {
         return connection;
