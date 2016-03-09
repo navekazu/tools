@@ -128,6 +128,12 @@ public class MainController extends Application implements Initializable, MainCo
     private ReservedWordController reservedWordController;
     private List<ReservedWord> reservedWordList = new ArrayList<>();
 
+    private Stage alertDialogStage;
+    private AlertController alertDialogController;
+
+    private Stage connectStage;
+    private ConnectController connectController;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("main");
@@ -183,6 +189,15 @@ public class MainController extends Application implements Initializable, MainCo
 
         // Controllerの読み込み
         FXMLLoader loader;
+        loader = ControllerManager.getControllerManager().getLoarder("connect");
+        try {
+            connectStage = ControllerManager.getControllerManager().getSubStage(loader, "connect");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        connectController = loader.getController();
+        connectController.setMainControllerInterface(this);
+
         loader = ControllerManager.getControllerManager().getLoarder("reservedWord");
         try {
             reservedWordStage = ControllerManager.getControllerManager().getTransparentSubStage(loader, "reservedWord");
@@ -193,7 +208,14 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordController.setMainControllerInterface(this);
         reservedWordController.setRservedWordList(reservedWordList);
 
-
+        loader = ControllerManager.getControllerManager().getLoarder("alertDialog");
+        try {
+            alertDialogStage = ControllerManager.getControllerManager().getSubStage(loader, "alertDialog");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        alertDialogController = loader.getController();
+        alertDialogController.setMainControllerInterface(this);
     }
 
     private void closeConnection() throws SQLException {
@@ -245,22 +267,17 @@ public class MainController extends Application implements Initializable, MainCo
 
         closeConnection();
 
-        FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("connect");
-        Stage stage = ControllerManager.getControllerManager().getSubStage(loader, "connect");
+        connectStage.showAndWait();
 
-        ConnectController controller = loader.getController();
-        controller.setMainControllerInterface(this);
-        stage.showAndWait();
-
-        connection = controller.getConnection();
-        connectParam = controller.getConnect();
+        connection = connectController.getConnection();
+        connectParam = connectController.getConnect();
         if (connection!=null) {
             writeLog("Connected.");
         }
         dbStructureUpdateService.restart();
         reservedWordUpdateService.restart();
 
-        stage.close();
+        connectStage.hide();
     }
 
     @FXML
@@ -530,6 +547,12 @@ public class MainController extends Application implements Initializable, MainCo
     @Override
     public void hideReservedWordStage() {
         reservedWordStage.hide();
+    }
+
+    @Override
+    public void showAlertDialog(String message, String detail) {
+        alertDialogController.setContents(message, detail);
+        alertDialogStage.showAndWait();
     }
 
     private class MainWindowShownHandler implements EventHandler<WindowEvent> {

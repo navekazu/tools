@@ -24,6 +24,7 @@ import java.net.URLClassLoader;
 import java.sql.Connection;
 import java.sql.Driver;
 import java.sql.DriverManager;
+import java.sql.SQLException;
 import java.util.*;
 
 public class ConnectController implements Initializable {
@@ -90,7 +91,7 @@ public class ConnectController implements Initializable {
     private Connect connect;
 
     public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
-        this.mainControllerInterface = this.mainControllerInterface;
+        this.mainControllerInterface = mainControllerInterface;
     }
 
     @Override
@@ -275,10 +276,14 @@ public class ConnectController implements Initializable {
 
     @FXML
     private void onOk(ActionEvent event) throws Exception {
-        this.connection = connectDatabase();
-        this.connect = createConnect();
+        Connection conn = connectDatabase();
 
-        connectTableView.getScene().getWindow().hide();
+        if (conn!=null) {
+            this.connection = connectDatabase();
+            this.connect = createConnect();
+
+            connectTableView.getScene().getWindow().hide();
+        }
     }
 
     @FXML
@@ -291,7 +296,10 @@ public class ConnectController implements Initializable {
     @FXML
     private void onTest(ActionEvent event) throws Exception {
         Connection conn = connectDatabase();
-        conn.close();
+        if (conn!=null) {
+            mainControllerInterface.showAlertDialog("Connect success.", "");
+            conn.close();
+        }
     }
 
     private Connection connectDatabase() throws Exception {
@@ -300,42 +308,47 @@ public class ConnectController implements Initializable {
         }
 
         Connection conn = null;
-        Properties info = new Properties();
+        try {
+            Properties info = new Properties();
 
-        if (!isEmptyString(userTextField.getText())) {
-            info.setProperty("user", userTextField.getText());
-        }
-        if (!isEmptyString(passwordTextField.getText())) {
-            info.setProperty("password", passwordTextField.getText());
-        }
+            if (!isEmptyString(userTextField.getText())) {
+                info.setProperty("user", userTextField.getText());
+            }
+            if (!isEmptyString(passwordTextField.getText())) {
+                info.setProperty("password", passwordTextField.getText());
+            }
 
-        if (!(isEmptyString(libraryPathTextField.getText())&&isEmptyString(driverTextField.getText()))) {
-            // ドライバ指定あり
-            URL[] lib = { new File(libraryPathTextField.getText()).toURI().toURL() };
-            URLClassLoader loader = URLClassLoader.newInstance(lib);
-            Class<Driver> cd = (Class<Driver>) loader.loadClass(driverTextField.getText());
-            Driver driver = cd.newInstance();
-            conn = driver.connect(urlTextField.getText(), info);
-        } else {
-            // ドライバ指定なし
-//            Class.forName(entity.getDriver());
-            conn = DriverManager.getConnection(urlTextField.getText(), info);
-        }
-        conn.setAutoCommit(false);
+            if (!(isEmptyString(libraryPathTextField.getText()) && isEmptyString(driverTextField.getText()))) {
+                // ドライバ指定あり
+                URL[] lib = {new File(libraryPathTextField.getText()).toURI().toURL()};
+                URLClassLoader loader = URLClassLoader.newInstance(lib);
+                Class<Driver> cd = (Class<Driver>) loader.loadClass(driverTextField.getText());
+                Driver driver = cd.newInstance();
+                conn = driver.connect(urlTextField.getText(), info);
+            } else {
+                // ドライバ指定なし
+//              Class.forName(entity.getDriver());
+                conn = DriverManager.getConnection(urlTextField.getText(), info);
+            }
+            conn.setAutoCommit(false);
 
-        // 接続に成功したら、履歴に追加する
-        ConnectHistory history = ConnectHistory.builder()
-                .connectedDate(new Date())
-                .libraryPath(libraryPathTextField.getText())
-                .driver(driverTextField.getText())
-                .url(urlTextField.getText())
-                .user(userTextField.getText())
-                .password(passwordTextField.getText())
-                .build();
-        ConnectHistoryMapper mapper = new ConnectHistoryMapper();
-        List<ConnectHistory> list = mapper.selectAll();
-        list.add(history);
-        mapper.save(list);
+            // 接続に成功したら、履歴に追加する
+            ConnectHistory history = ConnectHistory.builder()
+                    .connectedDate(new Date())
+                    .libraryPath(libraryPathTextField.getText())
+                    .driver(driverTextField.getText())
+                    .url(urlTextField.getText())
+                    .user(userTextField.getText())
+                    .password(passwordTextField.getText())
+                    .build();
+            ConnectHistoryMapper mapper = new ConnectHistoryMapper();
+            List<ConnectHistory> list = mapper.selectAll();
+            list.add(history);
+            mapper.save(list);
+
+        } catch (Exception e) {
+            mainControllerInterface.showAlertDialog("Connect failed.", e.toString());
+        }
 
         return conn;
     }

@@ -16,6 +16,7 @@ public interface MainControllerInterface {
     public void selectReservedWord(String word);
     public void mainControllerRequestFocus();
     public void hideReservedWordStage();
+    public void showAlertDialog(String message, String detail);
 
     public BackgroundCallback getDbStructureUpdateService();
     public BackgroundCallback getTableStructureTabPaneUpdateService();
