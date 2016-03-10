@@ -29,8 +29,6 @@ import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 
 import java.awt.*;
-import java.awt.event.WindowListener;
-import java.awt.im.spi.InputMethod;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
@@ -598,74 +596,33 @@ public class MainController extends Application implements Initializable, MainCo
             }
         }
     }
+
+    private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
+        KeyCode.TAB, KeyCode.DOWN,
+    };
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {
-        switch (code) {
-            case TAB:
-            case DOWN:
-                return true;
-        }
-
-        return false;
-    }
-    private boolean isSpaceInput(char c) {
-        switch(c) {
-            case ' ':
-            case '\t':
-            case '\n':
-            case '　':
-                return true;
-        }
-        return false;
+        return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES).anyMatch(c -> c == code);
     }
 
+    private static final Character[] SPACE_INPUT_CHARS = new Character[] {
+        ' ', '\t', '\n', '　',
+    };
+    private boolean isSpaceInput(char ch) {
+        return Arrays.stream(SPACE_INPUT_CHARS).anyMatch(c -> c == ch);
+    }
+
+    private static final KeyCode[] TEXT_INPUT_CODES = new KeyCode[] {
+            KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.M,
+            KeyCode.N, KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R, KeyCode.S, KeyCode.T, KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X, KeyCode.Y, KeyCode.Z,
+            KeyCode.NUMPAD0, KeyCode.NUMPAD1, KeyCode.NUMPAD2, KeyCode.NUMPAD3, KeyCode.NUMPAD4,
+            KeyCode.NUMPAD5, KeyCode.NUMPAD6, KeyCode.NUMPAD7, KeyCode.NUMPAD8, KeyCode.NUMPAD9,
+            KeyCode.DIGIT0, KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3, KeyCode.DIGIT4,
+            KeyCode.DIGIT5, KeyCode.DIGIT6, KeyCode.DIGIT7, KeyCode.DIGIT8, KeyCode.DIGIT9,
+            KeyCode.PLUS, KeyCode.MINUS, KeyCode.SLASH, KeyCode.ASTERISK,
+            KeyCode.BACK_SLASH, KeyCode.BACK_SPACE, KeyCode.OPEN_BRACKET, KeyCode.CLOSE_BRACKET,KeyCode.AT,
+            KeyCode.SEMICOLON, KeyCode.COLON, KeyCode.PERIOD
+    };
     private boolean isTextInput(KeyCode code) {
-        switch (code) {
-            case A:
-            case B:
-            case C:
-            case D:
-            case E:
-            case F:
-            case G:
-            case H:
-            case I:
-            case J:
-            case K:
-            case L:
-            case M:
-            case N:
-            case O:
-            case P:
-            case Q:
-            case R:
-            case S:
-            case T:
-            case U:
-            case V:
-            case W:
-            case X:
-            case Y:
-            case Z:
-            case NUMPAD0:
-            case NUMPAD1:
-            case NUMPAD2:
-            case NUMPAD3:
-            case NUMPAD4:
-            case NUMPAD5:
-            case NUMPAD6:
-            case NUMPAD7:
-            case NUMPAD8:
-            case NUMPAD9:
-            case DOLLAR:
-            case UNDERSCORE:
-            case PLUS:
-            case MINUS:
-            case SLASH:
-            case ASTERISK:
-                return true;
-        }
-
-        return false;
+        return Arrays.stream(TEXT_INPUT_CODES).anyMatch(c -> c == code);
     }
-
 }
