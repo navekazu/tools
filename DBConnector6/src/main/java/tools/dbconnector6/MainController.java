@@ -17,6 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.InputMethodRequests;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import tools.dbconnector6.controller.ControllerManager;
@@ -314,6 +315,7 @@ public class MainController extends Application implements Initializable, MainCo
         }
         try {
             connection.commit();
+            writeLog("Commit success.");
         } catch(Exception e) {
             writeLog(e);
         }
@@ -327,6 +329,7 @@ public class MainController extends Application implements Initializable, MainCo
         }
         try {
             connection.rollback();
+            writeLog("Rollback success.");
         } catch(Exception e) {
             writeLog(e);
         }
