@@ -217,12 +217,12 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     private void showConnect() {
+        closeConnection();
         connectStage.showAndWait();
 
         Connection con = connectController.getConnection();
         if (con!=null) {
             writeLog("Connected.");
-            closeConnection();
             connection = con;
             connectParam = connectController.getConnect();
             dbStructureUpdateService.restart();
