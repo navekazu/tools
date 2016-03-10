@@ -279,7 +279,7 @@ public class ConnectController implements Initializable {
         Connection conn = connectDatabase();
 
         if (conn!=null) {
-            this.connection = connectDatabase();
+            this.connection = conn;
             this.connect = createConnect();
 
             connectTableView.getScene().getWindow().hide();
