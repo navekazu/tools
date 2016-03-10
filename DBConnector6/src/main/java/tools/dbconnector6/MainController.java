@@ -218,9 +218,26 @@ public class MainController extends Application implements Initializable, MainCo
         alertDialogController.setMainControllerInterface(this);
     }
 
-    private void closeConnection() throws SQLException {
+    private void showConnect() {
+        connectStage.showAndWait();
+
+        Connection con = connectController.getConnection();
+        if (con!=null) {
+            writeLog("Connected.");
+            closeConnection();
+            connection = con;
+            connectParam = connectController.getConnect();
+            dbStructureUpdateService.restart();
+            reservedWordUpdateService.restart();
+        }
+    }
+    private void closeConnection() {
         if (connection!=null) {
-            connection.close();
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                writeLog(e);
+            }
             connection = null;
             connectParam = null;
             writeLog("Disconnected.");
@@ -230,7 +247,7 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     @FXML
-    private void onClose(ActionEvent event) throws SQLException {
+    private void onClose(ActionEvent event) {
         closeConnection();
     }
 
@@ -263,25 +280,12 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     @FXML
-    private void onConnect(ActionEvent event) throws IOException, SQLException {
-
-        closeConnection();
-
-        connectStage.showAndWait();
-
-        connection = connectController.getConnection();
-        connectParam = connectController.getConnect();
-        if (connection!=null) {
-            writeLog("Connected.");
-        }
-        dbStructureUpdateService.restart();
-        reservedWordUpdateService.restart();
-
-        connectStage.hide();
+    private void onConnect(ActionEvent event) {
+        showConnect();
     }
 
     @FXML
-    private void onDisconnect(ActionEvent event) throws SQLException {
+    private void onDisconnect(ActionEvent event) {
         closeConnection();
     }
 
@@ -313,7 +317,7 @@ public class MainController extends Application implements Initializable, MainCo
         try {
             connection.commit();
         } catch(Exception e) {
-            writeLog(e.getMessage());
+            writeLog(e);
         }
     }
 
@@ -326,7 +330,7 @@ public class MainController extends Application implements Initializable, MainCo
         try {
             connection.rollback();
         } catch(Exception e) {
-            writeLog(e.getMessage());
+            writeLog(e);
         }
     }
 
@@ -568,23 +572,11 @@ public class MainController extends Application implements Initializable, MainCo
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 controller.queryTextArea.setText(workingQuerySerializer.readText());
                 controller.queryTextArea.positionCaret(controller.queryTextArea.getText().length());
+
+                controller.showConnect();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-/*
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        onConnect(null);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-*/
         }
     }
 
@@ -597,16 +589,12 @@ public class MainController extends Application implements Initializable, MainCo
 
         @Override
         public void handle(WindowEvent event) {
-            try {
-                controller.closeConnection();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            controller.closeConnection();
             try {
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 workingQuerySerializer.updateText(controller.queryTextArea.getText());
             } catch (IOException e) {
-                e.printStackTrace();
+                writeLog(e);
             }
         }
     }
