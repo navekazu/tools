@@ -245,6 +245,191 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordUpdateService.restart();
     }
 
+    public void writeLog(String message, Object... args) {
+        final String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                logTextArea.appendText(logText + "\n");
+            }
+        });
+    }
+
+    public void writeLog(Exception e) {
+        ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
+        try {
+            e.printStackTrace();
+            applicationLogSerializer.appendText(e.getMessage());
+        } catch (IOException e1) {
+            writeLog(e1.getMessage());
+            e1.printStackTrace();
+        }
+        writeLog(e.getMessage());
+    }
+
+
+    public Connection getConnection() {
+        return connection;
+    }
+    public Connect getConnectParam() {
+        return connectParam;
+    }
+
+
+    public BackgroundCallback getDbStructureUpdateService() {
+        return dbStructureUpdateService;
+    }
+
+    public BackgroundCallback getTableStructureTabPaneUpdateService() {
+        return tableStructureTabPaneUpdateService;
+    }
+
+    public BackgroundCallback getTableStructureUpdateService() {
+        return tableStructureUpdateService;
+    }
+
+    public BackgroundCallback getQueryResultUpdateService() {
+        return queryResultUpdateService;
+    }
+
+    public DbStructureParam getDbStructureParam() {
+        MainControllerInterface.DbStructureParam param = new MainControllerInterface.DbStructureParam();
+        param.filterTextField = filterTextField;
+        param.dbStructureTreeView = dbStructureTreeView;
+        param.dbStructurRootItem = dbStructurRootItem;
+        return param;
+    }
+
+    public MainControllerInterface.TableStructureTabParam getTableStructureTabParam() {
+        MainControllerInterface.TableStructureTabParam param = new MainControllerInterface.TableStructureTabParam();
+        param.tableStructureTabPane = tableStructureTabPane;
+
+        param.tablePropertyTab = tablePropertyTab;
+        param.tablePropertyTableView = tablePropertyTableView;
+        param.keyTableColumn = keyTableColumn;
+        param.valueTableColumn = valueTableColumn;
+
+        param.tableColumnTab = tableColumnTab;
+        param.tableColumnTableView = tableColumnTableView;
+        param.nameTableColumn = nameTableColumn;
+        param.typeTableColumn = typeTableColumn;
+        param.sizeTableColumn = sizeTableColumn;
+        param.decimalDigitsTableColumn = decimalDigitsTableColumn;
+        param.nullableTableColumn = nullableTableColumn;
+        param.primaryKeyTableColumn = primaryKeyTableColumn;
+        param.remarksTableColumn = remarksTableColumn;
+        param.columnDefaultTableColumn = columnDefaultTableColumn;
+        param.autoincrementTableColumn = autoincrementTableColumn;
+        param.generatedColumnTableColumn = generatedColumnTableColumn;
+
+        param.tableIndexTab = tableIndexTab;
+        param.tableIndexComboBox = tableIndexComboBox;
+        param.tablePrimaryKeyTextField = tablePrimaryKeyTextField;
+        param.tableUniqueKeyTextField = tableUniqueKeyTextField;
+        param.tableIndexListView = tableIndexListView;
+
+        return param;
+    }
+
+    public QueryParam getQueryParam() {
+        MainControllerInterface.QueryParam param = new MainControllerInterface.QueryParam();
+
+        param.queryTextArea = queryTextArea;
+        param.queryResultTableView = queryResultTableView;
+
+        return param;
+    }
+
+    public class DbStructureTreeViewChangeListener implements ChangeListener {
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            tableStructureTabPaneUpdateService.restart();
+        }
+    }
+
+    private String inputWord(String text, int caret) {
+        StringBuilder caretForward = new StringBuilder(text.substring(0, caret));
+        caretForward = caretForward.reverse();
+
+        StringBuilder inputKeyword = new StringBuilder();
+        for (int loop=0; loop<caretForward.length(); loop++){
+            if (isSpaceInput(caretForward.charAt(loop))) {
+                break;
+            }
+            inputKeyword.insert(0, caretForward.charAt(loop));
+        }
+
+        return inputKeyword.toString();
+    }
+
+    @Override
+    public void selectReservedWord(String word) {
+        int caret = queryTextArea.getCaretPosition();
+        String text = queryTextArea.getText();
+        String inputKeyword = inputWord(text, caret);       // キャレットより前の単語を取得
+
+        // キャレットより前の単語を削除
+        queryTextArea.deleteText(caret-inputKeyword.length(), caret);
+
+        // キャレット位置に選択した単語を挿入
+        queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
+    }
+
+    @Override
+    public void mainControllerRequestFocus() {
+        primaryStage.requestFocus();
+    }
+
+    @Override
+    public void hideReservedWordStage() {
+        reservedWordStage.hide();
+    }
+
+    @Override
+    public void showAlertDialog(String message, String detail) {
+        alertDialogController.setContents(message, detail);
+        alertDialogStage.showAndWait();
+    }
+
+    private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
+        KeyCode.TAB, KeyCode.DOWN,
+    };
+    private boolean isChangeFocusForReservedWordStage(KeyCode code) {
+        return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES).anyMatch(c -> c == code);
+    }
+
+    private static final Character[] SPACE_INPUT_CHARS = new Character[] {
+        ' ', '\t', '\n', '　',
+    };
+    private boolean isSpaceInput(char ch) {
+        return Arrays.stream(SPACE_INPUT_CHARS).anyMatch(c -> c == ch);
+    }
+
+    private static final KeyCode[] TEXT_INPUT_CODES = new KeyCode[] {
+            KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.M,
+            KeyCode.N, KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R, KeyCode.S, KeyCode.T, KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X, KeyCode.Y, KeyCode.Z,
+            KeyCode.NUMPAD0, KeyCode.NUMPAD1, KeyCode.NUMPAD2, KeyCode.NUMPAD3, KeyCode.NUMPAD4,
+            KeyCode.NUMPAD5, KeyCode.NUMPAD6, KeyCode.NUMPAD7, KeyCode.NUMPAD8, KeyCode.NUMPAD9,
+            KeyCode.DIGIT0, KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3, KeyCode.DIGIT4,
+            KeyCode.DIGIT5, KeyCode.DIGIT6, KeyCode.DIGIT7, KeyCode.DIGIT8, KeyCode.DIGIT9,
+            KeyCode.PLUS, KeyCode.MINUS, KeyCode.SLASH, KeyCode.ASTERISK,
+            KeyCode.BACK_SLASH, KeyCode.BACK_SPACE, KeyCode.OPEN_BRACKET, KeyCode.CLOSE_BRACKET,KeyCode.AT,
+            KeyCode.SEMICOLON, KeyCode.COLON, KeyCode.PERIOD
+    };
+    private boolean isTextInput(KeyCode code) {
+        return Arrays.stream(TEXT_INPUT_CODES).anyMatch(c -> c == code);
+    }
+
+
+    /***************************************************************************
+     *                                                                         *
+     * Event handler                                                           *
+     *                                                                         *
+     **************************************************************************/
+
+    ////////////////////////////////////////////////////////////////////////////
+    // menu action
+
     @FXML
     private void onClose(ActionEvent event) {
         closeConnection();
@@ -366,107 +551,8 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    public void writeLog(String message, Object... args) {
-        final String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                logTextArea.appendText(logText + "\n");
-            }
-        });
-    }
-
-    public void writeLog(Exception e) {
-        ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
-        try {
-            e.printStackTrace();
-            applicationLogSerializer.appendText(e.getMessage());
-        } catch (IOException e1) {
-            writeLog(e1.getMessage());
-            e1.printStackTrace();
-        }
-        writeLog(e.getMessage());
-    }
-
-
-    public Connection getConnection() {
-        return connection;
-    }
-    public Connect getConnectParam() {
-        return connectParam;
-    }
-
-
-    public BackgroundCallback getDbStructureUpdateService() {
-        return dbStructureUpdateService;
-    }
-
-    public BackgroundCallback getTableStructureTabPaneUpdateService() {
-        return tableStructureTabPaneUpdateService;
-    }
-
-    public BackgroundCallback getTableStructureUpdateService() {
-        return tableStructureUpdateService;
-    }
-
-    public BackgroundCallback getQueryResultUpdateService() {
-        return queryResultUpdateService;
-    }
-
-    public DbStructureParam getDbStructureParam() {
-        MainControllerInterface.DbStructureParam param = new MainControllerInterface.DbStructureParam();
-        param.filterTextField = filterTextField;
-        param.dbStructureTreeView = dbStructureTreeView;
-        param.dbStructurRootItem = dbStructurRootItem;
-        return param;
-    }
-
-    public MainControllerInterface.TableStructureTabParam getTableStructureTabParam() {
-        MainControllerInterface.TableStructureTabParam param = new MainControllerInterface.TableStructureTabParam();
-        param.tableStructureTabPane = tableStructureTabPane;
-
-        param.tablePropertyTab = tablePropertyTab;
-        param.tablePropertyTableView = tablePropertyTableView;
-        param.keyTableColumn = keyTableColumn;
-        param.valueTableColumn = valueTableColumn;
-
-        param.tableColumnTab = tableColumnTab;
-        param.tableColumnTableView = tableColumnTableView;
-        param.nameTableColumn = nameTableColumn;
-        param.typeTableColumn = typeTableColumn;
-        param.sizeTableColumn = sizeTableColumn;
-        param.decimalDigitsTableColumn = decimalDigitsTableColumn;
-        param.nullableTableColumn = nullableTableColumn;
-        param.primaryKeyTableColumn = primaryKeyTableColumn;
-        param.remarksTableColumn = remarksTableColumn;
-        param.columnDefaultTableColumn = columnDefaultTableColumn;
-        param.autoincrementTableColumn = autoincrementTableColumn;
-        param.generatedColumnTableColumn = generatedColumnTableColumn;
-
-        param.tableIndexTab = tableIndexTab;
-        param.tableIndexComboBox = tableIndexComboBox;
-        param.tablePrimaryKeyTextField = tablePrimaryKeyTextField;
-        param.tableUniqueKeyTextField = tableUniqueKeyTextField;
-        param.tableIndexListView = tableIndexListView;
-
-        return param;
-    }
-
-    public QueryParam getQueryParam() {
-        MainControllerInterface.QueryParam param = new MainControllerInterface.QueryParam();
-
-        param.queryTextArea = queryTextArea;
-        param.queryResultTableView = queryResultTableView;
-
-        return param;
-    }
-
-    public class DbStructureTreeViewChangeListener implements ChangeListener {
-        @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-            tableStructureTabPaneUpdateService.restart();
-        }
-    }
+    ////////////////////////////////////////////////////////////////////////////
+    // queryTextArea event
 
     @FXML
     public void onQueryTextAreaKeyPressed(KeyEvent event) {
@@ -508,21 +594,6 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    private String inputWord(String text, int caret) {
-        StringBuilder caretForward = new StringBuilder(text.substring(0, caret));
-        caretForward = caretForward.reverse();
-
-        StringBuilder inputKeyword = new StringBuilder();
-        for (int loop=0; loop<caretForward.length(); loop++){
-            if (isSpaceInput(caretForward.charAt(loop))) {
-                break;
-            }
-            inputKeyword.insert(0, caretForward.charAt(loop));
-        }
-
-        return inputKeyword.toString();
-    }
-
     @FXML
     public void onQueryTextAreaKeyReleased(KeyEvent event) {
     }
@@ -531,34 +602,8 @@ public class MainController extends Application implements Initializable, MainCo
     public void onQueryTextAreaKeyTyped(KeyEvent event) {
     }
 
-    @Override
-    public void selectReservedWord(String word) {
-        int caret = queryTextArea.getCaretPosition();
-        String text = queryTextArea.getText();
-        String inputKeyword = inputWord(text, caret);       // キャレットより前の単語を取得
-
-        // キャレットより前の単語を削除
-        queryTextArea.deleteText(caret-inputKeyword.length(), caret);
-
-        // キャレット位置に選択した単語を挿入
-        queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
-    }
-
-    @Override
-    public void mainControllerRequestFocus() {
-        primaryStage.requestFocus();
-    }
-
-    @Override
-    public void hideReservedWordStage() {
-        reservedWordStage.hide();
-    }
-
-    @Override
-    public void showAlertDialog(String message, String detail) {
-        alertDialogController.setContents(message, detail);
-        alertDialogStage.showAndWait();
-    }
+    ////////////////////////////////////////////////////////////////////////////
+    // MainWindow event
 
     private class MainWindowShownHandler implements EventHandler<WindowEvent> {
         private MainController controller;
@@ -600,32 +645,11 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
-        KeyCode.TAB, KeyCode.DOWN,
-    };
-    private boolean isChangeFocusForReservedWordStage(KeyCode code) {
-        return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES).anyMatch(c -> c == code);
-    }
 
-    private static final Character[] SPACE_INPUT_CHARS = new Character[] {
-        ' ', '\t', '\n', '　',
-    };
-    private boolean isSpaceInput(char ch) {
-        return Arrays.stream(SPACE_INPUT_CHARS).anyMatch(c -> c == ch);
-    }
+    /***************************************************************************
+     *                                                                         *
+     * MainControllerInterface implementation                                  *
+     *                                                                         *
+     **************************************************************************/
 
-    private static final KeyCode[] TEXT_INPUT_CODES = new KeyCode[] {
-            KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.M,
-            KeyCode.N, KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R, KeyCode.S, KeyCode.T, KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X, KeyCode.Y, KeyCode.Z,
-            KeyCode.NUMPAD0, KeyCode.NUMPAD1, KeyCode.NUMPAD2, KeyCode.NUMPAD3, KeyCode.NUMPAD4,
-            KeyCode.NUMPAD5, KeyCode.NUMPAD6, KeyCode.NUMPAD7, KeyCode.NUMPAD8, KeyCode.NUMPAD9,
-            KeyCode.DIGIT0, KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3, KeyCode.DIGIT4,
-            KeyCode.DIGIT5, KeyCode.DIGIT6, KeyCode.DIGIT7, KeyCode.DIGIT8, KeyCode.DIGIT9,
-            KeyCode.PLUS, KeyCode.MINUS, KeyCode.SLASH, KeyCode.ASTERISK,
-            KeyCode.BACK_SLASH, KeyCode.BACK_SPACE, KeyCode.OPEN_BRACKET, KeyCode.CLOSE_BRACKET,KeyCode.AT,
-            KeyCode.SEMICOLON, KeyCode.COLON, KeyCode.PERIOD
-    };
-    private boolean isTextInput(KeyCode code) {
-        return Arrays.stream(TEXT_INPUT_CODES).anyMatch(c -> c == code);
-    }
 }
