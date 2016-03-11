@@ -11,6 +11,7 @@ import tools.dbconnector6.BackgroundCallbackInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.QueryResult;
+import tools.dbconnector6.entity.QueryResultCellValue;
 import tools.dbconnector6.serializer.QueryHistorySerializer;
 
 import java.sql.*;
@@ -19,7 +20,7 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
 
-public class QueryResultUpdateService implements BackgroundCallbackInterface<List<TableColumn<QueryResult, String>>, List<Map<String, String>>> {
+public class QueryResultUpdateService implements BackgroundCallbackInterface<List<TableColumn<QueryResult, String>>, List<Map<String, QueryResultCellValue>>> {
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
     private static final int FLUSH_ROW_COUNT = 1000;
@@ -104,7 +105,7 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                                 new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
                                     @Override
                                     public ObservableValue<String> call(TableColumn.CellDataFeatures<QueryResult, String> p) {
-                                        return new SimpleStringProperty(p.getValue().getData(key));
+                                        return new SimpleStringProperty(p.getValue().getData(key).getFormattedString());
                                     }
                                 });
                         colList.add(col);
@@ -116,12 +117,13 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                     }
 
                     // 結果を取得
-                    List<Map<String, String>> rowList = new ArrayList<>();
+                    List<Map<String, QueryResultCellValue>> rowList = new ArrayList<>();
                     long rowCount = 0;
                     while (resultSet.next()) {
-                        Map<String, String> data = new HashMap<String, String>();
+                        Map<String, QueryResultCellValue> data = new HashMap<>();
                         for (int loop=0; loop<metaData.getColumnCount(); loop++) {
-                            data.put(Integer.toString(loop), resultSet.getString(loop+1));
+                            QueryResultCellValue cellValue = QueryResultCellValue.createQueryResultCellValue(loop+1, metaData, resultSet);
+                            data.put(Integer.toString(loop), cellValue);
                         }
                         rowList.add(data);
                         rowCount++;
@@ -169,12 +171,12 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
     }
 
     @Override
-    public void updateUI(List<Map<String, String>> uiParam) throws Exception {
-        final List<Map<String, String>> dispatchParam = new ArrayList<>(uiParam);
+    public void updateUI(List<Map<String, QueryResultCellValue>> uiParam) throws Exception {
+        final List<Map<String, QueryResultCellValue>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                for (Map<String, String> m: dispatchParam) {
+                for (Map<String, QueryResultCellValue> m: dispatchParam) {
                     QueryResult r = new QueryResult();
                     r.setData(m);
                     mainControllerInterface.getQueryParam().queryResultTableView.getItems().add(r);
