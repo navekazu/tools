@@ -1,11 +1,10 @@
-package tools.dbconnector6.entity;
+package tools.dbconnector6.queryresult;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
 import java.text.Format;
-import java.text.SimpleDateFormat;
 
 public abstract class QueryResultCellValue<V> {
     protected static final String NULL_PROMPT = "(null)";

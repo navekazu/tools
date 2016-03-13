@@ -5,13 +5,15 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.geometry.Pos;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.util.Callback;
 import tools.dbconnector6.BackgroundCallbackInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.Connect;
-import tools.dbconnector6.entity.QueryResult;
-import tools.dbconnector6.entity.QueryResultCellValue;
+import tools.dbconnector6.queryresult.QueryResult;
+import tools.dbconnector6.queryresult.QueryResultCellValue;
 import tools.dbconnector6.serializer.QueryHistorySerializer;
 
 import java.sql.*;
@@ -108,6 +110,22 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                                         return new SimpleStringProperty(p.getValue().getData(key).getFormattedString());
                                     }
                                 });
+                        col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
+                            @Override
+                            public TableCell<QueryResult, String> call(TableColumn<QueryResult, String> param) {
+                                TableCell cell = new TableCell(){
+                                    @Override
+                                    public void updateItem(Object item, boolean empty){
+                                        if(item !=null){
+                                            setText(item.toString());
+                                        }
+                                    }
+                                };
+
+                                cell.setAlignment(Pos.CENTER_RIGHT);
+                                return cell;
+                            }
+                        });
                         colList.add(col);
                     }
                     updateUIPreparation(colList);

@@ -1,12 +1,12 @@
-package tools.dbconnector6.entity;
+package tools.dbconnector6.queryresult;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.Format;
 
-public class QueryResultCellValueNumber extends QueryResultCellValue<BigDecimal> {
-    private static final Format STANDARD_FORMAT = new DecimalFormat("#,##0");
-    private static final Format EVIDENCE_MODE_FORMAT = new DecimalFormat("0");
+public class QueryResultCellValueReal extends QueryResultCellValue<BigDecimal> {
+    private static final Format STANDARD_FORMAT = new DecimalFormat("#,##0.0");
+    private static final Format EVIDENCE_MODE_FORMAT = new DecimalFormat("0.0");
 
     @Override
     protected Format getStandardFormat() {

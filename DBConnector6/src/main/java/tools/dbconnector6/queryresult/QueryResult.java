@@ -1,4 +1,4 @@
-package tools.dbconnector6.entity;
+package tools.dbconnector6.queryresult;
 
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;

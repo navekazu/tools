@@ -1,6 +1,5 @@
-package tools.dbconnector6.entity;
+package tools.dbconnector6.queryresult;
 
-import java.text.DecimalFormat;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
