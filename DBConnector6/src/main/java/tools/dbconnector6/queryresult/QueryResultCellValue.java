@@ -1,5 +1,7 @@
 package tools.dbconnector6.queryresult;
 
+import javafx.geometry.Pos;
+
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
@@ -25,9 +27,14 @@ public abstract class QueryResultCellValue<V> {
 
     protected abstract Format getStandardFormat();
     protected abstract Format getEvidenceModeFormat();
+    protected abstract Pos getAlignment();
+
+    public boolean isNullValue() {
+        return value==null;
+    }
 
     public String getFormattedString() {
-        return getValueString(getStandardFormat());
+        return value==null? NULL_PROMPT: getValueString(getStandardFormat());
     }
     public String getEvidenceModeString() {
         return getValueString(getEvidenceModeFormat());
@@ -36,7 +43,27 @@ public abstract class QueryResultCellValue<V> {
         return value==null? "": (f==null? value.toString(): f.format(value));
     }
 
+    public static Pos getAlignment(int column, ResultSetMetaData meta) throws SQLException {
+        QueryResultCellValue queryResultCellValue = QueryResultCellValue.createQueryResultCellValue(column, meta);
+        return queryResultCellValue.getAlignment();
+    }
+
     public static QueryResultCellValue createQueryResultCellValue(int column, ResultSetMetaData meta, ResultSet resultSet) throws SQLException {
+        QueryResultCellValue queryResultCellValue = QueryResultCellValue.createQueryResultCellValue(column, meta);
+
+        if (queryResultCellValue instanceof QueryResultCellValueNumber
+            ||queryResultCellValue instanceof QueryResultCellValueReal) {
+            queryResultCellValue.build(resultSet.getBigDecimal(column));
+        } else if (queryResultCellValue instanceof QueryResultCellValueDate) {
+            queryResultCellValue.build(resultSet.getDate(column));
+        } else {
+            queryResultCellValue.build(resultSet.getString(column));
+        }
+
+        return queryResultCellValue;
+
+    }
+    private static QueryResultCellValue createQueryResultCellValue(int column, ResultSetMetaData meta) throws SQLException {
         int type = meta.getColumnType(column);
 
         switch(type) {
@@ -49,16 +76,16 @@ public abstract class QueryResultCellValue<V> {
             case Types.REAL:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型REALを識別します。
             case Types.TINYINT:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TINYINTを識別します。
                 if (meta.getScale(column)==0) {
-                    return new QueryResultCellValueNumber().build(resultSet.getBigDecimal(column));
+                    return new QueryResultCellValueNumber();
                 }
-                return new QueryResultCellValueReal().build(resultSet.getBigDecimal(column));
+                return new QueryResultCellValueReal();
 
             case Types.DATE:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型DATEを識別します。
             case Types.TIME:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TIMEを識別します。
             case Types.TIME_WITH_TIMEZONE:      // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TIME WITH TIMEZONEを識別します。
             case Types.TIMESTAMP:               // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TIMESTAMPを識別します。
             case Types.TIMESTAMP_WITH_TIMEZONE: // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TIMESTAMP WITH TIMEZONEを識別します。
-                return new QueryResultCellValueDate().build(resultSet.getDate(column));
+                return new QueryResultCellValueDate();
 
 /*
             case Types.ARRAY:                   // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型ARRAYを識別します。
@@ -89,6 +116,6 @@ public abstract class QueryResultCellValue<V> {
             case Types.VARCHAR:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型VARCHARを識別します。
 */
         }
-        return new QueryResultCellValueString().build(resultSet.getString(column));
+        return new QueryResultCellValueString();
     }
 }

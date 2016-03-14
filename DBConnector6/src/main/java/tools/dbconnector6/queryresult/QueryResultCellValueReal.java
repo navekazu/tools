@@ -1,5 +1,7 @@
 package tools.dbconnector6.queryresult;
 
+import javafx.geometry.Pos;
+
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.Format;
@@ -16,5 +18,10 @@ public class QueryResultCellValueReal extends QueryResultCellValue<BigDecimal> {
     @Override
     protected Format getEvidenceModeFormat() {
         return EVIDENCE_MODE_FORMAT;
+    }
+
+    @Override
+    protected Pos getAlignment() {
+        return Pos.CENTER_RIGHT;
     }
 }

@@ -1,5 +1,7 @@
 package tools.dbconnector6.queryresult;
 
+import javafx.geometry.Pos;
+
 import java.text.Format;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -18,4 +20,8 @@ public class QueryResultCellValueDate extends QueryResultCellValue<Date> {
         return EVIDENCE_MODE_FORMAT;
     }
 
+    @Override
+    protected Pos getAlignment() {
+        return Pos.CENTER_LEFT;
+    }
 }

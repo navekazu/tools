@@ -8,6 +8,8 @@ import javafx.concurrent.Task;
 import javafx.geometry.Pos;
 import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
+import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import tools.dbconnector6.BackgroundCallbackInterface;
 import tools.dbconnector6.MainControllerInterface;
@@ -103,6 +105,7 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                     for (int loop=0; loop<metaData.getColumnCount(); loop++) {
                         TableColumn<QueryResult, String> col = new TableColumn<>(metaData.getColumnName(loop+1));
                         final String key = Integer.toString(loop);
+                        final Pos pos = QueryResultCellValue.getAlignment(loop+1, metaData);
                         col.setCellValueFactory(
                                 new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
                                     @Override
@@ -113,19 +116,52 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                         col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
                             @Override
                             public TableCell<QueryResult, String> call(TableColumn<QueryResult, String> param) {
-                                TableCell cell = new TableCell(){
+                                return  new TableCell<QueryResult, String>() {
                                     @Override
-                                    public void updateItem(Object item, boolean empty){
-                                        if(item !=null){
+                                    public void updateItem(String item, boolean empty) {
+                                        if (item==null) {
+                                            return ;
+                                        }
+                                        setText(item.toString());
+
+                                        TableRow row = getTableRow();
+                                        if (row==null) {
+                                            return ;
+                                        }
+                                        ObservableList<QueryResult> list = getTableView().getItems();
+                                        QueryResult queryResult = list.get(row.getIndex());
+                                        QueryResultCellValue cellValue = queryResult.getData(key);
+                                        if (cellValue.isNullValue()) {
+                                            setAlignment(Pos.CENTER);
+                                            setTextFill(Color.BLUE);
+                                        } else {
+                                            setAlignment(pos);
+                                            setTextFill(Color.BLACK);
+                                        }
+                                    }
+                                };
+                            }
+                        });
+
+/*
+                        col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
+                            @Override
+                            public TableCell<QueryResult, String> call(TableColumn<QueryResult, String> param) {
+                                TableCell cell = new TableCell<QueryResult, String>() {
+                                    @Override
+                                    public void updateItem(String item, boolean empty) {
+                                        if (item != null) {
                                             setText(item.toString());
                                         }
                                     }
                                 };
 
-                                cell.setAlignment(Pos.CENTER_RIGHT);
+                                cell.setAlignment(pos);
                                 return cell;
                             }
                         });
+*/
+
                         colList.add(col);
                     }
                     updateUIPreparation(colList);
