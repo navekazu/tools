@@ -37,8 +37,8 @@ public class MapperBaseTest {
     @Test
     public void getArchiveFilePathのテスト() {
         ConnectMapper connectMapper = new ConnectMapper();
-        assertEquals(connectMapper.getArchiveFilePath(),
-                Paths.get(System.getProperty("user.home"), ".DBConnector6", "config", connectMapper.getArchiveFileName()));
+        assertEquals(Paths.get(System.getProperty("user.home"), ".DBConnector6", "config", connectMapper.getArchiveFileName()+"_test")
+                , connectMapper.getArchiveFilePath());
     }
 
 }

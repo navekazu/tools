@@ -17,6 +17,7 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.InputMethodRequests;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
+import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import tools.dbconnector6.controller.ControllerManager;
@@ -29,8 +30,6 @@ import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 
 import java.awt.*;
-import java.awt.event.WindowListener;
-import java.awt.im.spi.InputMethod;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
@@ -218,147 +217,32 @@ public class MainController extends Application implements Initializable, MainCo
         alertDialogController.setMainControllerInterface(this);
     }
 
-    private void closeConnection() throws SQLException {
+    private void showConnect() {
+        closeConnection();
+        connectStage.showAndWait();
+
+        Connection con = connectController.getConnection();
+        if (con!=null) {
+            writeLog("Connected.");
+            connection = con;
+            connectParam = connectController.getConnect();
+            dbStructureUpdateService.restart();
+            reservedWordUpdateService.restart();
+        }
+    }
+    private void closeConnection() {
         if (connection!=null) {
-            connection.close();
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                writeLog(e);
+            }
             connection = null;
             connectParam = null;
             writeLog("Disconnected.");
         }
         dbStructureUpdateService.restart();
         reservedWordUpdateService.restart();
-    }
-
-    @FXML
-    private void onClose(ActionEvent event) throws SQLException {
-        closeConnection();
-    }
-
-    @FXML
-    private void onUndo(ActionEvent event) {
-    }
-
-    @FXML
-    private void onRedo(ActionEvent event) {
-    }
-
-    @FXML
-    private void onCut(ActionEvent event) {
-    }
-
-    @FXML
-    private void onCopy(ActionEvent event) {
-    }
-
-    @FXML
-    private void onPaste(ActionEvent event) {
-    }
-
-    @FXML
-    private void onSettingSqlEditor(ActionEvent event) {
-    }
-
-    @FXML
-    private void onCallSqlEditor(ActionEvent event) {
-    }
-
-    @FXML
-    private void onConnect(ActionEvent event) throws IOException, SQLException {
-
-        closeConnection();
-
-        connectStage.showAndWait();
-
-        connection = connectController.getConnection();
-        connectParam = connectController.getConnect();
-        if (connection!=null) {
-            writeLog("Connected.");
-        }
-        dbStructureUpdateService.restart();
-        reservedWordUpdateService.restart();
-
-        connectStage.hide();
-    }
-
-    @FXML
-    private void onDisconnect(ActionEvent event) throws SQLException {
-        closeConnection();
-    }
-
-    @FXML
-    private void onExecuteQuery(ActionEvent event) {
-        queryResultUpdateService.restart();
-    }
-
-
-    @FXML
-    private void onPasteAndExecuteQuery(ActionEvent event) {
-    }
-
-    @FXML
-    private void onCancelQuery(ActionEvent event) {
-        queryResultUpdateService.cancel();
-    }
-
-    @FXML
-    private void onQueryScript(ActionEvent event) {
-    }
-
-    @FXML
-    private void onCommit(ActionEvent event) {
-        if (connection==null) {
-            writeLog("No connect.");
-            return ;
-        }
-        try {
-            connection.commit();
-        } catch(Exception e) {
-            writeLog(e.getMessage());
-        }
-    }
-
-    @FXML
-    private void onRollback(ActionEvent event) {
-        if (connection==null) {
-            writeLog("No connect.");
-            return ;
-        }
-        try {
-            connection.rollback();
-        } catch(Exception e) {
-            writeLog(e.getMessage());
-        }
-    }
-
-    @FXML
-    private void onCheckIsolation(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceMode(ActionEvent event) {
-    }
-
-    @FXML
-    private void onIncludeHeader(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterTab(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterComma(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterSpace(ActionEvent event) {
-    }
-
-    @FXML
-    private void onSearchButton(ActionEvent event) {
-        if (connection!=null) {
-            dbStructureUpdateService.restart();
-        }
     }
 
     public void writeLog(String message, Object... args) {
@@ -463,6 +347,213 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    private String inputWord(String text, int caret) {
+        StringBuilder caretForward = new StringBuilder(text.substring(0, caret));
+        caretForward = caretForward.reverse();
+
+        StringBuilder inputKeyword = new StringBuilder();
+        for (int loop=0; loop<caretForward.length(); loop++){
+            if (isSpaceInput(caretForward.charAt(loop))) {
+                break;
+            }
+            inputKeyword.insert(0, caretForward.charAt(loop));
+        }
+
+        return inputKeyword.toString();
+    }
+
+    @Override
+    public void selectReservedWord(String word) {
+        int caret = queryTextArea.getCaretPosition();
+        String text = queryTextArea.getText();
+        String inputKeyword = inputWord(text, caret);       // キャレットより前の単語を取得
+
+        // キャレットより前の単語を削除
+        queryTextArea.deleteText(caret-inputKeyword.length(), caret);
+
+        // キャレット位置に選択した単語を挿入
+        queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
+    }
+
+    @Override
+    public void mainControllerRequestFocus() {
+        primaryStage.requestFocus();
+    }
+
+    @Override
+    public void hideReservedWordStage() {
+        reservedWordStage.hide();
+    }
+
+    @Override
+    public void showAlertDialog(String message, String detail) {
+        alertDialogController.setContents(message, detail);
+        alertDialogStage.showAndWait();
+    }
+
+    private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
+        KeyCode.TAB, KeyCode.DOWN,
+    };
+    private boolean isChangeFocusForReservedWordStage(KeyCode code) {
+        return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES).anyMatch(c -> c == code);
+    }
+
+    private static final Character[] SPACE_INPUT_CHARS = new Character[] {
+        ' ', '\t', '\n', '　',
+    };
+    private boolean isSpaceInput(char ch) {
+        return Arrays.stream(SPACE_INPUT_CHARS).anyMatch(c -> c == ch);
+    }
+
+    private static final KeyCode[] TEXT_INPUT_CODES = new KeyCode[] {
+            KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.M,
+            KeyCode.N, KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R, KeyCode.S, KeyCode.T, KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X, KeyCode.Y, KeyCode.Z,
+            KeyCode.NUMPAD0, KeyCode.NUMPAD1, KeyCode.NUMPAD2, KeyCode.NUMPAD3, KeyCode.NUMPAD4,
+            KeyCode.NUMPAD5, KeyCode.NUMPAD6, KeyCode.NUMPAD7, KeyCode.NUMPAD8, KeyCode.NUMPAD9,
+            KeyCode.DIGIT0, KeyCode.DIGIT1, KeyCode.DIGIT2, KeyCode.DIGIT3, KeyCode.DIGIT4,
+            KeyCode.DIGIT5, KeyCode.DIGIT6, KeyCode.DIGIT7, KeyCode.DIGIT8, KeyCode.DIGIT9,
+            KeyCode.PLUS, KeyCode.MINUS, KeyCode.SLASH, KeyCode.ASTERISK,
+            KeyCode.BACK_SLASH, KeyCode.BACK_SPACE, KeyCode.OPEN_BRACKET, KeyCode.CLOSE_BRACKET,KeyCode.AT,
+            KeyCode.SEMICOLON, KeyCode.COLON, KeyCode.PERIOD
+    };
+    private boolean isTextInput(KeyCode code) {
+        return Arrays.stream(TEXT_INPUT_CODES).anyMatch(c -> c == code);
+    }
+
+
+    /***************************************************************************
+     *                                                                         *
+     * Event handler                                                           *
+     *                                                                         *
+     **************************************************************************/
+
+    ////////////////////////////////////////////////////////////////////////////
+    // menu action
+
+    @FXML
+    private void onClose(ActionEvent event) {
+        closeConnection();
+    }
+
+    @FXML
+    private void onUndo(ActionEvent event) {
+    }
+
+    @FXML
+    private void onRedo(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCut(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCopy(ActionEvent event) {
+    }
+
+    @FXML
+    private void onPaste(ActionEvent event) {
+    }
+
+    @FXML
+    private void onSettingSqlEditor(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCallSqlEditor(ActionEvent event) {
+    }
+
+    @FXML
+    private void onConnect(ActionEvent event) {
+        showConnect();
+    }
+
+    @FXML
+    private void onDisconnect(ActionEvent event) {
+        closeConnection();
+    }
+
+    @FXML
+    private void onExecuteQuery(ActionEvent event) {
+        queryResultUpdateService.restart();
+    }
+
+
+    @FXML
+    private void onPasteAndExecuteQuery(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCancelQuery(ActionEvent event) {
+        queryResultUpdateService.cancel();
+    }
+
+    @FXML
+    private void onQueryScript(ActionEvent event) {
+    }
+
+    @FXML
+    private void onCommit(ActionEvent event) {
+        if (connection==null) {
+            writeLog("No connect.");
+            return ;
+        }
+        try {
+            connection.commit();
+            writeLog("Commit success.");
+        } catch(Exception e) {
+            writeLog(e);
+        }
+    }
+
+    @FXML
+    private void onRollback(ActionEvent event) {
+        if (connection==null) {
+            writeLog("No connect.");
+            return ;
+        }
+        try {
+            connection.rollback();
+            writeLog("Rollback success.");
+        } catch(Exception e) {
+            writeLog(e);
+        }
+    }
+
+    @FXML
+    private void onCheckIsolation(ActionEvent event) {
+    }
+
+    @FXML
+    private void onEvidenceMode(ActionEvent event) {
+    }
+
+    @FXML
+    private void onIncludeHeader(ActionEvent event) {
+    }
+
+    @FXML
+    private void onEvidenceDelimiterTab(ActionEvent event) {
+    }
+
+    @FXML
+    private void onEvidenceDelimiterComma(ActionEvent event) {
+    }
+
+    @FXML
+    private void onEvidenceDelimiterSpace(ActionEvent event) {
+    }
+
+    @FXML
+    private void onSearchButton(ActionEvent event) {
+        if (connection!=null) {
+            dbStructureUpdateService.restart();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // queryTextArea event
+
     @FXML
     public void onQueryTextAreaKeyPressed(KeyEvent event) {
         // フォーカス移動
@@ -503,21 +594,6 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    private String inputWord(String text, int caret) {
-        StringBuilder caretForward = new StringBuilder(text.substring(0, caret));
-        caretForward = caretForward.reverse();
-
-        StringBuilder inputKeyword = new StringBuilder();
-        for (int loop=0; loop<caretForward.length(); loop++){
-            if (isSpaceInput(caretForward.charAt(loop))) {
-                break;
-            }
-            inputKeyword.insert(0, caretForward.charAt(loop));
-        }
-
-        return inputKeyword.toString();
-    }
-
     @FXML
     public void onQueryTextAreaKeyReleased(KeyEvent event) {
     }
@@ -526,34 +602,8 @@ public class MainController extends Application implements Initializable, MainCo
     public void onQueryTextAreaKeyTyped(KeyEvent event) {
     }
 
-    @Override
-    public void selectReservedWord(String word) {
-        int caret = queryTextArea.getCaretPosition();
-        String text = queryTextArea.getText();
-        String inputKeyword = inputWord(text, caret);       // キャレットより前の単語を取得
-
-        // キャレットより前の単語を削除
-        queryTextArea.deleteText(caret-inputKeyword.length(), caret);
-
-        // キャレット位置に選択した単語を挿入
-        queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
-    }
-
-    @Override
-    public void mainControllerRequestFocus() {
-        primaryStage.requestFocus();
-    }
-
-    @Override
-    public void hideReservedWordStage() {
-        reservedWordStage.hide();
-    }
-
-    @Override
-    public void showAlertDialog(String message, String detail) {
-        alertDialogController.setContents(message, detail);
-        alertDialogStage.showAndWait();
-    }
+    ////////////////////////////////////////////////////////////////////////////
+    // MainWindow event
 
     private class MainWindowShownHandler implements EventHandler<WindowEvent> {
         private MainController controller;
@@ -568,23 +618,11 @@ public class MainController extends Application implements Initializable, MainCo
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 controller.queryTextArea.setText(workingQuerySerializer.readText());
                 controller.queryTextArea.positionCaret(controller.queryTextArea.getText().length());
+
+                controller.showConnect();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-/*
-            Platform.runLater(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        onConnect(null);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (SQLException e) {
-                        e.printStackTrace();
-                    }
-                }
-            });
-*/
         }
     }
 
@@ -597,87 +635,21 @@ public class MainController extends Application implements Initializable, MainCo
 
         @Override
         public void handle(WindowEvent event) {
-            try {
-                controller.closeConnection();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            controller.closeConnection();
             try {
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 workingQuerySerializer.updateText(controller.queryTextArea.getText());
             } catch (IOException e) {
-                e.printStackTrace();
+                writeLog(e);
             }
         }
     }
-    private boolean isChangeFocusForReservedWordStage(KeyCode code) {
-        switch (code) {
-            case TAB:
-            case DOWN:
-                return true;
-        }
 
-        return false;
-    }
-    private boolean isSpaceInput(char c) {
-        switch(c) {
-            case ' ':
-            case '\t':
-            case '\n':
-            case '　':
-                return true;
-        }
-        return false;
-    }
 
-    private boolean isTextInput(KeyCode code) {
-        switch (code) {
-            case A:
-            case B:
-            case C:
-            case D:
-            case E:
-            case F:
-            case G:
-            case H:
-            case I:
-            case J:
-            case K:
-            case L:
-            case M:
-            case N:
-            case O:
-            case P:
-            case Q:
-            case R:
-            case S:
-            case T:
-            case U:
-            case V:
-            case W:
-            case X:
-            case Y:
-            case Z:
-            case NUMPAD0:
-            case NUMPAD1:
-            case NUMPAD2:
-            case NUMPAD3:
-            case NUMPAD4:
-            case NUMPAD5:
-            case NUMPAD6:
-            case NUMPAD7:
-            case NUMPAD8:
-            case NUMPAD9:
-            case DOLLAR:
-            case UNDERSCORE:
-            case PLUS:
-            case MINUS:
-            case SLASH:
-            case ASTERISK:
-                return true;
-        }
-
-        return false;
-    }
+    /***************************************************************************
+     *                                                                         *
+     * MainControllerInterface implementation                                  *
+     *                                                                         *
+     **************************************************************************/
 
 }
