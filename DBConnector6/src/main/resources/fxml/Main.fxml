@@ -138,7 +138,7 @@
                         </TabPane>
                     </items>
                   </SplitPane>
-                  <SplitPane fx:id="rightSplitPane" dividerPositions="0.27845884413309985, 0.8336252189141856" orientation="VERTICAL">
+                  <SplitPane fx:id="rightSplitPane" dividerPositions="0.2785, 0.8336" orientation="VERTICAL">
                     <items>
                       <AnchorPane minHeight="0.0" minWidth="0.0">
                            <children>
