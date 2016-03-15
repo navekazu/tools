@@ -11,10 +11,10 @@ import lombok.experimental.Builder;
 @Builder
 public class AppConfigMainStage extends AppConfig {
     private boolean maximized;
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private double x;
+    private double y;
+    private double width;
+    private double height;
     private double primaryDividerPosition;
     private double leftDividerPosition;
     private double rightDivider1Position;

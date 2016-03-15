@@ -12,29 +12,30 @@ public class AppConfigMapper extends MapperBase<AppConfig> {
 
     @Override
     protected AppConfig unboxing(String line) {
-        int index = 0;
         String[] data = line.split("\t");
 
         AppConfig appConfig = null;
 
-        if (AppConfigMainStage.getLabel().equals(data[index++])) {
+        if (AppConfigMainStage.getLabel().equals(data[0])) {
+            int index = 1;
             appConfig = AppConfigMainStage.builder()
-                    .maximized(Boolean.getBoolean(data[index++]))
-                    .x(Integer.getInteger(data[index++]))
-                    .y(Integer.getInteger(data[index++]))
-                    .width(Integer.getInteger(data[index++]))
-                    .height(Integer.getInteger(data[index++]))
+                    .maximized(Boolean.parseBoolean(data[index++]))
+                    .x(Double.parseDouble(data[index++]))
+                    .y(Double.parseDouble(data[index++]))
+                    .width(Double.parseDouble(data[index++]))
+                    .height(Double.parseDouble(data[index++]))
                     .primaryDividerPosition(Double.parseDouble(data[index++]))
                     .leftDividerPosition(Double.parseDouble(data[index++]))
                     .rightDivider1Position(Double.parseDouble(data[index++]))
                     .rightDivider2Position(Double.parseDouble(data[index++]))
                     .build();
         } else
-        if (AppConfigEvidenceMode.getLabel().equals(data[index++])) {
+        if (AppConfigEvidenceMode.getLabel().equals(data[0])) {
+            int index = 1;
             appConfig = AppConfigEvidenceMode.builder()
-                    .evidenceMode(Boolean.getBoolean(data[index++]))
-                    .includeHeader(Boolean.getBoolean(data[index++]))
-                    .evidenceDelimiter(Integer.getInteger(data[index++]))
+                    .evidenceMode(Boolean.parseBoolean(data[index++]))
+                    .includeHeader(Boolean.parseBoolean(data[index++]))
+                    .evidenceDelimiter(Integer.parseInt(data[index++]))
                     .build();
         }
 
@@ -48,10 +49,10 @@ public class AppConfigMapper extends MapperBase<AppConfig> {
             return String.format("%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s"
                     , blankToOneSpace(AppConfigMainStage.getLabel())
                     , blankToOneSpace(Boolean.toString(appConfigMainStage.isMaximized()))
-                    , blankToOneSpace(Integer.toString(appConfigMainStage.getX()))
-                    , blankToOneSpace(Integer.toString(appConfigMainStage.getY()))
-                    , blankToOneSpace(Integer.toString(appConfigMainStage.getWidth()))
-                    , blankToOneSpace(Integer.toString(appConfigMainStage.getHeight()))
+                    , blankToOneSpace(Double.toString(appConfigMainStage.getX()))
+                    , blankToOneSpace(Double.toString(appConfigMainStage.getY()))
+                    , blankToOneSpace(Double.toString(appConfigMainStage.getWidth()))
+                    , blankToOneSpace(Double.toString(appConfigMainStage.getHeight()))
                     , blankToOneSpace(Double.toString(appConfigMainStage.getPrimaryDividerPosition()))
                     , blankToOneSpace(Double.toString(appConfigMainStage.getLeftDividerPosition()))
                     , blankToOneSpace(Double.toString(appConfigMainStage.getRightDivider1Position()))
