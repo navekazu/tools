@@ -117,6 +117,10 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML private SplitPane leftSplitPane;
     @FXML private SplitPane rightSplitPane;
 
+    @FXML private CheckMenuItem evidenceMode;
+    @FXML private CheckMenuItem evidenceModeIncludeHeader;
+    @FXML private ToggleGroup evidenceDelimiter;
+
     private Connection connection;
     private Connect connectParam;
     private BackgroundCallback dbStructureUpdateService;
@@ -229,15 +233,6 @@ public class MainController extends Application implements Initializable, MainCo
                 connectStage.showAndWait();
             }
         });
-
-        Connection con = connectController.getConnection();
-        if (con!=null) {
-            writeLog("Connected.");
-            connection = con;
-            connectParam = connectController.getConnect();
-            dbStructureUpdateService.restart();
-            reservedWordUpdateService.restart();
-        }
     }
     private void closeConnection() {
         if (connection!=null) {
@@ -276,6 +271,16 @@ public class MainController extends Application implements Initializable, MainCo
         writeLog(e.getMessage());
     }
 
+    public void connectNotify() {
+        Connection con = connectController.getConnection();
+        if (con!=null) {
+            writeLog("Connected.");
+            connection = con;
+            connectParam = connectController.getConnect();
+            dbStructureUpdateService.restart();
+            reservedWordUpdateService.restart();
+        }
+    }
 
     public Connection getConnection() {
         return connection;
@@ -398,6 +403,31 @@ public class MainController extends Application implements Initializable, MainCo
     public void showAlertDialog(String message, String detail) {
         alertDialogController.setContents(message, detail);
         alertDialogStage.showAndWait();
+    }
+
+    @Override
+    public boolean isEvidenceMode() {
+        return evidenceMode.isSelected();
+    }
+
+    @Override
+    public boolean isEvidenceModeIncludeHeader() {
+        return evidenceModeIncludeHeader.isSelected();
+    }
+
+    @Override
+    public String getEvidenceDelimiter() {
+        String[] delimiters = new String[] {"\t", ",", " "};
+
+        int selectedIndex = 0;
+        for (Toggle toggle: evidenceDelimiter.getToggles()) {
+            if (toggle.isSelected()) {
+                break;
+            }
+            selectedIndex++;
+        }
+
+        return delimiters[selectedIndex];
     }
 
     private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
@@ -642,6 +672,10 @@ public class MainController extends Application implements Initializable, MainCo
 
                     }
                     if (c instanceof AppConfigEvidenceMode) {
+                        AppConfigEvidenceMode appConfigEvidenceMode = (AppConfigEvidenceMode)c;
+                        controller.evidenceMode.setSelected(appConfigEvidenceMode.isEvidenceMode());
+                        controller.evidenceModeIncludeHeader.setSelected(appConfigEvidenceMode.isIncludeHeader());
+                        controller.evidenceDelimiter.getToggles().get(appConfigEvidenceMode.getEvidenceDelimiter()).setSelected(true);
 
                     }
                 }
@@ -701,10 +735,19 @@ public class MainController extends Application implements Initializable, MainCo
                 appConfigMainStage.setRightDivider2Position(controller.rightSplitPane.getDividerPositions()[1]);
                 list.add(appConfigMainStage);
 
-                double[] d;
-                d = controller.primarySplitPane.getDividerPositions();
-                d = controller.leftSplitPane.getDividerPositions();
-                d = controller.rightSplitPane.getDividerPositions();
+                AppConfigEvidenceMode appConfigEvidenceMode = new AppConfigEvidenceMode();
+                appConfigEvidenceMode.setEvidenceMode(controller.evidenceMode.isSelected());
+                appConfigEvidenceMode.setIncludeHeader(controller.evidenceModeIncludeHeader.isSelected());
+                int selectedIndex = 0;
+                for (Toggle toggle: controller.evidenceDelimiter.getToggles()) {
+                    if (toggle.isSelected()) {
+                        break;
+                    }
+                    selectedIndex++;
+                }
+                appConfigEvidenceMode.setEvidenceDelimiter(selectedIndex);
+                list.add(appConfigEvidenceMode);
+
                 mapper.save(list);
 
             } catch (IOException e) {

@@ -260,17 +260,17 @@
                   </Menu>
                   <Menu mnemonicParsing="false" text="Evidence mode">
                     <items>
-                        <CheckMenuItem mnemonicParsing="false" onAction="#onEvidenceMode" text="Evidence mode" />
-                        <CheckMenuItem mnemonicParsing="false" onAction="#onIncludeHeader" text="Include header" />
+                        <CheckMenuItem fx:id="evidenceMode" mnemonicParsing="false" onAction="#onEvidenceMode" selected="true" text="Evidence mode" />
+                        <CheckMenuItem fx:id="evidenceModeIncludeHeader" mnemonicParsing="false" onAction="#onIncludeHeader" selected="true" text="Include header" />
                         <Menu mnemonicParsing="false" text="Evidence delimiter">
                           <items>
-                              <RadioMenuItem mnemonicParsing="false" onAction="#onEvidenceDelimiterTab" text="Tab">
+                              <RadioMenuItem fx:id="evidenceDelimiterTab" mnemonicParsing="false" onAction="#onEvidenceDelimiterTab" selected="true" text="Tab">
                                  <toggleGroup>
                                     <ToggleGroup fx:id="evidenceDelimiter" />
                                  </toggleGroup>
                               </RadioMenuItem>
-                              <RadioMenuItem mnemonicParsing="false" onAction="#onEvidenceDelimiterComma" text="Comma" toggleGroup="$evidenceDelimiter" />
-                              <RadioMenuItem mnemonicParsing="false" onAction="#onEvidenceDelimiterSpace" text="Space" toggleGroup="$evidenceDelimiter" />
+                              <RadioMenuItem fx:id="evidenceDelimiterComma" mnemonicParsing="false" onAction="#onEvidenceDelimiterComma" text="Comma" toggleGroup="$evidenceDelimiter" />
+                              <RadioMenuItem fx:id="evidenceDelimiterSpace" mnemonicParsing="false" onAction="#onEvidenceDelimiterSpace" text="Space" toggleGroup="$evidenceDelimiter" />
                           </items>
                         </Menu>
                     </items>
