@@ -21,10 +21,8 @@ import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import tools.dbconnector6.controller.ControllerManager;
-import tools.dbconnector6.entity.Connect;
-import tools.dbconnector6.entity.ReservedWord;
-import tools.dbconnector6.entity.TableColumnTab;
-import tools.dbconnector6.entity.TablePropertyTab;
+import tools.dbconnector6.entity.*;
+import tools.dbconnector6.mapper.AppConfigMapper;
 import tools.dbconnector6.serializer.ApplicationLogSerializer;
 import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
@@ -115,6 +113,14 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML
     private TextArea logTextArea;
 
+    @FXML private SplitPane primarySplitPane;
+    @FXML private SplitPane leftSplitPane;
+    @FXML private SplitPane rightSplitPane;
+
+    @FXML private CheckMenuItem evidenceMode;
+    @FXML private CheckMenuItem evidenceModeIncludeHeader;
+    @FXML private ToggleGroup evidenceDelimiter;
+
     private Connection connection;
     private Connect connectParam;
     private BackgroundCallback dbStructureUpdateService;
@@ -139,14 +145,16 @@ public class MainController extends Application implements Initializable, MainCo
         ControllerManager.getControllerManager().getMainStage(loader, primaryStage);
 
         MainController controller = loader.getController();
+        primaryStage.setOnShowing(new MainWindowShowingHandler(controller));
         primaryStage.setOnShown(new MainWindowShownHandler(controller));
         primaryStage.setOnCloseRequest(new MainWindowCloseRequestHandler(controller));
+
+        controller.primaryStage = primaryStage;
 
         primaryStage.show();
 
         // 初期フォーカスを検索ワード入力欄に（initializeの中ではフォーカス移動できない）
         controller.focusQueryTextArea();
-        controller.primaryStage = primaryStage;
     }
 
     public void focusQueryTextArea() {
@@ -219,16 +227,12 @@ public class MainController extends Application implements Initializable, MainCo
 
     private void showConnect() {
         closeConnection();
-        connectStage.showAndWait();
-
-        Connection con = connectController.getConnection();
-        if (con!=null) {
-            writeLog("Connected.");
-            connection = con;
-            connectParam = connectController.getConnect();
-            dbStructureUpdateService.restart();
-            reservedWordUpdateService.restart();
-        }
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                connectStage.showAndWait();
+            }
+        });
     }
     private void closeConnection() {
         if (connection!=null) {
@@ -267,6 +271,16 @@ public class MainController extends Application implements Initializable, MainCo
         writeLog(e.getMessage());
     }
 
+    public void connectNotify() {
+        Connection con = connectController.getConnection();
+        if (con!=null) {
+            writeLog("Connected.");
+            connection = con;
+            connectParam = connectController.getConnect();
+            dbStructureUpdateService.restart();
+            reservedWordUpdateService.restart();
+        }
+    }
 
     public Connection getConnection() {
         return connection;
@@ -389,6 +403,31 @@ public class MainController extends Application implements Initializable, MainCo
     public void showAlertDialog(String message, String detail) {
         alertDialogController.setContents(message, detail);
         alertDialogStage.showAndWait();
+    }
+
+    @Override
+    public boolean isEvidenceMode() {
+        return evidenceMode.isSelected();
+    }
+
+    @Override
+    public boolean isEvidenceModeIncludeHeader() {
+        return evidenceModeIncludeHeader.isSelected();
+    }
+
+    @Override
+    public String getEvidenceDelimiter() {
+        String[] delimiters = new String[] {"\t", ",", " "};
+
+        int selectedIndex = 0;
+        for (Toggle toggle: evidenceDelimiter.getToggles()) {
+            if (toggle.isSelected()) {
+                break;
+            }
+            selectedIndex++;
+        }
+
+        return delimiters[selectedIndex];
     }
 
     private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
@@ -605,6 +644,47 @@ public class MainController extends Application implements Initializable, MainCo
     ////////////////////////////////////////////////////////////////////////////
     // MainWindow event
 
+    private class MainWindowShowingHandler implements EventHandler<WindowEvent> {
+        private MainController controller;
+        public MainWindowShowingHandler(MainController controller) {
+            this.controller = controller;
+
+        }
+
+        @Override
+        public void handle(WindowEvent event) {
+            try {
+                AppConfigMapper mapper = new AppConfigMapper();
+                List<AppConfig> selectList = mapper.selectAll();
+
+                for (AppConfig c: selectList) {
+                    if (c instanceof AppConfigMainStage) {
+                        AppConfigMainStage appConfigMainStage = (AppConfigMainStage)c;
+                        controller.primaryStage.setMaximized(appConfigMainStage.isMaximized());
+                        controller.primaryStage.setX(appConfigMainStage.getX());
+                        controller.primaryStage.setY(appConfigMainStage.getY());
+                        controller.primaryStage.setWidth(appConfigMainStage.getWidth());
+                        controller.primaryStage.setHeight(appConfigMainStage.getHeight());
+                        controller.primarySplitPane.setDividerPosition(0, appConfigMainStage.getPrimaryDividerPosition());
+                        controller.leftSplitPane.setDividerPosition(0, appConfigMainStage.getLeftDividerPosition());
+                        controller.rightSplitPane.setDividerPosition(0, appConfigMainStage.getRightDivider1Position());
+                        controller.rightSplitPane.setDividerPosition(1, appConfigMainStage.getRightDivider2Position());
+
+                    }
+                    if (c instanceof AppConfigEvidenceMode) {
+                        AppConfigEvidenceMode appConfigEvidenceMode = (AppConfigEvidenceMode)c;
+                        controller.evidenceMode.setSelected(appConfigEvidenceMode.isEvidenceMode());
+                        controller.evidenceModeIncludeHeader.setSelected(appConfigEvidenceMode.isIncludeHeader());
+                        controller.evidenceDelimiter.getToggles().get(appConfigEvidenceMode.getEvidenceDelimiter()).setSelected(true);
+
+                    }
+                }
+            } catch (IOException e) {
+                writeLog(e);
+            }
+        }
+    }
+
     private class MainWindowShownHandler implements EventHandler<WindowEvent> {
         private MainController controller;
         public MainWindowShownHandler(MainController controller) {
@@ -621,7 +701,7 @@ public class MainController extends Application implements Initializable, MainCo
 
                 controller.showConnect();
             } catch (IOException e) {
-                e.printStackTrace();
+                writeLog(e);
             }
         }
     }
@@ -639,6 +719,37 @@ public class MainController extends Application implements Initializable, MainCo
             try {
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 workingQuerySerializer.updateText(controller.queryTextArea.getText());
+
+                AppConfigMapper mapper = new AppConfigMapper();
+                List<AppConfig> list = new ArrayList<>();
+
+                AppConfigMainStage appConfigMainStage = new AppConfigMainStage();
+                appConfigMainStage.setMaximized(controller.primaryStage.isMaximized());
+                appConfigMainStage.setX(controller.primaryStage.getX());
+                appConfigMainStage.setY(controller.primaryStage.getY());
+                appConfigMainStage.setWidth(controller.primaryStage.getWidth());
+                appConfigMainStage.setHeight(controller.primaryStage.getHeight());
+                appConfigMainStage.setPrimaryDividerPosition(controller.primarySplitPane.getDividerPositions()[0]);
+                appConfigMainStage.setLeftDividerPosition(controller.leftSplitPane.getDividerPositions()[0]);
+                appConfigMainStage.setRightDivider1Position(controller.rightSplitPane.getDividerPositions()[0]);
+                appConfigMainStage.setRightDivider2Position(controller.rightSplitPane.getDividerPositions()[1]);
+                list.add(appConfigMainStage);
+
+                AppConfigEvidenceMode appConfigEvidenceMode = new AppConfigEvidenceMode();
+                appConfigEvidenceMode.setEvidenceMode(controller.evidenceMode.isSelected());
+                appConfigEvidenceMode.setIncludeHeader(controller.evidenceModeIncludeHeader.isSelected());
+                int selectedIndex = 0;
+                for (Toggle toggle: controller.evidenceDelimiter.getToggles()) {
+                    if (toggle.isSelected()) {
+                        break;
+                    }
+                    selectedIndex++;
+                }
+                appConfigEvidenceMode.setEvidenceDelimiter(selectedIndex);
+                list.add(appConfigEvidenceMode);
+
+                mapper.save(list);
+
             } catch (IOException e) {
                 writeLog(e);
             }

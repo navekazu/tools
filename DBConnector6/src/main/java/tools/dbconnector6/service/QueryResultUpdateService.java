@@ -18,11 +18,18 @@ import tools.dbconnector6.queryresult.QueryResult;
 import tools.dbconnector6.queryresult.QueryResultCellValue;
 import tools.dbconnector6.serializer.QueryHistorySerializer;
 
+import java.awt.*;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
+import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.Date;
+import java.util.List;
 
 public class QueryResultUpdateService implements BackgroundCallbackInterface<List<TableColumn<QueryResult, String>>, List<Map<String, QueryResultCellValue>>> {
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
@@ -98,6 +105,8 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                 // 結果あり
                 startTime = System.currentTimeMillis();
                 try (ResultSet resultSet = statement.getResultSet()) {
+                    EvidenceInfo evidenceInfo = new EvidenceInfo();
+
                     // カラム情報を取得
                     ResultSetMetaData metaData = resultSet.getMetaData();
                     List<TableColumn<QueryResult, String>> colList = new ArrayList<>();
@@ -143,28 +152,11 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                             }
                         });
 
-/*
-                        col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
-                            @Override
-                            public TableCell<QueryResult, String> call(TableColumn<QueryResult, String> param) {
-                                TableCell cell = new TableCell<QueryResult, String>() {
-                                    @Override
-                                    public void updateItem(String item, boolean empty) {
-                                        if (item != null) {
-                                            setText(item.toString());
-                                        }
-                                    }
-                                };
-
-                                cell.setAlignment(pos);
-                                return cell;
-                            }
-                        });
-*/
-
                         colList.add(col);
+                        evidenceInfo.appendHeader(metaData.getColumnName(loop + 1));
                     }
                     updateUIPreparation(colList);
+                    evidenceInfo.flushHeader();
 
                     if (task.isCancelled()) {
                         return;
@@ -178,9 +170,11 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                         for (int loop=0; loop<metaData.getColumnCount(); loop++) {
                             QueryResultCellValue cellValue = QueryResultCellValue.createQueryResultCellValue(loop+1, metaData, resultSet);
                             data.put(Integer.toString(loop), cellValue);
+                            evidenceInfo.appendRow(cellValue.getEvidenceModeString());
                         }
                         rowList.add(data);
                         rowCount++;
+                        evidenceInfo.flushRow();
 
                         if (task.isCancelled()) {
                             return;
@@ -191,6 +185,8 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                             rowList.clear();
                         }
                     }
+
+                    evidenceInfo.pasteClipboard();
 
                     if (task.isCancelled()) {
                         return;
@@ -267,6 +263,16 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                 .toArray(String[]::new);
     }
 
+    private void pasteEvidenceInfo(List<String> evidenceInfo) {
+        StringBuilder stringBuilder = new StringBuilder();
+        evidenceInfo.stream().forEach(e -> {stringBuilder.append(e); stringBuilder.append("\n");});
+
+        Toolkit toolkit = Toolkit.getDefaultToolkit();
+        Clipboard clip = toolkit.getSystemClipboard();
+        StringSelection stringSelection = new StringSelection(stringBuilder.toString());
+        clip.setContents(stringSelection, stringSelection);
+    }
+
     private String createQueryHistory(String query) {
         Connect connect = mainControllerInterface.getConnectParam();
         StringBuilder builder = new StringBuilder();
@@ -283,5 +289,75 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
         builder.append("\n");
 
         return builder.toString();
+    }
+
+    private class EvidenceInfo {
+
+        private StringBuilder evidenceInfo = null;
+        private StringBuilder header = null;
+        private StringBuilder row = null;
+
+        public EvidenceInfo() {
+            evidenceInfo = new StringBuilder();
+        }
+
+        public void appendHeader(String data) {
+            if (!(mainControllerInterface.isEvidenceMode() && mainControllerInterface.isEvidenceModeIncludeHeader())) {
+                return;
+            }
+            if (header==null) {
+                header = new StringBuilder();
+            } else {
+                header.append(mainControllerInterface.getEvidenceDelimiter());
+            }
+            header.append(data);
+        }
+        public void flushHeader() {
+            if (!(mainControllerInterface.isEvidenceMode() && mainControllerInterface.isEvidenceModeIncludeHeader())) {
+                return;
+            }
+            evidenceInfo.append(header);
+            evidenceInfo.append("\n");
+            header = null;
+        }
+        public void appendRow(String data) {
+            if (!mainControllerInterface.isEvidenceMode()) {
+                return;
+            }
+            if (row==null) {
+                row = new StringBuilder();
+            } else {
+                row.append(mainControllerInterface.getEvidenceDelimiter());
+            }
+            row.append(data);
+        }
+        public void flushRow() {
+            if (!mainControllerInterface.isEvidenceMode()) {
+                return;
+            }
+            evidenceInfo.append(row);
+            evidenceInfo.append("\n");
+            row = null;
+        }
+
+        private void append(StringBuilder sb, String data) {
+            if (header==null) {
+                header = new StringBuilder();
+            } else {
+                header.append(mainControllerInterface.getEvidenceDelimiter());
+            }
+            header.append(data);
+        }
+
+        public void pasteClipboard() {
+            if (!mainControllerInterface.isEvidenceMode()) {
+                return;
+            }
+
+            Toolkit toolkit = Toolkit.getDefaultToolkit();
+            Clipboard clip = toolkit.getSystemClipboard();
+            StringSelection stringSelection = new StringSelection(evidenceInfo.toString());
+            clip.setContents(stringSelection, stringSelection);
+        }
     }
 }

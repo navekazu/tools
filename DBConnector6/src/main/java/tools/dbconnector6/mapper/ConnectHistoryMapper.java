@@ -6,7 +6,7 @@ import tools.dbconnector6.entity.ConnectHistory;
 public class ConnectHistoryMapper extends MapperBase<ConnectHistory> {
     @Override
     protected String getArchiveFileName() {
-        return "connectionHistory";
+        return "connection_history";
     }
 
     @Override

@@ -283,6 +283,7 @@ public class ConnectController implements Initializable {
             this.connect = createConnect();
 
             connectTableView.getScene().getWindow().hide();
+            mainControllerInterface.connectNotify();
         }
     }
 
