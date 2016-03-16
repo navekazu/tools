@@ -5,12 +5,11 @@
 <?import java.lang.*?>
 <?import javafx.scene.layout.*?>
 
-
 <AnchorPane prefHeight="500.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tools.dbconnector6.ConnectController">
    <children>
       <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
-            <TableView fx:id="connectTableView" BorderPane.alignment="CENTER">
+            <TableView fx:id="connectTableView" onKeyPressed="#onKeyPressConnectTableView" onMouseClicked="#onMouseClickConnectTableView" BorderPane.alignment="CENTER">
               <columns>
                 <TableColumn fx:id="libraryPathTableColumn" editable="false" prefWidth="107.0" sortable="false" text="Library path" />
                 <TableColumn fx:id="driverTableColumn" editable="false" minWidth="3.0" prefWidth="102.0" sortable="false" text="Driver" />
@@ -182,7 +181,7 @@
                         </Button>
                      </children>
                      <padding>
-                        <Insets bottom="3.0" top="3.0" />
+                        <Insets bottom="10.0" top="3.0" />
                      </padding>
                   </FlowPane>
                </bottom>

@@ -18,10 +18,23 @@ public class BackgroundCallback extends Service {
         return new Task() {
             @Override
             protected Object call() throws Exception {
-                bci.run();
+                bci.run(this);
                 return null;
 
             }
         };
+    }
+
+    @Override
+    public boolean cancel() {
+        boolean cancel = super.cancel();
+        try {
+            bci.cancel();
+        } catch (Exception e) {
+            cancel = false;
+            e.printStackTrace();
+        }
+
+        return cancel;
     }
 }

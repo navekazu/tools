@@ -2,6 +2,7 @@ package tools.dbconnector6;
 
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
 
@@ -9,10 +10,17 @@ import java.sql.Connection;
 
 public interface MainControllerInterface {
     public void writeLog(String message, Object... args);
+    public void writeLog(Exception e);
+    public void connectNotify();
     public Connection getConnection();
+    public Connect getConnectParam();
     public void selectReservedWord(String word);
     public void mainControllerRequestFocus();
     public void hideReservedWordStage();
+    public void showAlertDialog(String message, String detail);
+    public boolean isEvidenceMode();
+    public boolean isEvidenceModeIncludeHeader();
+    public String getEvidenceDelimiter();
 
     public BackgroundCallback getDbStructureUpdateService();
     public BackgroundCallback getTableStructureTabPaneUpdateService();

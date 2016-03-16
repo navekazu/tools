@@ -1,5 +1,6 @@
 package tools.dbconnector6.service;
 
+import javafx.concurrent.Task;
 import tools.dbconnector6.BackgroundCallbackInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.ReservedWord;
@@ -29,12 +30,22 @@ public class ReservedWordUpdateService implements BackgroundCallbackInterface<Vo
 
 
     @Override
-    public void run() throws Exception {
+    public void run(Task task) throws Exception {
         reservedWordList.clear();
         addSQLReservedWord();
-        DatabaseMetaData dmd =mainControllerInterface.getConnection().getMetaData();
-        addMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, dmd.getTables(null,  null, null, null), "TABLE_NAME");
-        addMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, dmd.getColumns(null, null, null, null), "COLUMN_NAME");
+
+        if (mainControllerInterface.getConnection()!=null) {
+            mainControllerInterface.writeLog("Reserved word parsing...");
+            DatabaseMetaData dmd = mainControllerInterface.getConnection().getMetaData();
+            addMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, dmd.getTables(null, null, null, null), "TABLE_NAME");
+            addMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, dmd.getColumns(null, null, null, null), "COLUMN_NAME");
+            mainControllerInterface.writeLog("Reserved word parsed.");
+        }
+    }
+
+    @Override
+    public void cancel() throws Exception {
+
     }
 
     private void addMetadataReservedWord(ReservedWord.ReservedWordType reservedWordType, ResultSet resultSet, String name) throws SQLException {

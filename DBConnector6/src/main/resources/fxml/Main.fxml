@@ -8,13 +8,13 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="600.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tools.dbconnector6.MainController">
    <children>
-      <BorderPane prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+      <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <center>
-            <SplitPane dividerPositions="0.29797979797979796" prefHeight="160.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <SplitPane fx:id="primarySplitPane" dividerPositions="0.29797979797979796" BorderPane.alignment="CENTER">
               <items>
-                  <SplitPane dividerPositions="0.6538461538461539" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0">
+                  <SplitPane fx:id="leftSplitPane" dividerPositions="0.6538461538461539" orientation="VERTICAL">
                     <items>
-                        <BorderPane prefHeight="200.0" prefWidth="200.0">
+                        <BorderPane>
                            <top>
                               <BorderPane BorderPane.alignment="CENTER">
                                  <right>
@@ -28,21 +28,21 @@
                                     <Label text="Filter" BorderPane.alignment="CENTER" />
                                  </left>
                                  <center>
-                                    <TextField fx:id="filterTextField" BorderPane.alignment="CENTER" />
+                                    <TextField fx:id="filterTextField" promptText="Narrow down a search" BorderPane.alignment="CENTER" />
                                  </center>
                               </BorderPane>
                            </top>
                            <center>
-                              <TreeView fx:id="dbStructureTreeView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                              <TreeView fx:id="dbStructureTreeView" BorderPane.alignment="CENTER" />
                            </center>
                         </BorderPane>
-                        <TabPane fx:id="tableStructureTabPane" prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE">
+                        <TabPane fx:id="tableStructureTabPane" tabClosingPolicy="UNAVAILABLE">
                           <tabs>
                             <Tab fx:id="tablePropertyTab" closable="false" text="Property">
                               <content>
-                                <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                <AnchorPane minHeight="0.0" minWidth="0.0">
                                        <children>
-                                          <TableView fx:id="tablePropertyTableView" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                                          <TableView fx:id="tablePropertyTableView" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                             <columns>
                                               <TableColumn fx:id="keyTableColumn" prefWidth="75.0" text="Key" />
                                               <TableColumn fx:id="valueTableColumn" prefWidth="75.0" text="Value" />
@@ -74,7 +74,7 @@
                             </Tab>
                               <Tab fx:id="tableIndexTab" text="Index">
                                 <content>
-                                  <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0">
+                                  <AnchorPane minHeight="0.0" minWidth="0.0">
                                        <children>
                                           <BorderPane AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                                              <top>
@@ -119,7 +119,7 @@
                                                           <RowConstraints vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
-                                                            <ComboBox fx:id="tableIndexNameComboBox" prefWidth="150.0" />
+                                                            <ComboBox fx:id="tableIndexNameComboBox" />
                                                             <TextField fx:id="tableIndexPrimaryKeyTextField" editable="false" GridPane.rowIndex="1" />
                                                             <TextField fx:id="tableIndexUniqueKeyTextField" editable="false" GridPane.rowIndex="2" />
                                                          </children>
@@ -128,7 +128,7 @@
                                                 </BorderPane>
                                              </top>
                                              <center>
-                                                <ListView fx:id="tableIndexListView" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
+                                                <ListView fx:id="tableIndexListView" BorderPane.alignment="CENTER" />
                                              </center>
                                           </BorderPane>
                                        </children></AnchorPane>
@@ -138,27 +138,25 @@
                         </TabPane>
                     </items>
                   </SplitPane>
-                  <BorderPane prefHeight="200.0" prefWidth="200.0">
-                     <center>
-                        <SplitPane dividerPositions="0.2777777777777778" orientation="VERTICAL" prefHeight="200.0" prefWidth="160.0" BorderPane.alignment="CENTER">
-                          <items>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                 <children>
-                                    <TextArea fx:id="queryTextArea" layoutX="-27.0" layoutY="-49.0" onKeyPressed="#onQueryTextAreaKeyPressed" onKeyReleased="#onQueryTextAreaKeyReleased" onKeyTyped="#onQueryTextAreaKeyTyped" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                 </children>
-                              </AnchorPane>
-                            <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="100.0" prefWidth="160.0">
-                                 <children>
-                                    <TableView fx:id="queryResultTableView" layoutY="6.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
-                                 </children>
-                              </AnchorPane>
-                          </items>
-                        </SplitPane>
-                     </center>
-                     <bottom>
-                        <TextArea fx:id="logTextArea" editable="false" prefHeight="100.0" prefWidth="200.0" BorderPane.alignment="CENTER" />
-                     </bottom>
-                  </BorderPane>
+                  <SplitPane fx:id="rightSplitPane" dividerPositions="0.2785, 0.8336" orientation="VERTICAL">
+                    <items>
+                      <AnchorPane minHeight="0.0" minWidth="0.0">
+                           <children>
+                              <TextArea fx:id="queryTextArea" layoutX="-27.0" layoutY="-49.0" onKeyPressed="#onQueryTextAreaKeyPressed" onKeyReleased="#onQueryTextAreaKeyReleased" onKeyTyped="#onQueryTextAreaKeyTyped" promptText="Input query" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                      <AnchorPane minHeight="0.0" minWidth="0.0">
+                           <children>
+                              <TableView fx:id="queryResultTableView" layoutY="6.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                        <AnchorPane>
+                           <children>
+                              <TextArea fx:id="logTextArea" editable="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0" />
+                           </children>
+                        </AnchorPane>
+                    </items>
+                  </SplitPane>
               </items>
             </SplitPane>
          </center>
@@ -262,17 +260,17 @@
                   </Menu>
                   <Menu mnemonicParsing="false" text="Evidence mode">
                     <items>
-                        <CheckMenuItem mnemonicParsing="false" onAction="#onEvidenceMode" text="Evidence mode" />
-                        <CheckMenuItem mnemonicParsing="false" onAction="#onIncludeHeader" text="Include header" />
+                        <CheckMenuItem fx:id="evidenceMode" mnemonicParsing="false" onAction="#onEvidenceMode" selected="true" text="Evidence mode" />
+                        <CheckMenuItem fx:id="evidenceModeIncludeHeader" mnemonicParsing="false" onAction="#onIncludeHeader" selected="true" text="Include header" />
                         <Menu mnemonicParsing="false" text="Evidence delimiter">
                           <items>
-                              <RadioMenuItem mnemonicParsing="false" onAction="#onEvidenceDelimiterTab" text="Tab">
+                              <RadioMenuItem fx:id="evidenceDelimiterTab" mnemonicParsing="false" onAction="#onEvidenceDelimiterTab" selected="true" text="Tab">
                                  <toggleGroup>
                                     <ToggleGroup fx:id="evidenceDelimiter" />
                                  </toggleGroup>
                               </RadioMenuItem>
-                              <RadioMenuItem mnemonicParsing="false" onAction="#onEvidenceDelimiterComma" text="Comma" toggleGroup="$evidenceDelimiter" />
-                              <RadioMenuItem mnemonicParsing="false" onAction="#onEvidenceDelimiterSpace" text="Space" toggleGroup="$evidenceDelimiter" />
+                              <RadioMenuItem fx:id="evidenceDelimiterComma" mnemonicParsing="false" onAction="#onEvidenceDelimiterComma" text="Comma" toggleGroup="$evidenceDelimiter" />
+                              <RadioMenuItem fx:id="evidenceDelimiterSpace" mnemonicParsing="false" onAction="#onEvidenceDelimiterSpace" text="Space" toggleGroup="$evidenceDelimiter" />
                           </items>
                         </Menu>
                     </items>
