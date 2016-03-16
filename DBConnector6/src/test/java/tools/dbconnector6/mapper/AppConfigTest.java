@@ -98,7 +98,7 @@ public class AppConfigTest {
                 .rightDivider1Position(6.3)
                 .rightDivider2Position(7.4)
                 .build();
-        assertEquals("MainStage\ttrue\t0\t1\t2\t3\t4.1\t5.2\t6.3\t7.4", mapper.autoboxing(mainStage));
+        assertEquals("MainStage\ttrue\t0.0\t1.0\t2.0\t3.0\t4.1\t5.2\t6.3\t7.4", mapper.autoboxing(mainStage));
 
         // 小数点なし
         mainStage = AppConfigMainStage.builder()
@@ -112,7 +112,7 @@ public class AppConfigTest {
                 .rightDivider1Position(6)
                 .rightDivider2Position(7)
                 .build();
-        assertEquals("MainStage\ttrue\t0\t1\t2\t3\t4.0\t5.0\t6.0\t7.0", mapper.autoboxing(mainStage));
+        assertEquals("MainStage\ttrue\t0.0\t1.0\t2.0\t3.0\t4.0\t5.0\t6.0\t7.0", mapper.autoboxing(mainStage));
     }
 
     @Test
