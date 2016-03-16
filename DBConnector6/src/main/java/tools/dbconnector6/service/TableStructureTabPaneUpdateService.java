@@ -3,7 +3,7 @@ package tools.dbconnector6.service;
 import javafx.application.Platform;
 import javafx.concurrent.Task;
 import tools.dbconnector6.BackgroundCallbackInterface;
-import tools.dbconnector6.DbStructureTreeItem;
+import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 
 public class TableStructureTabPaneUpdateService implements BackgroundCallbackInterface<Void, TableStructureTabPaneUpdateService.TabDisableProperty> {

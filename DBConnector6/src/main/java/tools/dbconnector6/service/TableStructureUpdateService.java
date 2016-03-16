@@ -3,7 +3,7 @@ package tools.dbconnector6.service;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import tools.dbconnector6.BackgroundCallbackInterface;
-import tools.dbconnector6.DbStructureTreeItem;
+import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;

@@ -1,4 +1,4 @@
-package tools.dbconnector6;
+package tools.dbconnector6.controller;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -17,10 +17,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.InputMethodRequests;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import tools.dbconnector6.controller.ControllerManager;
+import tools.dbconnector6.BackgroundCallback;
+import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.*;
 import tools.dbconnector6.mapper.AppConfigMapper;
 import tools.dbconnector6.serializer.ApplicationLogSerializer;
@@ -36,7 +36,7 @@ import java.util.*;
 import java.util.Date;
 import java.util.List;
 
-import static tools.dbconnector6.DbStructureTreeItem.ItemType.DATABASE;
+import static tools.dbconnector6.controller.DbStructureTreeItem.ItemType.DATABASE;
 
 public class MainController extends Application implements Initializable, MainControllerInterface {
     private static SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");

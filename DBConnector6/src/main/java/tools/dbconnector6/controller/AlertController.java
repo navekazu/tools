@@ -1,10 +1,11 @@
-package tools.dbconnector6;
+package tools.dbconnector6.controller;
 
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
+import tools.dbconnector6.MainControllerInterface;
 
 import java.net.URL;
 import java.util.ResourceBundle;
