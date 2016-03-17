@@ -103,7 +103,6 @@ public class MainController extends Application implements Initializable, MainCo
         ControllerManager.getControllerManager().getMainStage(loader, primaryStage);
 
         MainController controller = loader.getController();
-        primaryStage.setOnShowing(new MainWindowShowingHandler(controller));
         primaryStage.setOnShown(new MainWindowShownHandler(controller));
         primaryStage.setOnCloseRequest(new MainWindowCloseRequestHandler(controller));
 
@@ -454,10 +453,14 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onSettingSqlEditor(ActionEvent event) {
+        // TODO: 外部SQLエディタの実行ファイルを設定する
     }
 
     @FXML
     private void onCallSqlEditor(ActionEvent event) {
+        // TODO: テンポラリSQLファイルを作成（JVM終了時に削除するようマークすること）
+        // TODO: 外部SQLエディタを起動し、テンポラリSQLファイルを編集させる
+        // TODO: 起動した外部SQLエディタが終了したら、テンポラリSQLファイルの内容をクエリ入力欄に貼り付けて実行する
     }
 
     @FXML
@@ -478,6 +481,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onPasteAndExecuteQuery(ActionEvent event) {
+        // TODO: クリップボードの内容をクエリ入力欄に貼り付けると同時に、貼り付けた内容のSQLを実行する
     }
 
     @FXML
@@ -487,6 +491,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onQueryScript(ActionEvent event) {
+        // TODO: SQLファイルを読み込んで実行する
     }
 
     @FXML
@@ -519,6 +524,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCheckIsolation(ActionEvent event) {
+        // TODO: 現在のトランザクション分離レベルを表示する
     }
 
     @FXML
@@ -569,8 +575,8 @@ public class MainController extends Application implements Initializable, MainCo
         int caret = queryTextArea.getCaretPosition();
         String inputText = event.getText();
 
-        // シフトを押していてキャプスロックがOFFの場合、大文字に変換する
-        // シフトを押さずにキャプスロックがONの場合、大文字に変換する
+        // シフトを押していてCAPSロックがOFFの場合、大文字に変換する
+        // シフトを押さずにCAPSロックがONの場合、大文字に変換する
         if ((event.isShiftDown() && !Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))
                 ||(!event.isShiftDown() && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))) {
             inputText = inputText.toUpperCase();
@@ -602,9 +608,9 @@ public class MainController extends Application implements Initializable, MainCo
     ////////////////////////////////////////////////////////////////////////////
     // MainWindow event
 
-    private class MainWindowShowingHandler implements EventHandler<WindowEvent> {
+    private class MainWindowShownHandler implements EventHandler<WindowEvent> {
         private MainController controller;
-        public MainWindowShowingHandler(MainController controller) {
+        public MainWindowShownHandler(MainController controller) {
             this.controller = controller;
 
         }
@@ -612,10 +618,12 @@ public class MainController extends Application implements Initializable, MainCo
         @Override
         public void handle(WindowEvent event) {
             try {
+                // アプリケーション設定を読み込む
                 AppConfigMapper mapper = new AppConfigMapper();
                 List<AppConfig> selectList = mapper.selectAll();
 
                 for (AppConfig c: selectList) {
+                    // メイン画面の配置
                     if (c instanceof AppConfigMainStage) {
                         AppConfigMainStage appConfigMainStage = (AppConfigMainStage)c;
                         controller.primaryStage.setMaximized(appConfigMainStage.isMaximized());
@@ -629,6 +637,8 @@ public class MainController extends Application implements Initializable, MainCo
                         controller.rightSplitPane.setDividerPosition(1, appConfigMainStage.getRightDivider2Position());
 
                     }
+
+                    // エビデンスモードの復元
                     if (c instanceof AppConfigEvidenceMode) {
                         AppConfigEvidenceMode appConfigEvidenceMode = (AppConfigEvidenceMode)c;
                         controller.evidenceMode.setSelected(appConfigEvidenceMode.isEvidenceMode());
@@ -637,26 +647,13 @@ public class MainController extends Application implements Initializable, MainCo
 
                     }
                 }
-            } catch (IOException e) {
-                writeLog(e);
-            }
-        }
-    }
 
-    private class MainWindowShownHandler implements EventHandler<WindowEvent> {
-        private MainController controller;
-        public MainWindowShownHandler(MainController controller) {
-            this.controller = controller;
-
-        }
-
-        @Override
-        public void handle(WindowEvent event) {
-            try {
+                // 作業中クエリの復元
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 controller.queryTextArea.setText(workingQuerySerializer.readText());
                 controller.queryTextArea.positionCaret(controller.queryTextArea.getText().length());
 
+                // DB接続画面を表示
                 controller.showConnect();
             } catch (IOException e) {
                 writeLog(e);
@@ -673,14 +670,18 @@ public class MainController extends Application implements Initializable, MainCo
 
         @Override
         public void handle(WindowEvent event) {
+            // DB切断
             controller.closeConnection();
+
             try {
+                // アプリケーション設定を書き込む
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 workingQuerySerializer.updateText(controller.queryTextArea.getText());
 
                 AppConfigMapper mapper = new AppConfigMapper();
                 List<AppConfig> list = new ArrayList<>();
 
+                // メイン画面の配置を保存
                 AppConfigMainStage appConfigMainStage = new AppConfigMainStage();
                 appConfigMainStage.setMaximized(controller.primaryStage.isMaximized());
                 appConfigMainStage.setX(controller.primaryStage.getX());
@@ -693,6 +694,7 @@ public class MainController extends Application implements Initializable, MainCo
                 appConfigMainStage.setRightDivider2Position(controller.rightSplitPane.getDividerPositions()[1]);
                 list.add(appConfigMainStage);
 
+                // エビデンスモードの保存
                 AppConfigEvidenceMode appConfigEvidenceMode = new AppConfigEvidenceMode();
                 appConfigEvidenceMode.setEvidenceMode(controller.evidenceMode.isSelected());
                 appConfigEvidenceMode.setIncludeHeader(controller.evidenceModeIncludeHeader.isSelected());
