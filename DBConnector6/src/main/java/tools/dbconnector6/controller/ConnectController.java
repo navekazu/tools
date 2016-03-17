@@ -30,62 +30,25 @@ import java.util.*;
 
 public class ConnectController implements Initializable {
 
-    @FXML
-    private TableView connectTableView;
-
-    @FXML
-    private TableColumn<Connect, String> libraryPathTableColumn;
-
-    @FXML
-    private TableColumn<Connect, String> driverTableColumn;
-
-    @FXML
-    private TableColumn<Connect, String> urlTableColumn;
-
-    @FXML
-    private TableColumn<Connect, String> userTableColumn;
-
-    @FXML
-    private TableColumn<Connect, String> passwordTableColumn;
-
-    @FXML
-    private Button addButton;
-
-    @FXML
-    private Button updateButton;
-
-    @FXML
-    private Button deleteButton;
-
-    @FXML
-    private Button loadButton;
-
-    @FXML
-    private ComboBox historyComboBox;
-
-    @FXML
-    private TextField libraryPathTextField;
-
-    @FXML
-    private TextField driverTextField;
-
-    @FXML
-    private TextField urlTextField;
-
-    @FXML
-    private TextField userTextField;
-
-    @FXML
-    private TextField passwordTextField;
-
-    @FXML
-    private Button okButton;
-
-    @FXML
-    private Button cancelButton;
-
-    @FXML
-    private Button testButton;
+    @FXML private TableView connectTableView;
+    @FXML private TableColumn<Connect, String> libraryPathTableColumn;
+    @FXML private TableColumn<Connect, String> driverTableColumn;
+    @FXML private TableColumn<Connect, String> urlTableColumn;
+    @FXML private TableColumn<Connect, String> userTableColumn;
+    @FXML private TableColumn<Connect, String> passwordTableColumn;
+    @FXML private Button addButton;
+    @FXML private Button updateButton;
+    @FXML private Button deleteButton;
+    @FXML private Button loadButton;
+    @FXML private ComboBox historyComboBox;
+    @FXML private TextField libraryPathTextField;
+    @FXML private TextField driverTextField;
+    @FXML private TextField urlTextField;
+    @FXML private TextField userTextField;
+    @FXML private TextField passwordTextField;
+    @FXML private Button okButton;
+    @FXML private Button cancelButton;
+    @FXML private Button testButton;
 
     private MainControllerInterface mainControllerInterface;
     private Connection connection;

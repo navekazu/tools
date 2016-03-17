@@ -10,13 +10,14 @@ import tools.dbconnector6.MainControllerInterface;
 import java.net.URL;
 import java.util.ResourceBundle;
 
+/**
+ * アラート画面コントローラ
+ */
 public class AlertController implements Initializable {
 
-    @FXML
-    private Label messageLabel;
 
-    @FXML
-    private Label detailsLabel;
+    @FXML private Label messageLabel;
+    @FXML private Label detailsLabel;
 
     private MainControllerInterface mainControllerInterface;
 

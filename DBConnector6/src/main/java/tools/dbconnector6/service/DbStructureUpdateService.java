@@ -128,10 +128,10 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                mainControllerInterface.getDbStructureParam().dbStructurRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructurRootItem.getItemType().getName());
-                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructurRootItem.getChildren();
+                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
+                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
                 subList.clear();
-                mainControllerInterface.getDbStructureParam().dbStructurRootItem.setExpanded(true);
+                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
             }
         });
     }
@@ -142,8 +142,8 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                mainControllerInterface.getDbStructureParam().dbStructurRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructurRootItem.getItemType().getName());
-                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructurRootItem.getChildren();
+                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
+                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
                 subList.add(dispatchParam);
                 FXCollections.sort(subList, new Comparator<TreeItem<String>>() {
                     @Override
@@ -151,7 +151,7 @@ public class DbStructureUpdateService implements BackgroundCallbackInterface<Voi
                         return o1.getValue().compareTo(o2.getValue());
                     }
                 });
-                mainControllerInterface.getDbStructureParam().dbStructurRootItem.setExpanded(true);
+                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
             }
         });
     }

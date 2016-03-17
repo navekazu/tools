@@ -43,80 +43,38 @@ public class MainController extends Application implements Initializable, MainCo
 
     private Stage primaryStage;
 
-    @FXML
-    private TextField filterTextField;
-
-    @FXML
-    private Button searchButton;
-
-    @FXML
-    private TreeView dbStructureTreeView;
+    @FXML private TextField filterTextField;
+    @FXML private Button searchButton;
+    @FXML private TreeView dbStructureTreeView;
     private DbStructureTreeItem dbStructurRootItem;
-
-    @FXML
-    private TabPane tableStructureTabPane;
-
-    @FXML
-    private Tab tablePropertyTab;
-
-    @FXML
-    private TableView tablePropertyTableView;
-    @FXML
-    private TableColumn<TablePropertyTab, String> keyTableColumn;
-    @FXML
-    private TableColumn<TablePropertyTab, String> valueTableColumn;
-
-    @FXML
-    private Tab tableColumnTab;
-
-    @FXML
-    private TableView tableColumnTableView;
-    @FXML
-    private TableColumn<TableColumnTab, String> nameTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> typeTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, Integer> sizeTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, Integer> decimalDigitsTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> nullableTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, Integer> primaryKeyTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> remarksTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> columnDefaultTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> autoincrementTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> generatedColumnTableColumn;
-
-    @FXML
-    private Tab tableIndexTab;
-
-    @FXML
-    private ComboBox tableIndexComboBox;
-    @FXML
-    private TextField tablePrimaryKeyTextField;
-    @FXML
-    private TextField tableUniqueKeyTextField;
-    @FXML
-    private ListView tableIndexListView;
-
-    @FXML
-    private TextArea queryTextArea;
-
-    @FXML
-    private TableView queryResultTableView;
-
-    @FXML
-    private TextArea logTextArea;
-
+    @FXML private TabPane tableStructureTabPane;
+    @FXML private Tab tablePropertyTab;
+    @FXML private TableView tablePropertyTableView;
+    @FXML private TableColumn<TablePropertyTab, String> keyTableColumn;
+    @FXML private TableColumn<TablePropertyTab, String> valueTableColumn;
+    @FXML private Tab tableColumnTab;
+    @FXML private TableView tableColumnTableView;
+    @FXML private TableColumn<TableColumnTab, String> nameTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> typeTableColumn;
+    @FXML private TableColumn<TableColumnTab, Integer> sizeTableColumn;
+    @FXML private TableColumn<TableColumnTab, Integer> decimalDigitsTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> nullableTableColumn;
+    @FXML private TableColumn<TableColumnTab, Integer> primaryKeyTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> remarksTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> columnDefaultTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> autoincrementTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> generatedColumnTableColumn;
+    @FXML private Tab tableIndexTab;
+    @FXML private ComboBox tableIndexComboBox;
+    @FXML private TextField tablePrimaryKeyTextField;
+    @FXML private TextField tableUniqueKeyTextField;
+    @FXML private ListView tableIndexListView;
+    @FXML private TextArea queryTextArea;
+    @FXML private TableView queryResultTableView;
+    @FXML private TextArea logTextArea;
     @FXML private SplitPane primarySplitPane;
     @FXML private SplitPane leftSplitPane;
     @FXML private SplitPane rightSplitPane;
-
     @FXML private CheckMenuItem evidenceMode;
     @FXML private CheckMenuItem evidenceModeIncludeHeader;
     @FXML private ToggleGroup evidenceDelimiter;
@@ -310,7 +268,7 @@ public class MainController extends Application implements Initializable, MainCo
         MainControllerInterface.DbStructureParam param = new MainControllerInterface.DbStructureParam();
         param.filterTextField = filterTextField;
         param.dbStructureTreeView = dbStructureTreeView;
-        param.dbStructurRootItem = dbStructurRootItem;
+        param.dbStructureRootItem = dbStructurRootItem;
         return param;
     }
 

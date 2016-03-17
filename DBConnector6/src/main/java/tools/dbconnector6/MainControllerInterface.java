@@ -34,7 +34,7 @@ public interface MainControllerInterface {
     public class DbStructureParam {
         public TextField filterTextField;
         public TreeView dbStructureTreeView;
-        public DbStructureTreeItem dbStructurRootItem;
+        public DbStructureTreeItem dbStructureRootItem;
     }
     public class TableStructureTabParam {
         public TabPane tableStructureTabPane;

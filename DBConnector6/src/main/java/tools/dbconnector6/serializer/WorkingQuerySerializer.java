@@ -11,7 +11,7 @@ public class WorkingQuerySerializer extends DataSerializer {
 
     @Override
     protected String getArchiveFileName() {
-        return "query_history_"+DATE_FORMAT.format(new Date())+".sql";
+        return "working_history_"+DATE_FORMAT.format(new Date())+".sql";
     }
 
     @Override
