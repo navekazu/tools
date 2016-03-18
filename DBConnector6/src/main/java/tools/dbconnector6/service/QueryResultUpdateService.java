@@ -11,7 +11,7 @@ import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableRow;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import tools.dbconnector6.BackgroundCallbackInterface;
+import tools.dbconnector6.BackgroundServiceInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.queryresult.QueryResult;
@@ -21,9 +21,6 @@ import tools.dbconnector6.serializer.QueryHistorySerializer;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -31,7 +28,7 @@ import java.util.*;
 import java.util.Date;
 import java.util.List;
 
-public class QueryResultUpdateService implements BackgroundCallbackInterface<List<TableColumn<QueryResult, String>>, List<Map<String, QueryResultCellValue>>> {
+public class QueryResultUpdateService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<Map<String, QueryResultCellValue>>> {
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
     private static final int FLUSH_ROW_COUNT = 1000;

@@ -2,7 +2,7 @@ package tools.dbconnector6.service;
 
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import tools.dbconnector6.BackgroundCallbackInterface;
+import tools.dbconnector6.BackgroundServiceInterface;
 import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.TableColumnTab;
@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 
-public class TableStructureUpdateService implements BackgroundCallbackInterface<Void, Void> {
+public class TableStructureUpdateService implements BackgroundServiceInterface<Void, Void> {
     private MainControllerInterface mainControllerInterface;
     public TableStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;

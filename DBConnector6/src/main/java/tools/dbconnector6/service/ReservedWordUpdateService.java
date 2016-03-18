@@ -1,7 +1,7 @@
 package tools.dbconnector6.service;
 
 import javafx.concurrent.Task;
-import tools.dbconnector6.BackgroundCallbackInterface;
+import tools.dbconnector6.BackgroundServiceInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.ReservedWord;
 
@@ -10,7 +10,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
-public class ReservedWordUpdateService implements BackgroundCallbackInterface<Void, Void> {
+public class ReservedWordUpdateService implements BackgroundServiceInterface<Void, Void> {
 
     private MainControllerInterface mainControllerInterface;
     private List<ReservedWord> reservedWordList;

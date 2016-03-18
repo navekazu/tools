@@ -7,7 +7,7 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
-import tools.dbconnector6.BackgroundCallbackInterface;
+import tools.dbconnector6.BackgroundServiceInterface;
 import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 
@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
-public class DbStructureUpdateService implements BackgroundCallbackInterface<Void, DbStructureTreeItem> {
+public class DbStructureUpdateService implements BackgroundServiceInterface<Void, DbStructureTreeItem> {
     private MainControllerInterface mainControllerInterface;
     public DbStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;

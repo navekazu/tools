@@ -22,10 +22,10 @@ public interface MainControllerInterface {
     public boolean isEvidenceModeIncludeHeader();
     public String getEvidenceDelimiter();
 
-    public BackgroundCallback getDbStructureUpdateService();
-    public BackgroundCallback getTableStructureTabPaneUpdateService();
-    public BackgroundCallback getTableStructureUpdateService();
-    public BackgroundCallback getQueryResultUpdateService();
+    public BackgroundService getDbStructureUpdateService();
+    public BackgroundService getTableStructureTabPaneUpdateService();
+    public BackgroundService getTableStructureUpdateService();
+    public BackgroundService getQueryResultUpdateService();
 
     public DbStructureParam getDbStructureParam();
     public TableStructureTabParam getTableStructureTabParam();

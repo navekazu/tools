@@ -19,7 +19,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import tools.dbconnector6.BackgroundCallback;
+import tools.dbconnector6.BackgroundService;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.*;
 import tools.dbconnector6.mapper.AppConfigMapper;
@@ -81,11 +81,11 @@ public class MainController extends Application implements Initializable, MainCo
 
     private Connection connection;
     private Connect connectParam;
-    private BackgroundCallback dbStructureUpdateService;
-    private BackgroundCallback tableStructureTabPaneUpdateService;
-    private BackgroundCallback tableStructureUpdateService;
-    private BackgroundCallback queryResultUpdateService;
-    private BackgroundCallback reservedWordUpdateService;
+    private BackgroundService dbStructureUpdateService;
+    private BackgroundService tableStructureTabPaneUpdateService;
+    private BackgroundService tableStructureUpdateService;
+    private BackgroundService queryResultUpdateService;
+    private BackgroundService reservedWordUpdateService;
 
     private Stage reservedWordStage;
     private ReservedWordController reservedWordController;
@@ -124,9 +124,9 @@ public class MainController extends Application implements Initializable, MainCo
         dbStructureTreeView.setRoot(dbStructurRootItem);
         dbStructureTreeView.getSelectionModel().selectedItemProperty().addListener(new DbStructureTreeViewChangeListener());
 
-        dbStructureUpdateService = new BackgroundCallback(new DbStructureUpdateService(this));
-        tableStructureTabPaneUpdateService = new BackgroundCallback(new TableStructureTabPaneUpdateService(this));
-        tableStructureUpdateService = new BackgroundCallback(new TableStructureUpdateService(this));
+        dbStructureUpdateService = new BackgroundService(new DbStructureUpdateService(this));
+        tableStructureTabPaneUpdateService = new BackgroundService(new TableStructureTabPaneUpdateService(this));
+        tableStructureUpdateService = new BackgroundService(new TableStructureUpdateService(this));
 
         keyTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("key"));
         valueTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("value"));
@@ -142,8 +142,8 @@ public class MainController extends Application implements Initializable, MainCo
         autoincrementTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("autoincrement"));
         generatedColumnTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("generatedColumn"));
 
-        queryResultUpdateService = new BackgroundCallback(new QueryResultUpdateService(this));
-        reservedWordUpdateService = new BackgroundCallback(new ReservedWordUpdateService(this, reservedWordList));
+        queryResultUpdateService = new BackgroundService(new QueryResultUpdateService(this));
+        reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList));
 
         dbStructureUpdateService.restart();
         tableStructureTabPaneUpdateService.restart();
@@ -247,19 +247,19 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
 
-    public BackgroundCallback getDbStructureUpdateService() {
+    public BackgroundService getDbStructureUpdateService() {
         return dbStructureUpdateService;
     }
 
-    public BackgroundCallback getTableStructureTabPaneUpdateService() {
+    public BackgroundService getTableStructureTabPaneUpdateService() {
         return tableStructureTabPaneUpdateService;
     }
 
-    public BackgroundCallback getTableStructureUpdateService() {
+    public BackgroundService getTableStructureUpdateService() {
         return tableStructureUpdateService;
     }
 
-    public BackgroundCallback getQueryResultUpdateService() {
+    public BackgroundService getQueryResultUpdateService() {
         return queryResultUpdateService;
     }
 
