@@ -433,22 +433,17 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onUndo(ActionEvent event) {
+        // TODO: TextAreaのデフォルトの動作を更新したい・・・
     }
 
     @FXML
     private void onRedo(ActionEvent event) {
-    }
-
-    @FXML
-    private void onCut(ActionEvent event) {
+        // TODO: TextAreaのデフォルトの動作を更新したい・・・
     }
 
     @FXML
     private void onCopy(ActionEvent event) {
-    }
-
-    @FXML
-    private void onPaste(ActionEvent event) {
+        // TODO: SQL実行結果の表をクリップボードにコピーする
     }
 
     @FXML
