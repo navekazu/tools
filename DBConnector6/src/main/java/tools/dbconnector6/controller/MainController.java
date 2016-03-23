@@ -43,17 +43,93 @@ public class MainController extends Application implements Initializable, MainCo
 
     private Stage primaryStage;
 
+    // Scene overview
+    // +-----------------+---------------------------------------------------+
+    // | DB structure    | Query input area                                  |
+    // |                 |   queryTextArea                                   |
+    // |                 |                                                   |
+    // |                 +---------------------------------------------------+
+    // |                 | Executed result area                              |
+    // |                 |   queryResultTableView                            |
+    // |                 |                                                   |
+    // |                 |                                                   |
+    // |                 |                                                   |
+    // +-----------------+                                                   |
+    // | Table structure |                                                   |
+    // |                 +---------------------------------------------------+
+    // |                 | Log area                                          |
+    // |                 |   logTextArea                                     |
+    // +-----------------+---------------------------------------------------+
+    @FXML private TextArea queryTextArea;
+    @FXML private TableView queryResultTableView;
+    @FXML private TextArea logTextArea;
+
+    // DB structure
+    // +------------------------------------+
+    // | xxx filterTextField [searchButton] |
+    // | +--------------------------------+ |
+    // | | dbStructureTreeView            | |
+    // | |                                | |
+    // | |                                | |
+    // | +--------------------------------+ |
+    // +------------------------------------+
     @FXML private TextField filterTextField;
     @FXML private Button searchButton;
     @FXML private TreeView dbStructureTreeView;
     private DbStructureTreeItem dbStructurRootItem;
+
+    // Table structure overview
+    // +-----------------------------------------------------------+
+    // | +-------------------+-----------------+-----------------+ |
+    // | | tablePropertyTab  | tableColumnTab  | tableIndexTab   | |
+    // | |                                                       | |
+    // | |                                                       | |
+    // | |                                                       | |
+    // | |                                                       | |
+    // | | tableStructureTabPane                                 | |
+    // | |                                                       | |
+    // | +-------------------------------------------------------+ |
+    // +-----------------------------------------------------------+
     @FXML private TabPane tableStructureTabPane;
     @FXML private Tab tablePropertyTab;
+    @FXML private Tab tableColumnTab;
+    @FXML private Tab tableIndexTab;
+
+    // tablePropertyTab
+    // +-----------------------------------------------------------+
+    // | +-------------------+-----------------+-----------------+ |
+    // | | tablePropertyTab  |                 |                 | |
+    // | |                                                       | |
+    // | | +---------------------------------------------------+ | |
+    // | | |keyTableColumn|valueTableColumn                    | | |
+    // | | |                                                   | | |
+    // | | | tablePropertyTableView                            | | |
+    // | | |                                                   | | |
+    // | | +---------------------------------------------------+ | |
+    // | +-------------------------------------------------------+ |
+    // +-----------------------------------------------------------+
     @FXML private TableView tablePropertyTableView;
     @FXML private TableColumn<TablePropertyTab, String> keyTableColumn;
     @FXML private TableColumn<TablePropertyTab, String> valueTableColumn;
-    @FXML private Tab tableColumnTab;
     @FXML private TableView tableColumnTableView;
+
+    // tablePropertyTab
+    // +-----------------------------------------------------------+
+    // | +-------------------+-----------------+-----------------+ |
+    // | |                   | tableColumnTab  |                 | |
+    // | |                                                       | |
+    // | | +---------------------------------------------------+ | |
+    // | | |nameTableColumn|typeTableColumn|sizeTableColumn    | | |
+    // | | |  decimalDigitsTableColumn|nullableTableColumn     | | |
+    // | | |  primaryKeyTableColumn|remarksTableColumn         | | |
+    // | | |  columnDefaultTableColumn|autoincrementTableColumn| | |
+    // | | |  generatedColumnTableColumn                       | | |
+    // | | |                                                   | | |
+    // | | | tableColumnTableView                              | | |
+    // | | |                                                   | | |
+    // | | +---------------------------------------------------+ | |
+    // | +-------------------------------------------------------+ |
+    // +-----------------------------------------------------------+
     @FXML private TableColumn<TableColumnTab, String> nameTableColumn;
     @FXML private TableColumn<TableColumnTab, String> typeTableColumn;
     @FXML private TableColumn<TableColumnTab, Integer> sizeTableColumn;
@@ -64,14 +140,28 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML private TableColumn<TableColumnTab, String> columnDefaultTableColumn;
     @FXML private TableColumn<TableColumnTab, String> autoincrementTableColumn;
     @FXML private TableColumn<TableColumnTab, String> generatedColumnTableColumn;
-    @FXML private Tab tableIndexTab;
+
+    // tableIndexTab
+    // +-----------------------------------------------------------+
+    // | +-------------------+-----------------+-----------------+ |
+    // | |                   |                 | tableIndexTab   | |
+    // | |                                                       | |
+    // | | xxx tableIndexComboBox                                | |
+    // | | xxx tablePrimaryKeyTextField                          | |
+    // | | xxx tableUniqueKeyTextField                           | |
+    // | | +---------------------------------------------------+ | |
+    // | | |                                                   | | |
+    // | | | tableIndexListView                                | | |
+    // | | |                                                   | | |
+    // | | +---------------------------------------------------+ | |
+    // | +-------------------------------------------------------+ |
+    // +-----------------------------------------------------------+
     @FXML private ComboBox tableIndexComboBox;
     @FXML private TextField tablePrimaryKeyTextField;
     @FXML private TextField tableUniqueKeyTextField;
     @FXML private ListView tableIndexListView;
-    @FXML private TextArea queryTextArea;
-    @FXML private TableView queryResultTableView;
-    @FXML private TextArea logTextArea;
+
+
     @FXML private SplitPane primarySplitPane;
     @FXML private SplitPane leftSplitPane;
     @FXML private SplitPane rightSplitPane;
@@ -216,16 +306,16 @@ public class MainController extends Application implements Initializable, MainCo
         });
     }
 
-    public void writeLog(Exception e) {
+    public void writeLog(Throwable e) {
         ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
         try {
             e.printStackTrace();
-            applicationLogSerializer.appendText(e.getMessage());
+            applicationLogSerializer.appendText(e.toString());
         } catch (IOException e1) {
-            writeLog(e1.getMessage());
+            writeLog(e1.toString());
             e1.printStackTrace();
         }
-        writeLog(e.getMessage());
+        writeLog(e.toString());
     }
 
     public void connectNotify() {
@@ -580,7 +670,7 @@ public class MainController extends Application implements Initializable, MainCo
         String text = (new StringBuilder(queryTextArea.getText())).insert(caret, inputText).toString();
         String inputKeyword = inputWord(text, caret + inputText.length());       // キャレットより前の単語を取得
 
-        if (reservedWordController.notifyQueryInput(event, inputKeyword)) {
+        if (reservedWordController.isInputReservedWord(event, inputKeyword)) {
             // キャレット位置に選択画面を出す
             InputMethodRequests imr = queryTextArea.getInputMethodRequests();
             reservedWordStage.setX(imr.getTextLocation(0).getX());

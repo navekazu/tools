@@ -30,6 +30,22 @@ import java.util.*;
 
 public class ConnectController implements Initializable {
 
+    // Scene overview
+    // +-----------------------------------------------------------------------------------------------+
+    // | +----------------------+-----------------+--------------+---------------+-------------------+ |
+    // | |libraryPathTableColumn|driverTableColumn|urlTableColumn|userTableColumn|passwordTableColumn| |
+    // | |                                                                                           | |
+    // | | connectTableView                                                                          | |
+    // | +-------------------------------------------------------------------------------------------+ |
+    // |                     [addButton] [updateButton] [deleteButton] [loadButton]                    |
+    // | xxxxx historyComboBox                                                                         |
+    // | xxxxx libraryPathTextField                                                                    |
+    // | xxxxx driverTextField                                                                         |
+    // | xxxxx urlTextField                                                                            |
+    // | xxxxx userTextField                                                                           |
+    // | xxxxx passwordTextField                                                                       |
+    // |                                                        [okButton] [cancelButton] [testButton] |
+    // +-----------------------------------------------------------------------------------------------+
     @FXML private TableView connectTableView;
     @FXML private TableColumn<Connect, String> libraryPathTableColumn;
     @FXML private TableColumn<Connect, String> driverTableColumn;

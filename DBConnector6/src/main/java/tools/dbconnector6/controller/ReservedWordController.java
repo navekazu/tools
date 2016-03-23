@@ -20,6 +20,8 @@ public class ReservedWordController implements Initializable {
     @FXML private ListView reservedWordListView;
 
     private MainControllerInterface mainControllerInterface;
+
+    // 予約語の一覧（SQLの予約語・全テーブル名・全カラム名が入る）
     private List<ReservedWord> reservedWordList;
 
     public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
@@ -30,15 +32,13 @@ public class ReservedWordController implements Initializable {
         this.reservedWordList = reservedWordList;
     }
 
-    public boolean notifyKeyPressed(KeyEvent event) {
-        switch (event.getCode()) {
-            case ESCAPE:
-                return true;
-        }
-        return false;
-    }
-
-    public boolean notifyQueryInput(KeyEvent event, String query) {
+    /**
+     * 予約語を入力されたか、予約語一覧と突き合わせる
+     * @param event キーイベントの内容
+     * @param query キャレット位置にある入力済みSQL
+     * @return 予約語一覧に入力済みSQLがあれば true、なければ false
+     */
+    public boolean isInputReservedWord(KeyEvent event, String query) {
         if (query.length()<=1) {
             return false;
         }
@@ -65,6 +65,11 @@ public class ReservedWordController implements Initializable {
         return true;
     }
 
+    /**
+     * 最後に入力した文字が大文字か判定する
+     * @param query 入力済みSQL
+     * @return 大文字の場合 true、それ以外は false
+     */
     private boolean isUpperCase(String query) {
         StringBuilder queryBuffer = (new StringBuilder(query)).reverse();
 
@@ -80,6 +85,11 @@ public class ReservedWordController implements Initializable {
         return false;
     }
 
+    /**
+     * 入力文字が文字なのか判定
+     * @param c 入力文字
+     * @return 文字の場合 true、それ以外は false
+     */
     private boolean isCharacter(char c) {
         char[] alphabets = new char[]{
                 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
@@ -96,6 +106,11 @@ public class ReservedWordController implements Initializable {
         return false;
     }
 
+    /**
+     * 入力文字が大文字なのか判定
+     * @param c 入力文字
+     * @return 大文字の場合 true、それ以外は false
+     */
     private boolean isUpperCharacter(char c) {
         char[] alphabets = new char[]{
                 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
@@ -149,6 +164,9 @@ public class ReservedWordController implements Initializable {
         }
     }
 
+    /**
+     * 選択した予約語をメイン画面に通知する
+     */
     private void selected() {
         int index = reservedWordListView.getSelectionModel().getSelectedIndex();
         if (index==-1) {

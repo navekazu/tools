@@ -36,6 +36,11 @@ public abstract class DataSerializer {
                         out.print(text.charAt(loop));
                     }
                 }
+
+                // 最後の文字が改行でないなら、改行を付加する
+                if (!text.endsWith("\n")) {
+                    out.println();
+                }
             }
         } catch(IOException e) {
             e.printStackTrace();

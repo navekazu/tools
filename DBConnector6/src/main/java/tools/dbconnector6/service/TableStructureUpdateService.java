@@ -128,13 +128,13 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
                     .name(getStringForce(resultSet, "COLUMN_NAME"))
                     .type(getStringForce(resultSet, "TYPE_NAME"))
                     .size(getIntForce(resultSet, "COLUMN_SIZE"))
-                .decimalDigits(getIntForce(resultSet, "DECIMAL_DIGITS"))
+                    .decimalDigits(getIntForce(resultSet, "DECIMAL_DIGITS"))
                     .nullable(getStringForce(resultSet, "NULLABLE"))
 //                    .primaryKey(getStringForce(resultSet, "TYPE_NAME"))
                     .remarks(getStringForce(resultSet, "REMARKS"))
-                .columnDefault(getStringForce(resultSet, "COLUMN_DEF"))
-                .autoincrement(getStringForce(resultSet, "IS_AUTOINCREMENT"))
-                .generatedColumn(getStringForce(resultSet, "IS_GENERATEDCOLUMN"))
+                    .columnDefault(getStringForce(resultSet, "COLUMN_DEF"))
+                    .autoincrement(getStringForce(resultSet, "IS_AUTOINCREMENT"))
+                    .generatedColumn(getStringForce(resultSet, "IS_GENERATEDCOLUMN"))
                     .build();
 
             tableColumnList.add(data);

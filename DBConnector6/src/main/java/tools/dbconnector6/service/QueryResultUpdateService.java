@@ -198,6 +198,8 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                 mainControllerInterface.writeLog("Success. count: %S", NUMBER_FORMAT.format(statement.getUpdateCount()));
             }
 
+        } catch(Throwable e) {
+            mainControllerInterface.writeLog(e);
         }
     }
 

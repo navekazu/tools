@@ -15,7 +15,12 @@ import java.util.ResourceBundle;
  */
 public class AlertController implements Initializable {
 
-
+    // Scene overview
+    // +--------------------------------------------+
+    // |           messageLabel                     |
+    // |           detailsLabel                     |
+    // |                                            |
+    // +--------------------------------------------+
     @FXML private Label messageLabel;
     @FXML private Label detailsLabel;
 
