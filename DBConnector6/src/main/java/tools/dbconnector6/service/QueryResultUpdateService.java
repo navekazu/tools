@@ -123,17 +123,17 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                         col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
                             @Override
                             public TableCell<QueryResult, String> call(TableColumn<QueryResult, String> param) {
-                                return  new TableCell<QueryResult, String>() {
+                                return new TableCell<QueryResult, String>() {
                                     @Override
                                     public void updateItem(String item, boolean empty) {
-                                        if (item==null) {
-                                            return ;
+                                        if (item == null) {
+                                            return;
                                         }
                                         setText(item.toString());
 
                                         TableRow row = getTableRow();
-                                        if (row==null) {
-                                            return ;
+                                        if (row == null) {
+                                            return;
                                         }
                                         ObservableList<QueryResult> list = getTableView().getItems();
                                         QueryResult queryResult = list.get(row.getIndex());
@@ -210,11 +210,31 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                mainControllerInterface.getQueryParam().queryResultTableView.getItems().clear();
+                mainControllerInterface.getQueryParam().queryResultTableView.scrollTo(0);
+
+                ScrollBar scrollBar = getHorizontalScrollBarOnTableView(mainControllerInterface.getQueryParam().queryResultTableView);
+                scrollBar.setValue(0.0f);
+
                 ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
                 columnList.clear();
                 columnList.addAll(dispatchParam);
-                mainControllerInterface.getQueryParam().queryResultTableView.getItems().clear();
-                mainControllerInterface.getQueryParam().queryResultTableView.scrollTo(0);
+            }
+            private ScrollBar getHorizontalScrollBarOnTableView(TableView tableView) {
+                // ScrollBarには .scroll-bar というスタイルクラスが設定されているので、
+                // それを検索してインスタンスを取得する
+                // See: http://aoe-tk.hatenablog.com/entry/2015/05/23/141948
+                Set<Node> nodes = tableView.lookupAll(".scroll-bar");
+//                Set<Node> nodes = tableView.lookupAll("*");
+                for (Node node : nodes) {
+                    if (node instanceof ScrollBar) {
+                        ScrollBar scrollBar = (ScrollBar) node;
+                        if (scrollBar.getOrientation() == Orientation.HORIZONTAL) {
+                            return scrollBar;
+                        }
+                    }
+                }
+                throw new IllegalStateException("Not found!");
             }
         });
 
