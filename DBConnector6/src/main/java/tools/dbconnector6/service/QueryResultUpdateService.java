@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.Date;
 import java.util.List;
 
-public class QueryResultUpdateService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<Map<String, QueryResultCellValue>>> {
+public class QueryResultUpdateService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<List<QueryResultCellValue>>> {
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
@@ -111,12 +111,13 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                     for (int loop=0; loop<metaData.getColumnCount(); loop++) {
                         TableColumn<QueryResult, String> col = new TableColumn<>(metaData.getColumnName(loop+1));
                         final String key = Integer.toString(loop);
+                        final int index = loop;
                         final Pos pos = QueryResultCellValue.getAlignment(loop+1, metaData);
                         col.setCellValueFactory(
                                 new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
                                     @Override
                                     public ObservableValue<String> call(TableColumn.CellDataFeatures<QueryResult, String> p) {
-                                        return new SimpleStringProperty(p.getValue().getData(key).getFormattedString());
+                                        return new SimpleStringProperty(p.getValue().getData(index).getFormattedString());
                                     }
                                 });
                         col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
@@ -136,7 +137,7 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                                         }
                                         ObservableList<QueryResult> list = getTableView().getItems();
                                         QueryResult queryResult = list.get(row.getIndex());
-                                        QueryResultCellValue cellValue = queryResult.getData(key);
+                                        QueryResultCellValue cellValue = queryResult.getData(index);
                                         if (cellValue.isNullValue()) {
                                             setAlignment(Pos.CENTER);
                                             setTextFill(Color.BLUE);
@@ -160,13 +161,13 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                     }
 
                     // 結果を取得
-                    List<Map<String, QueryResultCellValue>> rowList = new ArrayList<>();
+                    List<List<QueryResultCellValue>> rowList = new ArrayList<>();
                     long rowCount = 0;
                     while (resultSet.next()) {
-                        Map<String, QueryResultCellValue> data = new HashMap<>();
+                        List<QueryResultCellValue> data = new ArrayList<>();
                         for (int loop=0; loop<metaData.getColumnCount(); loop++) {
                             QueryResultCellValue cellValue = QueryResultCellValue.createQueryResultCellValue(loop+1, metaData, resultSet);
-                            data.put(Integer.toString(loop), cellValue);
+                            data.add(cellValue);
                             evidenceInfo.appendRow(cellValue.getEvidenceModeString());
                         }
                         rowList.add(data);
@@ -220,13 +221,13 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
     }
 
     @Override
-    public void updateUI(List<Map<String, QueryResultCellValue>> uiParam) throws Exception {
-        final List<Map<String, QueryResultCellValue>> dispatchParam = new ArrayList<>(uiParam);
+    public void updateUI(List<List<QueryResultCellValue>> uiParam) throws Exception {
+        final List<List<QueryResultCellValue>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 List<QueryResult> list = new ArrayList<>();
-                for (Map<String, QueryResultCellValue> m: dispatchParam) {
+                for (List<QueryResultCellValue> m: dispatchParam) {
                     QueryResult r = new QueryResult();
                     r.setData(m);
                     list.add(r);
