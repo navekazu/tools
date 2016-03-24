@@ -5,10 +5,10 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import tools.dbconnector6.BackgroundServiceInterface;
@@ -31,8 +31,8 @@ import java.util.List;
 public class QueryResultUpdateService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<Map<String, QueryResultCellValue>>> {
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
-    private static final int FLUSH_ROW_COUNT = 1000;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+    private static final int FLUSH_ROW_COUNT = 1000;
     private QueryHistorySerializer queryHistorySerializer;
 
     private MainControllerInterface mainControllerInterface;
@@ -70,7 +70,7 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                 mainControllerInterface.writeLog("Total query count: %d", executeQueryCount);
             }
         } catch(SQLException e) {
-            mainControllerInterface.writeLog(e.getMessage());
+            mainControllerInterface.writeLog(e);
             // 複数クエリの場合、実行出来たクエリ数を出力
             if (queries.length >= 2) {
                 mainControllerInterface.writeLog("Succeeded query count: %d", executeQueryCount);
@@ -225,11 +225,33 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
+                List<QueryResult> list = new ArrayList<>();
                 for (Map<String, QueryResultCellValue> m: dispatchParam) {
                     QueryResult r = new QueryResult();
                     r.setData(m);
-                    mainControllerInterface.getQueryParam().queryResultTableView.getItems().add(r);
+                    list.add(r);
                 }
+                // 挿入した分、スクロールするのが気に入らない
+//                ScrollBar scrollBar = getVerticalScrollBarOnTableView(mainControllerInterface.getQueryParam().queryResultTableView);
+//                double val = scrollBar.getValue();
+                mainControllerInterface.getQueryParam().queryResultTableView.getItems().addAll(list);
+//                scrollBar.setValue(0.0f);
+            }
+
+            private ScrollBar getVerticalScrollBarOnTableView(TableView tableView) {
+                // ScrollBarには .scroll-bar というスタイルクラスが設定されているので、
+                // それを検索してインスタンスを取得する
+                // See: http://aoe-tk.hatenablog.com/entry/2015/05/23/141948
+                Set<Node> nodes = tableView.lookupAll(".scroll-bar");
+                for (Node node : nodes) {
+                    if (node instanceof ScrollBar) {
+                        ScrollBar scrollBar = (ScrollBar) node;
+                        if (scrollBar.getOrientation() == Orientation.VERTICAL) {
+                            return scrollBar;
+                        }
+                    }
+                }
+                throw new IllegalStateException("Not found!");
             }
         });
     }
@@ -264,7 +286,10 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
 
     private void pasteEvidenceInfo(List<String> evidenceInfo) {
         StringBuilder stringBuilder = new StringBuilder();
-        evidenceInfo.stream().forEach(e -> {stringBuilder.append(e); stringBuilder.append("\n");});
+        evidenceInfo.stream().forEach(e -> {
+            stringBuilder.append(e);
+            stringBuilder.append("\n");
+        });
 
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Clipboard clip = toolkit.getSystemClipboard();
