@@ -179,7 +179,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     private Stage reservedWordStage;
     private ReservedWordController reservedWordController;
-    private List<ReservedWord> reservedWordList = new ArrayList<>();
+    private Set<ReservedWord> reservedWordList = new HashSet<>();
 
     private Stage alertDialogStage;
     private AlertController alertDialogController;
@@ -485,7 +485,7 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     private static final Character[] SPACE_INPUT_CHARS = new Character[] {
-        ' ', '\t', '\n', '　',
+        ' ', '\t', '\n', '　', '.',
     };
     private boolean isSpaceInput(char ch) {
         return Arrays.stream(SPACE_INPUT_CHARS).anyMatch(c -> c == ch);

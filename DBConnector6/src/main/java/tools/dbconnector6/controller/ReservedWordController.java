@@ -13,6 +13,7 @@ import tools.dbconnector6.entity.ReservedWord;
 import java.net.URL;
 import java.util.List;
 import java.util.ResourceBundle;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ReservedWordController implements Initializable {
@@ -22,13 +23,13 @@ public class ReservedWordController implements Initializable {
     private MainControllerInterface mainControllerInterface;
 
     // 予約語の一覧（SQLの予約語・全テーブル名・全カラム名が入る）
-    private List<ReservedWord> reservedWordList;
+    private Set<ReservedWord> reservedWordList;
 
     public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }
 
-    public void setRservedWordList(List<ReservedWord> reservedWordList) {
+    public void setRservedWordList(Set<ReservedWord> reservedWordList) {
         this.reservedWordList = reservedWordList;
     }
 
@@ -46,13 +47,15 @@ public class ReservedWordController implements Initializable {
         final boolean upperCase = isUpperCase(query);
 
         List<ReservedWord> list;
-        list = reservedWordList.stream()
-                .filter(word -> word.getWord().toLowerCase().startsWith(query.toLowerCase()))
-                .map(word -> {
-                    word.setWord(upperCase ? word.getWord().toUpperCase() : word.getWord().toLowerCase());
-                    return word;
-                })
-                .collect(Collectors.toList());
+        synchronized (reservedWordList) {
+            list = reservedWordList.stream()
+                    .filter(word -> word.getWord().toLowerCase().startsWith(query.toLowerCase()))
+                    .map(word -> {
+                        word.setWord(upperCase ? word.getWord().toUpperCase() : word.getWord().toLowerCase());
+                        return word;
+                    })
+                    .collect(Collectors.toList());
+        }
 
         if (list.isEmpty()) {
             return false;
