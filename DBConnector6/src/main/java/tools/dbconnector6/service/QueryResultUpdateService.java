@@ -301,8 +301,14 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                 .map(s -> {
                     return s.trim();
                 })
+                .map(s -> {
+                    return isOneWord(s)? String.format("select * from %s", s): s;
+                })
                 .filter(s -> s.length()>=1)
                 .toArray(String[]::new);
+    }
+    private boolean isOneWord(String sql) {
+        return (sql.length()>=1 && sql.indexOf(" ")==-1 && sql.indexOf("\t")==-1);
     }
 
     private void pasteEvidenceInfo(List<String> evidenceInfo) {
