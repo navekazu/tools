@@ -146,9 +146,9 @@ public class MainController extends Application implements Initializable, MainCo
     // | +-------------------+-----------------+-----------------+ |
     // | |                   |                 | tableIndexTab   | |
     // | |                                                       | |
-    // | | xxx tableIndexComboBox                                | |
-    // | | xxx tablePrimaryKeyTextField                          | |
-    // | | xxx tableUniqueKeyTextField                           | |
+    // | | xxx tableIndexNameComboBox                            | |
+    // | | xxx tableIndexPrimaryKeyTextField                     | |
+    // | | xxx tableIndexUniqueKeyTextField                      | |
     // | | +---------------------------------------------------+ | |
     // | | |                                                   | | |
     // | | | tableIndexListView                                | | |
@@ -156,9 +156,9 @@ public class MainController extends Application implements Initializable, MainCo
     // | | +---------------------------------------------------+ | |
     // | +-------------------------------------------------------+ |
     // +-----------------------------------------------------------+
-    @FXML private ComboBox tableIndexComboBox;
-    @FXML private TextField tablePrimaryKeyTextField;
-    @FXML private TextField tableUniqueKeyTextField;
+    @FXML private ComboBox tableIndexNameComboBox;
+    @FXML private TextField tableIndexPrimaryKeyTextField;
+    @FXML private TextField tableIndexUniqueKeyTextField;
     @FXML private ListView tableIndexListView;
 
 
@@ -384,9 +384,9 @@ public class MainController extends Application implements Initializable, MainCo
         param.generatedColumnTableColumn = generatedColumnTableColumn;
 
         param.tableIndexTab = tableIndexTab;
-        param.tableIndexComboBox = tableIndexComboBox;
-        param.tablePrimaryKeyTextField = tablePrimaryKeyTextField;
-        param.tableUniqueKeyTextField = tableUniqueKeyTextField;
+        param.tableIndexNameComboBox = tableIndexNameComboBox;
+        param.tableIndexPrimaryKeyTextField = tableIndexPrimaryKeyTextField;
+        param.tableIndexUniqueKeyTextField = tableIndexUniqueKeyTextField;
         param.tableIndexListView = tableIndexListView;
 
         return param;

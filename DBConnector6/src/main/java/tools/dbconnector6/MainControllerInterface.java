@@ -58,9 +58,9 @@ public interface MainControllerInterface {
         public TableColumn<TableColumnTab, String> generatedColumnTableColumn;
 
         public Tab tableIndexTab;
-        public ComboBox tableIndexComboBox;
-        public TextField tablePrimaryKeyTextField;
-        public TextField tableUniqueKeyTextField;
+        public ComboBox tableIndexNameComboBox;
+        public TextField tableIndexPrimaryKeyTextField;
+        public TextField tableIndexUniqueKeyTextField;
         public ListView tableIndexListView;
     }
 
