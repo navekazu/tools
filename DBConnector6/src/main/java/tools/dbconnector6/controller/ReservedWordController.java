@@ -93,15 +93,14 @@ public class ReservedWordController implements Initializable {
      * @param c 入力文字
      * @return 文字の場合 true、それ以外は false
      */
+    private static final char[] ALPHABETS_ALL = new char[]{
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    };
     private boolean isCharacter(char c) {
-        char[] alphabets = new char[]{
-                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-                'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        };
-
-        for (char alphabet: alphabets) {
+        for (char alphabet: ALPHABETS_ALL) {
             if (c==alphabet) {
                 return true;
             }
@@ -114,13 +113,12 @@ public class ReservedWordController implements Initializable {
      * @param c 入力文字
      * @return 大文字の場合 true、それ以外は false
      */
+    private static final char[] ALPHABETS_UPPERCASE = new char[]{
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    };
     private boolean isUpperCharacter(char c) {
-        char[] alphabets = new char[]{
-                'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-                'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-        };
-
-        for (char alphabet: alphabets) {
+        for (char alphabet: ALPHABETS_UPPERCASE) {
             if (c==alphabet) {
                 return true;
             }
