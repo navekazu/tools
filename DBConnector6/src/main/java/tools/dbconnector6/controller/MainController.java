@@ -613,30 +613,32 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     @FXML
-    private void onEvidenceMode(ActionEvent event) {
-    }
-
-    @FXML
-    private void onIncludeHeader(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterTab(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterComma(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterSpace(ActionEvent event) {
-    }
-
-    @FXML
     private void onSearchButton(ActionEvent event) {
         if (connection!=null) {
             dbStructureUpdateService.restart();
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Table structure event
+
+    @FXML
+    private void onTableIndexNameComboBox(ActionEvent event) {
+        int index = tableIndexNameComboBox.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            tableIndexPrimaryKeyTextField.setText("");
+            tableIndexUniqueKeyTextField.setText("");
+            tableIndexListView.getItems().clear();
+            return;
+        }
+
+        List<TableIndexTab> list = tableIndexNameComboBox.getItems();
+        TableIndexTab tableIndexTab = list.get(index);
+
+        tableIndexPrimaryKeyTextField.setText(tableIndexTab.isPrimaryKey()? "Yes": "No");
+        tableIndexUniqueKeyTextField.setText(tableIndexTab.isUniqueKey()? "Yes": "No");
+        tableIndexListView.getItems().clear();
+        tableIndexListView.getItems().addAll(tableIndexTab.getColumnList());
     }
 
     ////////////////////////////////////////////////////////////////////////////

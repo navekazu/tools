@@ -28,7 +28,7 @@
                                     <Label text="Filter" BorderPane.alignment="CENTER" />
                                  </left>
                                  <center>
-                                    <TextField fx:id="filterTextField" promptText="Narrow down a search" BorderPane.alignment="CENTER" />
+                                    <TextField fx:id="filterTextField" BorderPane.alignment="CENTER" />
                                  </center>
                               </BorderPane>
                            </top>
@@ -119,7 +119,7 @@
                                                           <RowConstraints vgrow="SOMETIMES" />
                                                         </rowConstraints>
                                                          <children>
-                                                            <ComboBox fx:id="tableIndexNameComboBox" />
+                                                            <ComboBox fx:id="tableIndexNameComboBox" onAction="#onTableIndexNameComboBox" />
                                                             <TextField fx:id="tableIndexPrimaryKeyTextField" editable="false" GridPane.rowIndex="1" />
                                                             <TextField fx:id="tableIndexUniqueKeyTextField" editable="false" GridPane.rowIndex="2" />
                                                          </children>
@@ -260,17 +260,17 @@
                   </Menu>
                   <Menu mnemonicParsing="false" text="Evidence mode">
                     <items>
-                        <CheckMenuItem fx:id="evidenceMode" mnemonicParsing="false" onAction="#onEvidenceMode" selected="true" text="Evidence mode" />
-                        <CheckMenuItem fx:id="evidenceModeIncludeHeader" mnemonicParsing="false" onAction="#onIncludeHeader" selected="true" text="Include header" />
+                        <CheckMenuItem fx:id="evidenceMode" mnemonicParsing="false" selected="true" text="Evidence mode" />
+                        <CheckMenuItem fx:id="evidenceModeIncludeHeader" mnemonicParsing="false" selected="true" text="Include header" />
                         <Menu mnemonicParsing="false" text="Evidence delimiter">
                           <items>
-                              <RadioMenuItem fx:id="evidenceDelimiterTab" mnemonicParsing="false" onAction="#onEvidenceDelimiterTab" selected="true" text="Tab">
+                              <RadioMenuItem fx:id="evidenceDelimiterTab" mnemonicParsing="false" selected="true" text="Tab">
                                  <toggleGroup>
                                     <ToggleGroup fx:id="evidenceDelimiter" />
                                  </toggleGroup>
                               </RadioMenuItem>
-                              <RadioMenuItem fx:id="evidenceDelimiterComma" mnemonicParsing="false" onAction="#onEvidenceDelimiterComma" text="Comma" toggleGroup="$evidenceDelimiter" />
-                              <RadioMenuItem fx:id="evidenceDelimiterSpace" mnemonicParsing="false" onAction="#onEvidenceDelimiterSpace" text="Space" toggleGroup="$evidenceDelimiter" />
+                              <RadioMenuItem fx:id="evidenceDelimiterComma" mnemonicParsing="false" text="Comma" toggleGroup="$evidenceDelimiter" />
+                              <RadioMenuItem fx:id="evidenceDelimiterSpace" mnemonicParsing="false" text="Space" toggleGroup="$evidenceDelimiter" />
                           </items>
                         </Menu>
                     </items>

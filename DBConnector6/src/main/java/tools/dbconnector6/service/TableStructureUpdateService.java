@@ -13,10 +13,7 @@ import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.IntStream;
 
 public class TableStructureUpdateService implements BackgroundServiceInterface<Void, TableStructureUpdateService.TableStructures> {
@@ -35,6 +32,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     public void run(Task task) throws Exception {
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
         if (tableItem==null || mainControllerInterface.getConnection()==null) {
+            updateUIPreparation(null);
             return ;
         }
 
@@ -91,6 +89,9 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
                 mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(tablePropertyList);
                 mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(tableColumnList);
                 mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(tableIndexList);
+                if (tableIndexList.size()>=1) {
+                    mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getSelectionModel().select(0);
+                }
             }
         });
     }
@@ -236,9 +237,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
 
     private List<String> mapToList(final Map<Short, String> map) {
         List<String> columnList = new ArrayList<>();
-
-        IntStream.range(1, map.size()+1)
-                .forEach(i -> columnList.add(map.get(i)));
+        Set<Short> keyList = map.keySet();
+        keyList.stream().forEach(i -> columnList.add(map.get(i)));
 
         return columnList;
     }
