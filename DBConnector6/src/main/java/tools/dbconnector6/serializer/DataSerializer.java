@@ -6,6 +6,7 @@ import java.nio.file.*;
 
 public abstract class DataSerializer {
     protected abstract String getArchiveFileName();
+    protected abstract String getArchiveFileSuffix();
     protected abstract Path getArchiveFilePath();
 
     private static boolean utMode = false;
@@ -14,17 +15,25 @@ public abstract class DataSerializer {
     }
 
     protected Path getArchiveFilePath(String kind) {
-        return Paths.get(System.getProperty("user.home"), ".DBConnector6", kind, getArchiveFileName() + (utMode? "_test": ""));
+        return Paths.get(System.getProperty("user.home"), ".DBConnector6", kind, getArchiveFileName() + getArchiveFileSuffix() + (utMode? "_test": ""));
+    }
+    protected Path getTempFilePath(String kind) {
+        return Files.createTempFile(
+                Paths.get(System.getProperty("user.home"), ".DBConnector6", kind),
+                getArchiveFileName(), getArchiveFileSuffix() + (utMode? "_test": ""),
+                StandardOpenOption.CREATE, StandardOpenOption.WRITE);
     }
 
     public void appendText(String text) throws IOException {
-        writeText(text, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+        writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
     public void updateText(String text) throws IOException {
-        writeText(text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
     }
-    private void writeText(String text, OpenOption... options) throws IOException {
-        Path path = getArchiveFilePath();
+    public void updateTempText(String text) throws IOException {
+        writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    }
+    private void writeText(Path path, String text, OpenOption... options) throws IOException {
         Files.createDirectories(path.getParent());
 
         try {

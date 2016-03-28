@@ -327,7 +327,7 @@ public class ConnectController implements Initializable {
             list.add(history);
             mapper.save(list);
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             mainControllerInterface.showAlertDialog("Connect failed.", e.toString());
         }
 

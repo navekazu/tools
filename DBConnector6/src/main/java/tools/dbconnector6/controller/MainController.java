@@ -187,6 +187,10 @@ public class MainController extends Application implements Initializable, MainCo
     private Stage connectStage;
     private ConnectController connectController;
 
+    private Stage editorChooserStage;
+    private EditorChooserController editorChooserController;
+    private AppConfigEditor appConfigEditor = new AppConfigEditor();;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("main");
@@ -265,11 +269,22 @@ public class MainController extends Application implements Initializable, MainCo
         loader = ControllerManager.getControllerManager().getLoarder("alertDialog");
         try {
             alertDialogStage = ControllerManager.getControllerManager().getSubStage(loader, "alertDialog");
+            alertDialogStage.setResizable(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
         alertDialogController = loader.getController();
         alertDialogController.setMainControllerInterface(this);
+
+        loader = ControllerManager.getControllerManager().getLoarder("editorChooser");
+        try {
+            editorChooserStage = ControllerManager.getControllerManager().getSubStage(loader, "editorChooser");
+            editorChooserStage.setResizable(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        editorChooserController = loader.getController();
+        editorChooserController.setMainControllerInterface(this);
     }
 
     private void showConnect() {
@@ -538,7 +553,12 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onSettingSqlEditor(ActionEvent event) {
-        // TODO: 外部SQLエディタの実行ファイルを設定する
+        editorChooserController.setContents(appConfigEditor.getEditorPath());
+        editorChooserStage.showAndWait();
+
+        if (editorChooserController.isOk()) {
+            appConfigEditor.setEditorPath(editorChooserController.getEditorPath());
+        }
     }
 
     @FXML
@@ -733,6 +753,12 @@ public class MainController extends Application implements Initializable, MainCo
                         controller.evidenceDelimiter.getToggles().get(appConfigEvidenceMode.getEvidenceDelimiter()).setSelected(true);
 
                     }
+
+                    // エディタパスの復元
+                    if (c instanceof AppConfigEditor) {
+                        AppConfigEditor appConfigEditor = (AppConfigEditor)c;
+                        controller.appConfigEditor.setEditorPath(appConfigEditor.getEditorPath());
+                    }
                 }
 
                 // 作業中クエリの復元
@@ -794,6 +820,9 @@ public class MainController extends Application implements Initializable, MainCo
                 }
                 appConfigEvidenceMode.setEvidenceDelimiter(selectedIndex);
                 list.add(appConfigEvidenceMode);
+
+                // エディタパスの保存
+                list.add(controller.appConfigEditor);
 
                 mapper.save(list);
 

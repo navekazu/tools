@@ -1,6 +1,7 @@
 package tools.dbconnector6.mapper;
 
 import tools.dbconnector6.entity.AppConfig;
+import tools.dbconnector6.entity.AppConfigEditor;
 import tools.dbconnector6.entity.AppConfigEvidenceMode;
 import tools.dbconnector6.entity.AppConfigMainStage;
 
@@ -8,6 +9,11 @@ public class AppConfigMapper extends MapperBase<AppConfig> {
     @Override
     protected String getArchiveFileName() {
         return "app_config";
+    }
+
+    @Override
+    protected String getArchiveFileSuffix() {
+        return "";
     }
 
     @Override
@@ -36,6 +42,12 @@ public class AppConfigMapper extends MapperBase<AppConfig> {
                     .evidenceMode(Boolean.parseBoolean(data[index++]))
                     .includeHeader(Boolean.parseBoolean(data[index++]))
                     .evidenceDelimiter(Integer.parseInt(data[index++]))
+                    .build();
+        } else
+        if (AppConfigEditor.getLabel().equals(data[0])) {
+            int index = 1;
+            appConfig = AppConfigEditor.builder()
+                    .editorPath(data[index++])
                     .build();
         }
 
@@ -66,6 +78,13 @@ public class AppConfigMapper extends MapperBase<AppConfig> {
                     , blankToOneSpace(Boolean.toString(appConfigEvidenceMode.isEvidenceMode()))
                     , blankToOneSpace(Boolean.toString(appConfigEvidenceMode.isIncludeHeader()))
                     , blankToOneSpace(Integer.toString(appConfigEvidenceMode.getEvidenceDelimiter()))
+            );
+        } else
+        if (appConfig instanceof AppConfigEditor) {
+            AppConfigEditor appConfigEditor = (AppConfigEditor)appConfig;
+            return String.format("%s\t%s"
+                    , blankToOneSpace(AppConfigEditor.getLabel())
+                    , blankToOneSpace(appConfigEditor.getEditorPath())
             );
         }
         return "";
