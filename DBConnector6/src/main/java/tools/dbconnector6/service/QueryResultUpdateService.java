@@ -49,7 +49,7 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
         }
 
         // 実行するSQLを取得
-        String[] queries = splitQuery(getQuery());
+        String[] queries = splitQuery(mainControllerInterface.getInputQuery());
 
         // 個々のSQLを実行
         int executeQueryCount = 0;
@@ -81,6 +81,16 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
     @Override
     public void cancel() throws Exception {
         mainControllerInterface.writeLog("Query cancelling...");
+    }
+
+    @Override
+    public void cancelled() {
+
+    }
+
+    @Override
+    public void failed() {
+
     }
 
     private void executeQuery(Task task, String query) throws Exception {
@@ -235,15 +245,6 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                 mainControllerInterface.getQueryParam().queryResultTableView.getItems().addAll(list);
             }
         });
-    }
-
-    protected String getQuery() {
-        //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
-        String sql = mainControllerInterface.getQueryParam().queryTextArea.getSelectedText();
-        if (sql.length()<=0) {
-            sql = mainControllerInterface.getQueryParam().queryTextArea.getText();
-        }
-        return sql;
     }
 
     protected String[] splitQuery(String sql) {

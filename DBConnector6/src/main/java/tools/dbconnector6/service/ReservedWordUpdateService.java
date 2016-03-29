@@ -98,6 +98,16 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
 
     }
 
+    @Override
+    public void cancelled() {
+
+    }
+
+    @Override
+    public void failed() {
+
+    }
+
     private List<String> getResultList(ResultSet resultSet, String name) throws SQLException {
         List<String> list = new ArrayList<>();
         while(resultSet.next()) {

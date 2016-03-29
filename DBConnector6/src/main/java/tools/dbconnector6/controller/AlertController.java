@@ -3,6 +3,7 @@ package tools.dbconnector6.controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.stage.Stage;
 import tools.dbconnector6.MainControllerInterface;
@@ -23,8 +24,10 @@ public class AlertController implements Initializable {
     // +--------------------------------------------+
     @FXML private Label messageLabel;
     @FXML private Label detailsLabel;
+    @FXML private Button okButton;
 
     private MainControllerInterface mainControllerInterface;
+    private boolean waitMode;
 
     public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = this.mainControllerInterface;
@@ -44,5 +47,9 @@ public class AlertController implements Initializable {
         messageLabel.setText(message);
         detailsLabel.setText(details);
 
+    }
+
+    public void setWaitMode(boolean waitMode) {
+        okButton.setVisible(!waitMode);
     }
 }

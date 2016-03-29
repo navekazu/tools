@@ -2,6 +2,7 @@ package tools.dbconnector6.serializer;
 
 import tools.dbconnector6.serializer.DataSerializer;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,7 +21,7 @@ public class QueryHistorySerializer extends DataSerializer {
     }
 
     @Override
-    protected Path getArchiveFilePath() {
+    protected Path getArchiveFilePath() throws IOException {
         return getArchiveFilePath("query_history");
     }
 }

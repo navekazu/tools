@@ -64,6 +64,16 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     }
 
     @Override
+    public void cancelled() {
+
+    }
+
+    @Override
+    public void failed() {
+
+    }
+
+    @Override
     public void updateUIPreparation(Void uiParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override

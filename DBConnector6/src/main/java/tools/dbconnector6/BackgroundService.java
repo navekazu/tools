@@ -34,4 +34,14 @@ public class BackgroundService extends Service {
 
         return cancel;
     }
+
+    @Override
+    protected void cancelled() {
+        bci.cancelled();
+    }
+
+    @Override
+    protected void failed() {
+        bci.failed();
+    }
 }

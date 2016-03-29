@@ -176,6 +176,7 @@ public class MainController extends Application implements Initializable, MainCo
     private BackgroundService tableStructureUpdateService;
     private BackgroundService queryResultUpdateService;
     private BackgroundService reservedWordUpdateService;
+    private BackgroundService inputQueryUpdateService;
 
     private Stage reservedWordStage;
     private ReservedWordController reservedWordController;
@@ -238,6 +239,7 @@ public class MainController extends Application implements Initializable, MainCo
 
         queryResultUpdateService = new BackgroundService(new QueryResultUpdateService(this));
         reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList));
+        inputQueryUpdateService = new BackgroundService(new InputQueryUpdateService(this));
 
         dbStructureUpdateService.restart();
         tableStructureTabPaneUpdateService.restart();
@@ -464,7 +466,16 @@ public class MainController extends Application implements Initializable, MainCo
     @Override
     public void showAlertDialog(String message, String detail) {
         alertDialogController.setContents(message, detail);
+        alertDialogController.setWaitMode(false);
         alertDialogStage.showAndWait();
+    }
+    public void showWaitDialog(String message, String detail) {
+        alertDialogController.setContents(message, detail);
+        alertDialogController.setWaitMode(true);
+        alertDialogStage.showAndWait();
+    }
+    public void hideWaitDialog() {
+        alertDialogStage.hide();
     }
 
     @Override
@@ -490,6 +501,33 @@ public class MainController extends Application implements Initializable, MainCo
         }
 
         return delimiters[selectedIndex];
+    }
+
+    @Override
+    public String getInputQuery() {
+        //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
+        String sql = queryTextArea.getSelectedText();
+        if (sql.length()<=0) {
+            sql = queryTextArea.getText();
+        }
+        return sql;
+    }
+
+    @Override
+    public String getSelectedQuery() {
+        return queryTextArea.getSelectedText();
+    }
+
+    @Override
+    public String getEditorPath() {
+        return appConfigEditor.getEditorPath();
+    }
+
+    @Override
+    public void updateSelectedQuery(String query) {
+        int caret = queryTextArea.getCaretPosition();
+        int anchor = queryTextArea.getAnchor();
+        queryTextArea.replaceText((anchor<caret? anchor: caret), (anchor>caret? anchor: caret), query);    // "begin<=end" の関係でないとNG
     }
 
     private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
@@ -566,6 +604,7 @@ public class MainController extends Application implements Initializable, MainCo
         // TODO: テンポラリSQLファイルを作成（JVM終了時に削除するようマークすること）
         // TODO: 外部SQLエディタを起動し、テンポラリSQLファイルを編集させる
         // TODO: 起動した外部SQLエディタが終了したら、テンポラリSQLファイルの内容をクエリ入力欄に貼り付けて実行する
+        inputQueryUpdateService.restart();
     }
 
     @FXML

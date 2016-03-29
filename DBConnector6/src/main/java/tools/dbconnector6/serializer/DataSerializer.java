@@ -3,37 +3,39 @@ package tools.dbconnector6.serializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 
 public abstract class DataSerializer {
     protected abstract String getArchiveFileName();
     protected abstract String getArchiveFileSuffix();
-    protected abstract Path getArchiveFilePath();
+    protected abstract Path getArchiveFilePath() throws IOException ;
 
     private static boolean utMode = false;
     public static void setUtMode(boolean utMode) {
         DataSerializer.utMode = utMode;
     }
 
-    protected Path getArchiveFilePath(String kind) {
+    protected Path getArchiveFilePath(String kind) throws IOException {
         return Paths.get(System.getProperty("user.home"), ".DBConnector6", kind, getArchiveFileName() + getArchiveFileSuffix() + (utMode? "_test": ""));
     }
-    protected Path getTempFilePath(String kind) {
-        return Files.createTempFile(
-                Paths.get(System.getProperty("user.home"), ".DBConnector6", kind),
-                getArchiveFileName(), getArchiveFileSuffix() + (utMode? "_test": ""),
-                StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    protected Path getTempFilePath(String kind) throws IOException {
+        Path parent = Paths.get(System.getProperty("user.home"), ".DBConnector6", kind);
+        Files.createDirectories(parent);
+        return Files.createTempFile(parent, getArchiveFileName(), getArchiveFileSuffix() + (utMode? "_test": ""));
     }
 
-    public void appendText(String text) throws IOException {
-        writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
+    public Path appendText(String text) throws IOException {
+        return writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
-    public void updateText(String text) throws IOException {
-        writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    public Path updateText(String text) throws IOException {
+        return writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
     }
-    public void updateTempText(String text) throws IOException {
-        writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+    public Path createTempolaryFile(String text) throws IOException {
+        Path path = writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        path.toFile().deleteOnExit();   // VM終了時に削除するようマークする
+        return path;
     }
-    private void writeText(Path path, String text, OpenOption... options) throws IOException {
+    private Path writeText(Path path, String text, OpenOption... options) throws IOException {
         Files.createDirectories(path.getParent());
 
         try {
@@ -55,10 +57,14 @@ public abstract class DataSerializer {
             e.printStackTrace();
             throw e;
         }
+
+        return path;
     }
 
     public String readText() throws IOException {
-        Path path = getArchiveFilePath();
+        return readText(getArchiveFilePath());
+    }
+    public String readText(Path path) throws IOException {
         Files.createDirectories(path.getParent());
         StringBuilder stringBuilder = new StringBuilder();
 

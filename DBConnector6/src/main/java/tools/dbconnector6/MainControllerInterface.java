@@ -18,9 +18,15 @@ public interface MainControllerInterface {
     public void mainControllerRequestFocus();
     public void hideReservedWordStage();
     public void showAlertDialog(String message, String detail);
+    public void showWaitDialog(String message, String detail);
+    public void hideWaitDialog();
     public boolean isEvidenceMode();
     public boolean isEvidenceModeIncludeHeader();
     public String getEvidenceDelimiter();
+    public String getInputQuery();
+    public String getSelectedQuery();
+    public void updateSelectedQuery(String query);
+    public String getEditorPath();
 
     public BackgroundService getDbStructureUpdateService();
     public BackgroundService getTableStructureTabPaneUpdateService();

@@ -64,6 +64,16 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
     }
 
     @Override
+    public void cancelled() {
+
+    }
+
+    @Override
+    public void failed() {
+
+    }
+
+    @Override
     public void updateUIPreparation(Void uiParam) throws Exception {
     }
 

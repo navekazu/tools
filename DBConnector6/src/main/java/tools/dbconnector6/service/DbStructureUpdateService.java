@@ -52,6 +52,16 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
 
     }
 
+    @Override
+    public void cancelled() {
+
+    }
+
+    @Override
+    public void failed() {
+
+    }
+
     private class  SchemaSearchTask extends Task {
         DatabaseMetaData meta;
         DbStructureTreeItem item;
