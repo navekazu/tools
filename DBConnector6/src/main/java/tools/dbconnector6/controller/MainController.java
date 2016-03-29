@@ -425,21 +425,6 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    private String inputWord(String text, int caret) {
-        StringBuilder caretForward = new StringBuilder(text.substring(0, caret));
-        caretForward = caretForward.reverse();
-
-        StringBuilder inputKeyword = new StringBuilder();
-        for (int loop=0; loop<caretForward.length(); loop++){
-            if (isSpaceInput(caretForward.charAt(loop))) {
-                break;
-            }
-            inputKeyword.insert(0, caretForward.charAt(loop));
-        }
-
-        return inputKeyword.toString();
-    }
-
     protected String inputWord(String text, int caret, String inputCharacter) {
         // キーイベント前の入力内容に、キーイベントで入力した文字をキャレットの位置に入れる
         StringBuilder realText = new StringBuilder(text);
@@ -460,7 +445,7 @@ public class MainController extends Application implements Initializable, MainCo
     public void selectReservedWord(String word) {
         int caret = queryTextArea.getCaretPosition();
         String text = queryTextArea.getText();
-        String inputKeyword = inputWord(text, caret);       // キャレットより前の単語を取得
+        String inputKeyword = inputWord(text, caret, "");       // キャレットより前の単語を取得
 
         // キャレットより前の単語を削除
         queryTextArea.deleteText(caret-inputKeyword.length(), caret);
@@ -547,10 +532,16 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
-        KeyCode.TAB, KeyCode.DOWN,
+            KeyCode.TAB, KeyCode.DOWN,
+    };
+    private static final String[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_STRING = new String[] {
+            "\t"
     };
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {
         return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES).anyMatch(c -> c == code);
+    }
+    private boolean isChangeFocusForReservedWordStage(String key) {
+        return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_STRING).anyMatch(s -> s.equals(key));
     }
 
     private static final Character[] SPACE_INPUT_CHARS = new Character[] {
@@ -730,7 +721,7 @@ public class MainController extends Application implements Initializable, MainCo
             reservedWordStage.hide();
             return;
         }
-
+/*
         int caret = queryTextArea.getCaretPosition();
         String inputText = event.getText();
 
@@ -754,6 +745,7 @@ public class MainController extends Application implements Initializable, MainCo
         } else {
             reservedWordStage.hide();
         }
+*/
     }
 
     @FXML
@@ -762,11 +754,25 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     public void onQueryTextAreaKeyTyped(KeyEvent event) {
+        if (reservedWordStage.isShowing() && isChangeFocusForReservedWordStage(event.getCharacter())) {
+            return;
+        }
+
         String text = queryTextArea.getText();
         int caret = queryTextArea.getCaretPosition();
         String inputText = event.getCharacter();
         String inputKeyword = inputWord(text, caret, inputText);       // キャレットより前の単語を取得
 
+        if (reservedWordController.isInputReservedWord(event, inputKeyword)) {
+            // キャレット位置に選択画面を出す
+            InputMethodRequests imr = queryTextArea.getInputMethodRequests();
+            reservedWordStage.setX(imr.getTextLocation(0).getX());
+            reservedWordStage.setY(imr.getTextLocation(0).getY());
+            reservedWordStage.show();
+            primaryStage.requestFocus();    // フォーカスは移動させない
+        } else {
+            reservedWordStage.hide();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////
