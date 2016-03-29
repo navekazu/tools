@@ -440,6 +440,22 @@ public class MainController extends Application implements Initializable, MainCo
         return inputKeyword.toString();
     }
 
+    protected String inputWord(String text, int caret, String inputCharacter) {
+        // キーイベント前の入力内容に、キーイベントで入力した文字をキャレットの位置に入れる
+        StringBuilder realText = new StringBuilder(text);
+        realText.insert(caret, inputCharacter);
+
+        // キャレット位置から前に走査してスペースまでを単語として抜き出す
+        StringBuilder inputKeyword = new StringBuilder();
+        for (int loop=caret-1 + inputCharacter.length(); loop>=0; loop--){
+            if (isSpaceInput(realText.charAt(loop))) {
+                break;
+            }
+            inputKeyword.insert(0, realText.charAt(loop));
+        }
+        return inputKeyword.toString();
+    }
+
     @Override
     public void selectReservedWord(String word) {
         int caret = queryTextArea.getCaretPosition();
@@ -601,9 +617,6 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCallSqlEditor(ActionEvent event) {
-        // TODO: テンポラリSQLファイルを作成（JVM終了時に削除するようマークすること）
-        // TODO: 外部SQLエディタを起動し、テンポラリSQLファイルを編集させる
-        // TODO: 起動した外部SQLエディタが終了したら、テンポラリSQLファイルの内容をクエリ入力欄に貼り付けて実行する
         inputQueryUpdateService.restart();
     }
 
@@ -749,6 +762,11 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     public void onQueryTextAreaKeyTyped(KeyEvent event) {
+        String text = queryTextArea.getText();
+        int caret = queryTextArea.getCaretPosition();
+        String inputText = event.getCharacter();
+        String inputKeyword = inputWord(text, caret, inputText);       // キャレットより前の単語を取得
+
     }
 
     ////////////////////////////////////////////////////////////////////////////
