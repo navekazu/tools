@@ -1,5 +1,6 @@
 package tools.dbconnector6.serializer;
 
+import java.io.IOException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -9,11 +10,16 @@ public class ApplicationLogSerializer extends DataSerializer {
 
     @Override
     protected String getArchiveFileName() {
-        return "application_"+DATE_FORMAT.format(new Date())+".log";
+        return "application_"+DATE_FORMAT.format(new Date());
     }
 
     @Override
-    protected Path getArchiveFilePath() {
+    protected String getArchiveFileSuffix() {
+        return ".log";
+    }
+
+    @Override
+    protected Path getArchiveFilePath() throws IOException {
         return getArchiveFilePath("log");
     }
 }

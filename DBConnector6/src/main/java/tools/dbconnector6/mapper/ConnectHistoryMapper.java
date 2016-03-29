@@ -10,6 +10,11 @@ public class ConnectHistoryMapper extends MapperBase<ConnectHistory> {
     }
 
     @Override
+    protected String getArchiveFileSuffix() {
+        return "";
+    }
+
+    @Override
     protected ConnectHistory unboxing(String line) {
         String[] data = line.split("\t");
         return ConnectHistory.builder()

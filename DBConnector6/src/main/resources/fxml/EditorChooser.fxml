@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefWidth="700.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tools.dbconnector6.controller.EditorChooserController">
+   <top>
+      <BorderPane BorderPane.alignment="CENTER">
+         <left>
+            <Label text="Text editor path" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+               </BorderPane.margin>
+            </Label>
+         </left>
+         <center>
+            <TextField fx:id="editorPathTextField" BorderPane.alignment="CENTER">
+               <BorderPane.margin>
+                  <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+               </BorderPane.margin>
+            </TextField>
+         </center>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+         <right>
+            <GridPane BorderPane.alignment="CENTER">
+              <columnConstraints>
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0" />
+              </columnConstraints>
+              <rowConstraints>
+                <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+              </rowConstraints>
+               <children>
+                  <Label text="\${Tempolary SQL file path}">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Label>
+                  <Button fx:id="refButton" mnemonicParsing="false" onAction="#onRef" text="..." GridPane.columnIndex="1">
+                     <GridPane.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                     </GridPane.margin>
+                  </Button>
+               </children>
+            </GridPane>
+         </right>
+      </BorderPane>
+   </top>
+   <bottom>
+      <FlowPane alignment="CENTER_RIGHT" BorderPane.alignment="CENTER">
+         <children>
+            <Button fx:id="okButton" mnemonicParsing="false" onAction="#onOk" text="OK">
+               <FlowPane.margin>
+                  <Insets bottom="3.0" left="3.0" right="3.0" top="3.0" />
+               </FlowPane.margin>
+            </Button>
+            <Button fx:id="cancelButton" mnemonicParsing="false" onAction="#onCancel" text="Cancel" />
+         </children>
+         <opaqueInsets>
+            <Insets />
+         </opaqueInsets>
+         <BorderPane.margin>
+            <Insets />
+         </BorderPane.margin>
+         <padding>
+            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+         </padding>
+      </FlowPane>
+   </bottom>
+</BorderPane>

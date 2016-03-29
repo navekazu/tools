@@ -2,6 +2,7 @@ package tools.dbconnector6.mapper;
 
 import org.junit.*;
 import tools.dbconnector6.entity.AppConfig;
+import tools.dbconnector6.entity.AppConfigEditor;
 import tools.dbconnector6.entity.AppConfigEvidenceMode;
 import tools.dbconnector6.entity.AppConfigMainStage;
 
@@ -35,6 +36,8 @@ public class AppConfigTest {
         AppConfigMapper mapper = new AppConfigMapper();
         AppConfig config;
 
+        ///////////////////////////////////////////////////////////
+        // EvidenceMode
         config = mapper.unboxing("EvidenceMode\ttrue\tfalse\t0");
         assertTrue(config instanceof AppConfigEvidenceMode);
 
@@ -42,6 +45,17 @@ public class AppConfigTest {
         assertEquals(true, evidenceMode.isEvidenceMode());
         assertEquals(false, evidenceMode.isIncludeHeader());
         assertEquals(0, evidenceMode.getEvidenceDelimiter());
+
+        ///////////////////////////////////////////////////////////
+        // Editor
+        config = mapper.unboxing("Editor\tC:\\Program Files\\Microsoft VS Code\\code.exe");
+        assertTrue(config instanceof AppConfigEditor);
+
+        AppConfigEditor editor = (AppConfigEditor)config;
+        assertEquals("C:\\Program Files\\Microsoft VS Code\\code.exe", editor.getEditorPath());
+
+        ///////////////////////////////////////////////////////////
+        // MainStage
 
         // 小数点あり
         config = mapper.unboxing("MainStage\ttrue\t0\t1\t2\t3\t4.1\t5.2\t6.3\t7.4");
@@ -72,6 +86,7 @@ public class AppConfigTest {
         assertEquals(5.0, mainStage.getLeftDividerPosition(), 0.0);
         assertEquals(6.0, mainStage.getRightDivider1Position(), 0.0);
         assertEquals(7.0, mainStage.getRightDivider2Position(), 0.0);
+
     }
 
     @Test
@@ -79,12 +94,24 @@ public class AppConfigTest {
         AppConfigMapper mapper = new AppConfigMapper();
         AppConfig config;
 
+        ///////////////////////////////////////////////////////////
+        // EvidenceMode
         AppConfigEvidenceMode evidenceMode = AppConfigEvidenceMode.builder()
                 .evidenceMode(true)
                 .includeHeader(false)
                 .evidenceDelimiter(0)
                 .build();
         assertEquals("EvidenceMode\ttrue\tfalse\t0", mapper.autoboxing(evidenceMode));
+
+        ///////////////////////////////////////////////////////////
+        // Editor
+        AppConfigEditor editor = AppConfigEditor.builder()
+                .editorPath("C:\\Program Files\\Microsoft VS Code\\code.exe")
+                .build();
+        assertEquals("Editor\tC:\\Program Files\\Microsoft VS Code\\code.exe", mapper.autoboxing(editor));
+
+        ///////////////////////////////////////////////////////////
+        // MainStage
 
         // 小数点あり
         AppConfigMainStage mainStage = AppConfigMainStage.builder()

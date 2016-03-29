@@ -2,11 +2,11 @@ package tools.dbconnector6.service;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import tools.dbconnector6.BackgroundCallbackInterface;
-import tools.dbconnector6.DbStructureTreeItem;
+import tools.dbconnector6.BackgroundServiceInterface;
+import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 
-public class TableStructureTabPaneUpdateService implements BackgroundCallbackInterface<Void, TableStructureTabPaneUpdateService.TabDisableProperty> {
+public class TableStructureTabPaneUpdateService implements BackgroundServiceInterface<Void, TableStructureTabPaneUpdateService.TabDisableProperty> {
     private MainControllerInterface mainControllerInterface;
     public TableStructureTabPaneUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
@@ -60,6 +60,16 @@ public class TableStructureTabPaneUpdateService implements BackgroundCallbackInt
 
     @Override
     public void cancel() throws Exception {
+
+    }
+
+    @Override
+    public void cancelled() {
+
+    }
+
+    @Override
+    public void failed() {
 
     }
 

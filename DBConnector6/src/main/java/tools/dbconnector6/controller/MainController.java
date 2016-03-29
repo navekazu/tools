@@ -1,4 +1,4 @@
-package tools.dbconnector6;
+package tools.dbconnector6.controller;
 
 import javafx.application.Application;
 import javafx.application.Platform;
@@ -17,10 +17,10 @@ import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.InputMethodRequests;
 import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
-import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import tools.dbconnector6.controller.ControllerManager;
+import tools.dbconnector6.BackgroundService;
+import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.*;
 import tools.dbconnector6.mapper.AppConfigMapper;
 import tools.dbconnector6.serializer.ApplicationLogSerializer;
@@ -36,102 +36,151 @@ import java.util.*;
 import java.util.Date;
 import java.util.List;
 
-import static tools.dbconnector6.DbStructureTreeItem.ItemType.DATABASE;
+import static tools.dbconnector6.controller.DbStructureTreeItem.ItemType.DATABASE;
 
 public class MainController extends Application implements Initializable, MainControllerInterface {
     private static SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 
     private Stage primaryStage;
 
-    @FXML
-    private TextField filterTextField;
+    // Scene overview
+    // +-----------------+---------------------------------------------------+
+    // | DB structure    | Query input area                                  |
+    // |                 |   queryTextArea                                   |
+    // |                 |                                                   |
+    // |                 +---------------------------------------------------+
+    // |                 | Executed result area                              |
+    // |                 |   queryResultTableView                            |
+    // |                 |                                                   |
+    // |                 |                                                   |
+    // |                 |                                                   |
+    // +-----------------+                                                   |
+    // | Table structure |                                                   |
+    // |                 +---------------------------------------------------+
+    // |                 | Log area                                          |
+    // |                 |   logTextArea                                     |
+    // +-----------------+---------------------------------------------------+
+    @FXML private TextArea queryTextArea;
+    @FXML private TableView queryResultTableView;
+    @FXML private TextArea logTextArea;
 
-    @FXML
-    private Button searchButton;
-
-    @FXML
-    private TreeView dbStructureTreeView;
+    // DB structure
+    // +------------------------------------+
+    // | xxx filterTextField [searchButton] |
+    // | +--------------------------------+ |
+    // | | dbStructureTreeView            | |
+    // | |                                | |
+    // | |                                | |
+    // | +--------------------------------+ |
+    // +------------------------------------+
+    @FXML private TextField filterTextField;
+    @FXML private Button searchButton;
+    @FXML private TreeView dbStructureTreeView;
     private DbStructureTreeItem dbStructurRootItem;
 
-    @FXML
-    private TabPane tableStructureTabPane;
+    // Table structure overview
+    // +-----------------------------------------------------------+
+    // | +-------------------+-----------------+-----------------+ |
+    // | | tablePropertyTab  | tableColumnTab  | tableIndexTab   | |
+    // | |                                                       | |
+    // | |                                                       | |
+    // | |                                                       | |
+    // | |                                                       | |
+    // | | tableStructureTabPane                                 | |
+    // | |                                                       | |
+    // | +-------------------------------------------------------+ |
+    // +-----------------------------------------------------------+
+    @FXML private TabPane tableStructureTabPane;
+    @FXML private Tab tablePropertyTab;
+    @FXML private Tab tableColumnTab;
+    @FXML private Tab tableIndexTab;
 
-    @FXML
-    private Tab tablePropertyTab;
+    // tablePropertyTab
+    // +-----------------------------------------------------------+
+    // | +-------------------+-----------------+-----------------+ |
+    // | | tablePropertyTab  |                 |                 | |
+    // | |                                                       | |
+    // | | +---------------------------------------------------+ | |
+    // | | |keyTableColumn|valueTableColumn                    | | |
+    // | | |                                                   | | |
+    // | | | tablePropertyTableView                            | | |
+    // | | |                                                   | | |
+    // | | +---------------------------------------------------+ | |
+    // | +-------------------------------------------------------+ |
+    // +-----------------------------------------------------------+
+    @FXML private TableView tablePropertyTableView;
+    @FXML private TableColumn<TablePropertyTab, String> keyTableColumn;
+    @FXML private TableColumn<TablePropertyTab, String> valueTableColumn;
+    @FXML private TableView tableColumnTableView;
 
-    @FXML
-    private TableView tablePropertyTableView;
-    @FXML
-    private TableColumn<TablePropertyTab, String> keyTableColumn;
-    @FXML
-    private TableColumn<TablePropertyTab, String> valueTableColumn;
+    // tablePropertyTab
+    // +-----------------------------------------------------------+
+    // | +-------------------+-----------------+-----------------+ |
+    // | |                   | tableColumnTab  |                 | |
+    // | |                                                       | |
+    // | | +---------------------------------------------------+ | |
+    // | | |nameTableColumn|typeTableColumn|sizeTableColumn    | | |
+    // | | |  decimalDigitsTableColumn|nullableTableColumn     | | |
+    // | | |  primaryKeyTableColumn|remarksTableColumn         | | |
+    // | | |  columnDefaultTableColumn|autoincrementTableColumn| | |
+    // | | |  generatedColumnTableColumn                       | | |
+    // | | |                                                   | | |
+    // | | | tableColumnTableView                              | | |
+    // | | |                                                   | | |
+    // | | +---------------------------------------------------+ | |
+    // | +-------------------------------------------------------+ |
+    // +-----------------------------------------------------------+
+    @FXML private TableColumn<TableColumnTab, String> nameTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> typeTableColumn;
+    @FXML private TableColumn<TableColumnTab, Integer> sizeTableColumn;
+    @FXML private TableColumn<TableColumnTab, Integer> decimalDigitsTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> nullableTableColumn;
+    @FXML private TableColumn<TableColumnTab, Integer> primaryKeyTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> remarksTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> columnDefaultTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> autoincrementTableColumn;
+    @FXML private TableColumn<TableColumnTab, String> generatedColumnTableColumn;
 
-    @FXML
-    private Tab tableColumnTab;
+    // tableIndexTab
+    // +-----------------------------------------------------------+
+    // | +-------------------+-----------------+-----------------+ |
+    // | |                   |                 | tableIndexTab   | |
+    // | |                                                       | |
+    // | | xxx tableIndexNameComboBox                            | |
+    // | | xxx tableIndexPrimaryKeyTextField                     | |
+    // | | xxx tableIndexUniqueKeyTextField                      | |
+    // | | +---------------------------------------------------+ | |
+    // | | |                                                   | | |
+    // | | | tableIndexListView                                | | |
+    // | | |                                                   | | |
+    // | | +---------------------------------------------------+ | |
+    // | +-------------------------------------------------------+ |
+    // +-----------------------------------------------------------+
+    @FXML private ComboBox tableIndexNameComboBox;
+    @FXML private TextField tableIndexPrimaryKeyTextField;
+    @FXML private TextField tableIndexUniqueKeyTextField;
+    @FXML private ListView tableIndexListView;
 
-    @FXML
-    private TableView tableColumnTableView;
-    @FXML
-    private TableColumn<TableColumnTab, String> nameTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> typeTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, Integer> sizeTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, Integer> decimalDigitsTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> nullableTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, Integer> primaryKeyTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> remarksTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> columnDefaultTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> autoincrementTableColumn;
-    @FXML
-    private TableColumn<TableColumnTab, String> generatedColumnTableColumn;
-
-    @FXML
-    private Tab tableIndexTab;
-
-    @FXML
-    private ComboBox tableIndexComboBox;
-    @FXML
-    private TextField tablePrimaryKeyTextField;
-    @FXML
-    private TextField tableUniqueKeyTextField;
-    @FXML
-    private ListView tableIndexListView;
-
-    @FXML
-    private TextArea queryTextArea;
-
-    @FXML
-    private TableView queryResultTableView;
-
-    @FXML
-    private TextArea logTextArea;
 
     @FXML private SplitPane primarySplitPane;
     @FXML private SplitPane leftSplitPane;
     @FXML private SplitPane rightSplitPane;
-
     @FXML private CheckMenuItem evidenceMode;
     @FXML private CheckMenuItem evidenceModeIncludeHeader;
     @FXML private ToggleGroup evidenceDelimiter;
 
     private Connection connection;
     private Connect connectParam;
-    private BackgroundCallback dbStructureUpdateService;
-    private BackgroundCallback tableStructureTabPaneUpdateService;
-    private BackgroundCallback tableStructureUpdateService;
-    private BackgroundCallback queryResultUpdateService;
-    private BackgroundCallback reservedWordUpdateService;
+    private BackgroundService dbStructureUpdateService;
+    private BackgroundService tableStructureTabPaneUpdateService;
+    private BackgroundService tableStructureUpdateService;
+    private BackgroundService queryResultUpdateService;
+    private BackgroundService reservedWordUpdateService;
+    private BackgroundService inputQueryUpdateService;
 
     private Stage reservedWordStage;
     private ReservedWordController reservedWordController;
-    private List<ReservedWord> reservedWordList = new ArrayList<>();
+    private Set<ReservedWord> reservedWordList = new HashSet<>();
 
     private Stage alertDialogStage;
     private AlertController alertDialogController;
@@ -139,13 +188,16 @@ public class MainController extends Application implements Initializable, MainCo
     private Stage connectStage;
     private ConnectController connectController;
 
+    private Stage editorChooserStage;
+    private EditorChooserController editorChooserController;
+    private AppConfigEditor appConfigEditor = new AppConfigEditor();;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("main");
         ControllerManager.getControllerManager().getMainStage(loader, primaryStage);
 
         MainController controller = loader.getController();
-        primaryStage.setOnShowing(new MainWindowShowingHandler(controller));
         primaryStage.setOnShown(new MainWindowShownHandler(controller));
         primaryStage.setOnCloseRequest(new MainWindowCloseRequestHandler(controller));
 
@@ -167,9 +219,9 @@ public class MainController extends Application implements Initializable, MainCo
         dbStructureTreeView.setRoot(dbStructurRootItem);
         dbStructureTreeView.getSelectionModel().selectedItemProperty().addListener(new DbStructureTreeViewChangeListener());
 
-        dbStructureUpdateService = new BackgroundCallback(new DbStructureUpdateService(this));
-        tableStructureTabPaneUpdateService = new BackgroundCallback(new TableStructureTabPaneUpdateService(this));
-        tableStructureUpdateService = new BackgroundCallback(new TableStructureUpdateService(this));
+        dbStructureUpdateService = new BackgroundService(new DbStructureUpdateService(this));
+        tableStructureTabPaneUpdateService = new BackgroundService(new TableStructureTabPaneUpdateService(this));
+        tableStructureUpdateService = new BackgroundService(new TableStructureUpdateService(this));
 
         keyTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("key"));
         valueTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("value"));
@@ -185,8 +237,9 @@ public class MainController extends Application implements Initializable, MainCo
         autoincrementTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("autoincrement"));
         generatedColumnTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("generatedColumn"));
 
-        queryResultUpdateService = new BackgroundCallback(new QueryResultUpdateService(this));
-        reservedWordUpdateService = new BackgroundCallback(new ReservedWordUpdateService(this, reservedWordList));
+        queryResultUpdateService = new BackgroundService(new QueryResultUpdateService(this));
+        reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList));
+        inputQueryUpdateService = new BackgroundService(new InputQueryUpdateService(this));
 
         dbStructureUpdateService.restart();
         tableStructureTabPaneUpdateService.restart();
@@ -218,11 +271,22 @@ public class MainController extends Application implements Initializable, MainCo
         loader = ControllerManager.getControllerManager().getLoarder("alertDialog");
         try {
             alertDialogStage = ControllerManager.getControllerManager().getSubStage(loader, "alertDialog");
+            alertDialogStage.setResizable(false);
         } catch (IOException e) {
             e.printStackTrace();
         }
         alertDialogController = loader.getController();
         alertDialogController.setMainControllerInterface(this);
+
+        loader = ControllerManager.getControllerManager().getLoarder("editorChooser");
+        try {
+            editorChooserStage = ControllerManager.getControllerManager().getSubStage(loader, "editorChooser");
+            editorChooserStage.setResizable(false);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        editorChooserController = loader.getController();
+        editorChooserController.setMainControllerInterface(this);
     }
 
     private void showConnect() {
@@ -259,16 +323,16 @@ public class MainController extends Application implements Initializable, MainCo
         });
     }
 
-    public void writeLog(Exception e) {
+    public void writeLog(Throwable e) {
         ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
         try {
             e.printStackTrace();
-            applicationLogSerializer.appendText(e.getMessage());
+            applicationLogSerializer.appendText(e.toString());
         } catch (IOException e1) {
-            writeLog(e1.getMessage());
+            writeLog(e1.toString());
             e1.printStackTrace();
         }
-        writeLog(e.getMessage());
+        writeLog(e.toString());
     }
 
     public void connectNotify() {
@@ -290,19 +354,19 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
 
-    public BackgroundCallback getDbStructureUpdateService() {
+    public BackgroundService getDbStructureUpdateService() {
         return dbStructureUpdateService;
     }
 
-    public BackgroundCallback getTableStructureTabPaneUpdateService() {
+    public BackgroundService getTableStructureTabPaneUpdateService() {
         return tableStructureTabPaneUpdateService;
     }
 
-    public BackgroundCallback getTableStructureUpdateService() {
+    public BackgroundService getTableStructureUpdateService() {
         return tableStructureUpdateService;
     }
 
-    public BackgroundCallback getQueryResultUpdateService() {
+    public BackgroundService getQueryResultUpdateService() {
         return queryResultUpdateService;
     }
 
@@ -310,7 +374,7 @@ public class MainController extends Application implements Initializable, MainCo
         MainControllerInterface.DbStructureParam param = new MainControllerInterface.DbStructureParam();
         param.filterTextField = filterTextField;
         param.dbStructureTreeView = dbStructureTreeView;
-        param.dbStructurRootItem = dbStructurRootItem;
+        param.dbStructureRootItem = dbStructurRootItem;
         return param;
     }
 
@@ -337,9 +401,9 @@ public class MainController extends Application implements Initializable, MainCo
         param.generatedColumnTableColumn = generatedColumnTableColumn;
 
         param.tableIndexTab = tableIndexTab;
-        param.tableIndexComboBox = tableIndexComboBox;
-        param.tablePrimaryKeyTextField = tablePrimaryKeyTextField;
-        param.tableUniqueKeyTextField = tableUniqueKeyTextField;
+        param.tableIndexNameComboBox = tableIndexNameComboBox;
+        param.tableIndexPrimaryKeyTextField = tableIndexPrimaryKeyTextField;
+        param.tableIndexUniqueKeyTextField = tableIndexUniqueKeyTextField;
         param.tableIndexListView = tableIndexListView;
 
         return param;
@@ -402,7 +466,16 @@ public class MainController extends Application implements Initializable, MainCo
     @Override
     public void showAlertDialog(String message, String detail) {
         alertDialogController.setContents(message, detail);
+        alertDialogController.setWaitMode(false);
         alertDialogStage.showAndWait();
+    }
+    public void showWaitDialog(String message, String detail) {
+        alertDialogController.setContents(message, detail);
+        alertDialogController.setWaitMode(true);
+        alertDialogStage.showAndWait();
+    }
+    public void hideWaitDialog() {
+        alertDialogStage.hide();
     }
 
     @Override
@@ -430,6 +503,33 @@ public class MainController extends Application implements Initializable, MainCo
         return delimiters[selectedIndex];
     }
 
+    @Override
+    public String getInputQuery() {
+        //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
+        String sql = queryTextArea.getSelectedText();
+        if (sql.length()<=0) {
+            sql = queryTextArea.getText();
+        }
+        return sql;
+    }
+
+    @Override
+    public String getSelectedQuery() {
+        return queryTextArea.getSelectedText();
+    }
+
+    @Override
+    public String getEditorPath() {
+        return appConfigEditor.getEditorPath();
+    }
+
+    @Override
+    public void updateSelectedQuery(String query) {
+        int caret = queryTextArea.getCaretPosition();
+        int anchor = queryTextArea.getAnchor();
+        queryTextArea.replaceText((anchor<caret? anchor: caret), (anchor>caret? anchor: caret), query);    // "begin<=end" の関係でないとNG
+    }
+
     private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
         KeyCode.TAB, KeyCode.DOWN,
     };
@@ -438,7 +538,7 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     private static final Character[] SPACE_INPUT_CHARS = new Character[] {
-        ' ', '\t', '\n', '　',
+        ' ', '\t', '\n', '　', '.',
     };
     private boolean isSpaceInput(char ch) {
         return Arrays.stream(SPACE_INPUT_CHARS).anyMatch(c -> c == ch);
@@ -476,30 +576,35 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onUndo(ActionEvent event) {
+        // TODO: TextAreaのデフォルトの動作を更新したい・・・
     }
 
     @FXML
     private void onRedo(ActionEvent event) {
-    }
-
-    @FXML
-    private void onCut(ActionEvent event) {
+        // TODO: TextAreaのデフォルトの動作を更新したい・・・
     }
 
     @FXML
     private void onCopy(ActionEvent event) {
-    }
-
-    @FXML
-    private void onPaste(ActionEvent event) {
+        // TODO: SQL実行結果の表をクリップボードにコピーする
     }
 
     @FXML
     private void onSettingSqlEditor(ActionEvent event) {
+        editorChooserController.setContents(appConfigEditor.getEditorPath());
+        editorChooserStage.showAndWait();
+
+        if (editorChooserController.isOk()) {
+            appConfigEditor.setEditorPath(editorChooserController.getEditorPath());
+        }
     }
 
     @FXML
     private void onCallSqlEditor(ActionEvent event) {
+        // TODO: テンポラリSQLファイルを作成（JVM終了時に削除するようマークすること）
+        // TODO: 外部SQLエディタを起動し、テンポラリSQLファイルを編集させる
+        // TODO: 起動した外部SQLエディタが終了したら、テンポラリSQLファイルの内容をクエリ入力欄に貼り付けて実行する
+        inputQueryUpdateService.restart();
     }
 
     @FXML
@@ -520,6 +625,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onPasteAndExecuteQuery(ActionEvent event) {
+        // TODO: クリップボードの内容をクエリ入力欄に貼り付けると同時に、貼り付けた内容のSQLを実行する
     }
 
     @FXML
@@ -529,6 +635,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onQueryScript(ActionEvent event) {
+        // TODO: SQLファイルを読み込んで実行する
     }
 
     @FXML
@@ -561,26 +668,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCheckIsolation(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceMode(ActionEvent event) {
-    }
-
-    @FXML
-    private void onIncludeHeader(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterTab(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterComma(ActionEvent event) {
-    }
-
-    @FXML
-    private void onEvidenceDelimiterSpace(ActionEvent event) {
+        // TODO: 現在のトランザクション分離レベルを表示する
     }
 
     @FXML
@@ -588,6 +676,28 @@ public class MainController extends Application implements Initializable, MainCo
         if (connection!=null) {
             dbStructureUpdateService.restart();
         }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // Table structure event
+
+    @FXML
+    private void onTableIndexNameComboBox(ActionEvent event) {
+        int index = tableIndexNameComboBox.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            tableIndexPrimaryKeyTextField.setText("");
+            tableIndexUniqueKeyTextField.setText("");
+            tableIndexListView.getItems().clear();
+            return;
+        }
+
+        List<TableIndexTab> list = tableIndexNameComboBox.getItems();
+        TableIndexTab tableIndexTab = list.get(index);
+
+        tableIndexPrimaryKeyTextField.setText(tableIndexTab.isPrimaryKey()? "Yes": "No");
+        tableIndexUniqueKeyTextField.setText(tableIndexTab.isUniqueKey()? "Yes": "No");
+        tableIndexListView.getItems().clear();
+        tableIndexListView.getItems().addAll(tableIndexTab.getColumnList());
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -611,8 +721,8 @@ public class MainController extends Application implements Initializable, MainCo
         int caret = queryTextArea.getCaretPosition();
         String inputText = event.getText();
 
-        // シフトを押していてキャプスロックがOFFの場合、大文字に変換する
-        // シフトを押さずにキャプスロックがONの場合、大文字に変換する
+        // シフトを押していてCAPSロックがOFFの場合、大文字に変換する
+        // シフトを押さずにCAPSロックがONの場合、大文字に変換する
         if ((event.isShiftDown() && !Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))
                 ||(!event.isShiftDown() && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))) {
             inputText = inputText.toUpperCase();
@@ -621,7 +731,7 @@ public class MainController extends Application implements Initializable, MainCo
         String text = (new StringBuilder(queryTextArea.getText())).insert(caret, inputText).toString();
         String inputKeyword = inputWord(text, caret + inputText.length());       // キャレットより前の単語を取得
 
-        if (reservedWordController.notifyQueryInput(event, inputKeyword)) {
+        if (reservedWordController.isInputReservedWord(event, inputKeyword)) {
             // キャレット位置に選択画面を出す
             InputMethodRequests imr = queryTextArea.getInputMethodRequests();
             reservedWordStage.setX(imr.getTextLocation(0).getX());
@@ -644,9 +754,9 @@ public class MainController extends Application implements Initializable, MainCo
     ////////////////////////////////////////////////////////////////////////////
     // MainWindow event
 
-    private class MainWindowShowingHandler implements EventHandler<WindowEvent> {
+    private class MainWindowShownHandler implements EventHandler<WindowEvent> {
         private MainController controller;
-        public MainWindowShowingHandler(MainController controller) {
+        public MainWindowShownHandler(MainController controller) {
             this.controller = controller;
 
         }
@@ -654,10 +764,12 @@ public class MainController extends Application implements Initializable, MainCo
         @Override
         public void handle(WindowEvent event) {
             try {
+                // アプリケーション設定を読み込む
                 AppConfigMapper mapper = new AppConfigMapper();
                 List<AppConfig> selectList = mapper.selectAll();
 
                 for (AppConfig c: selectList) {
+                    // メイン画面の配置
                     if (c instanceof AppConfigMainStage) {
                         AppConfigMainStage appConfigMainStage = (AppConfigMainStage)c;
                         controller.primaryStage.setMaximized(appConfigMainStage.isMaximized());
@@ -671,6 +783,8 @@ public class MainController extends Application implements Initializable, MainCo
                         controller.rightSplitPane.setDividerPosition(1, appConfigMainStage.getRightDivider2Position());
 
                     }
+
+                    // エビデンスモードの復元
                     if (c instanceof AppConfigEvidenceMode) {
                         AppConfigEvidenceMode appConfigEvidenceMode = (AppConfigEvidenceMode)c;
                         controller.evidenceMode.setSelected(appConfigEvidenceMode.isEvidenceMode());
@@ -678,27 +792,20 @@ public class MainController extends Application implements Initializable, MainCo
                         controller.evidenceDelimiter.getToggles().get(appConfigEvidenceMode.getEvidenceDelimiter()).setSelected(true);
 
                     }
+
+                    // エディタパスの復元
+                    if (c instanceof AppConfigEditor) {
+                        AppConfigEditor appConfigEditor = (AppConfigEditor)c;
+                        controller.appConfigEditor.setEditorPath(appConfigEditor.getEditorPath());
+                    }
                 }
-            } catch (IOException e) {
-                writeLog(e);
-            }
-        }
-    }
 
-    private class MainWindowShownHandler implements EventHandler<WindowEvent> {
-        private MainController controller;
-        public MainWindowShownHandler(MainController controller) {
-            this.controller = controller;
-
-        }
-
-        @Override
-        public void handle(WindowEvent event) {
-            try {
+                // 作業中クエリの復元
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 controller.queryTextArea.setText(workingQuerySerializer.readText());
                 controller.queryTextArea.positionCaret(controller.queryTextArea.getText().length());
 
+                // DB接続画面を表示
                 controller.showConnect();
             } catch (IOException e) {
                 writeLog(e);
@@ -715,14 +822,18 @@ public class MainController extends Application implements Initializable, MainCo
 
         @Override
         public void handle(WindowEvent event) {
+            // DB切断
             controller.closeConnection();
+
             try {
+                // アプリケーション設定を書き込む
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 workingQuerySerializer.updateText(controller.queryTextArea.getText());
 
                 AppConfigMapper mapper = new AppConfigMapper();
                 List<AppConfig> list = new ArrayList<>();
 
+                // メイン画面の配置を保存
                 AppConfigMainStage appConfigMainStage = new AppConfigMainStage();
                 appConfigMainStage.setMaximized(controller.primaryStage.isMaximized());
                 appConfigMainStage.setX(controller.primaryStage.getX());
@@ -735,6 +846,7 @@ public class MainController extends Application implements Initializable, MainCo
                 appConfigMainStage.setRightDivider2Position(controller.rightSplitPane.getDividerPositions()[1]);
                 list.add(appConfigMainStage);
 
+                // エビデンスモードの保存
                 AppConfigEvidenceMode appConfigEvidenceMode = new AppConfigEvidenceMode();
                 appConfigEvidenceMode.setEvidenceMode(controller.evidenceMode.isSelected());
                 appConfigEvidenceMode.setIncludeHeader(controller.evidenceModeIncludeHeader.isSelected());
@@ -747,6 +859,9 @@ public class MainController extends Application implements Initializable, MainCo
                 }
                 appConfigEvidenceMode.setEvidenceDelimiter(selectedIndex);
                 list.add(appConfigEvidenceMode);
+
+                // エディタパスの保存
+                list.add(controller.appConfigEditor);
 
                 mapper.save(list);
 

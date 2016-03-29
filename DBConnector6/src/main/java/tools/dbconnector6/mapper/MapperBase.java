@@ -51,7 +51,7 @@ public abstract class MapperBase<T> extends DataSerializer {
         }
     }
 
-    protected Path getArchiveFilePath() {
+    protected Path getArchiveFilePath() throws IOException {
         return getArchiveFilePath("config");
     }
 

@@ -5,13 +5,13 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
+import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.control.TableCell;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableRow;
+import javafx.scene.Node;
+import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import tools.dbconnector6.BackgroundCallbackInterface;
+import tools.dbconnector6.BackgroundServiceInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.queryresult.QueryResult;
@@ -21,9 +21,6 @@ import tools.dbconnector6.serializer.QueryHistorySerializer;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.sql.*;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
@@ -31,11 +28,11 @@ import java.util.*;
 import java.util.Date;
 import java.util.List;
 
-public class QueryResultUpdateService implements BackgroundCallbackInterface<List<TableColumn<QueryResult, String>>, List<Map<String, QueryResultCellValue>>> {
+public class QueryResultUpdateService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<List<QueryResultCellValue>>> {
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
-    private static final int FLUSH_ROW_COUNT = 1000;
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+    private static final int FLUSH_ROW_COUNT = 1000;
     private QueryHistorySerializer queryHistorySerializer;
 
     private MainControllerInterface mainControllerInterface;
@@ -52,7 +49,7 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
         }
 
         // 実行するSQLを取得
-        String[] queries = splitQuery(getQuery());
+        String[] queries = splitQuery(mainControllerInterface.getInputQuery());
 
         // 個々のSQLを実行
         int executeQueryCount = 0;
@@ -73,7 +70,7 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                 mainControllerInterface.writeLog("Total query count: %d", executeQueryCount);
             }
         } catch(SQLException e) {
-            mainControllerInterface.writeLog(e.getMessage());
+            mainControllerInterface.writeLog(e);
             // 複数クエリの場合、実行出来たクエリ数を出力
             if (queries.length >= 2) {
                 mainControllerInterface.writeLog("Succeeded query count: %d", executeQueryCount);
@@ -84,6 +81,16 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
     @Override
     public void cancel() throws Exception {
         mainControllerInterface.writeLog("Query cancelling...");
+    }
+
+    @Override
+    public void cancelled() {
+
+    }
+
+    @Override
+    public void failed() {
+
     }
 
     private void executeQuery(Task task, String query) throws Exception {
@@ -114,32 +121,33 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                     for (int loop=0; loop<metaData.getColumnCount(); loop++) {
                         TableColumn<QueryResult, String> col = new TableColumn<>(metaData.getColumnName(loop+1));
                         final String key = Integer.toString(loop);
+                        final int index = loop;
                         final Pos pos = QueryResultCellValue.getAlignment(loop+1, metaData);
                         col.setCellValueFactory(
                                 new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
                                     @Override
                                     public ObservableValue<String> call(TableColumn.CellDataFeatures<QueryResult, String> p) {
-                                        return new SimpleStringProperty(p.getValue().getData(key).getFormattedString());
+                                        return new SimpleStringProperty(p.getValue().getData(index).getFormattedString());
                                     }
                                 });
                         col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
                             @Override
                             public TableCell<QueryResult, String> call(TableColumn<QueryResult, String> param) {
-                                return  new TableCell<QueryResult, String>() {
+                                return new TableCell<QueryResult, String>() {
                                     @Override
                                     public void updateItem(String item, boolean empty) {
-                                        if (item==null) {
-                                            return ;
+                                        if (item == null) {
+                                            return;
                                         }
                                         setText(item.toString());
 
                                         TableRow row = getTableRow();
-                                        if (row==null) {
-                                            return ;
+                                        if (row == null) {
+                                            return;
                                         }
                                         ObservableList<QueryResult> list = getTableView().getItems();
                                         QueryResult queryResult = list.get(row.getIndex());
-                                        QueryResultCellValue cellValue = queryResult.getData(key);
+                                        QueryResultCellValue cellValue = queryResult.getData(index);
                                         if (cellValue.isNullValue()) {
                                             setAlignment(Pos.CENTER);
                                             setTextFill(Color.BLUE);
@@ -163,13 +171,13 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                     }
 
                     // 結果を取得
-                    List<Map<String, QueryResultCellValue>> rowList = new ArrayList<>();
+                    List<List<QueryResultCellValue>> rowList = new ArrayList<>();
                     long rowCount = 0;
                     while (resultSet.next()) {
-                        Map<String, QueryResultCellValue> data = new HashMap<>();
+                        List<QueryResultCellValue> data = new ArrayList<>();
                         for (int loop=0; loop<metaData.getColumnCount(); loop++) {
                             QueryResultCellValue cellValue = QueryResultCellValue.createQueryResultCellValue(loop+1, metaData, resultSet);
-                            data.put(Integer.toString(loop), cellValue);
+                            data.add(cellValue);
                             evidenceInfo.appendRow(cellValue.getEvidenceModeString());
                         }
                         rowList.add(data);
@@ -201,6 +209,8 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                 mainControllerInterface.writeLog("Success. count: %S", NUMBER_FORMAT.format(statement.getUpdateCount()));
             }
 
+        } catch(Throwable e) {
+            mainControllerInterface.writeLog(e);
         }
     }
 
@@ -210,38 +220,31 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
-                columnList.clear();
-                columnList.addAll(dispatchParam);
                 mainControllerInterface.getQueryParam().queryResultTableView.getItems().clear();
-                mainControllerInterface.getQueryParam().queryResultTableView.scrollTo(0);
+                mainControllerInterface.getQueryParam().queryResultTableView.getColumns().clear();
+
+                ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
+                columnList.addAll(dispatchParam);
             }
         });
 
     }
 
     @Override
-    public void updateUI(List<Map<String, QueryResultCellValue>> uiParam) throws Exception {
-        final List<Map<String, QueryResultCellValue>> dispatchParam = new ArrayList<>(uiParam);
+    public void updateUI(List<List<QueryResultCellValue>> uiParam) throws Exception {
+        final List<List<QueryResultCellValue>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                for (Map<String, QueryResultCellValue> m: dispatchParam) {
+                List<QueryResult> list = new ArrayList<>();
+                for (List<QueryResultCellValue> m: dispatchParam) {
                     QueryResult r = new QueryResult();
                     r.setData(m);
-                    mainControllerInterface.getQueryParam().queryResultTableView.getItems().add(r);
+                    list.add(r);
                 }
+                mainControllerInterface.getQueryParam().queryResultTableView.getItems().addAll(list);
             }
         });
-    }
-
-    protected String getQuery() {
-        //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
-        String sql = mainControllerInterface.getQueryParam().queryTextArea.getSelectedText();
-        if (sql.length()<=0) {
-            sql = mainControllerInterface.getQueryParam().queryTextArea.getText();
-        }
-        return sql;
     }
 
     protected String[] splitQuery(String sql) {
@@ -259,13 +262,22 @@ public class QueryResultUpdateService implements BackgroundCallbackInterface<Lis
                 .map(s -> {
                     return s.trim();
                 })
+                .map(s -> {
+                    return isOneWord(s)? String.format("select * from %s", s): s;
+                })
                 .filter(s -> s.length()>=1)
                 .toArray(String[]::new);
+    }
+    private boolean isOneWord(String sql) {
+        return (sql.length()>=1 && sql.indexOf(" ")==-1 && sql.indexOf("\t")==-1);
     }
 
     private void pasteEvidenceInfo(List<String> evidenceInfo) {
         StringBuilder stringBuilder = new StringBuilder();
-        evidenceInfo.stream().forEach(e -> {stringBuilder.append(e); stringBuilder.append("\n");});
+        evidenceInfo.stream().forEach(e -> {
+            stringBuilder.append(e);
+            stringBuilder.append("\n");
+        });
 
         Toolkit toolkit = Toolkit.getDefaultToolkit();
         Clipboard clip = toolkit.getSystemClipboard();

@@ -1,4 +1,4 @@
-package tools.dbconnector6;
+package tools.dbconnector6.controller;
 
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
