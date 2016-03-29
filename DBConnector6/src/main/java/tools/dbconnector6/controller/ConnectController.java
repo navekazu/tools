@@ -1,4 +1,4 @@
-package tools.dbconnector6;
+package tools.dbconnector6.controller;
 
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
@@ -12,6 +12,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ConnectHistory;
 import tools.dbconnector6.mapper.ConnectHistoryMapper;
@@ -29,62 +30,41 @@ import java.util.*;
 
 public class ConnectController implements Initializable {
 
-    @FXML
-    private TableView connectTableView;
-
-    @FXML
-    private TableColumn<Connect, String> libraryPathTableColumn;
-
-    @FXML
-    private TableColumn<Connect, String> driverTableColumn;
-
-    @FXML
-    private TableColumn<Connect, String> urlTableColumn;
-
-    @FXML
-    private TableColumn<Connect, String> userTableColumn;
-
-    @FXML
-    private TableColumn<Connect, String> passwordTableColumn;
-
-    @FXML
-    private Button addButton;
-
-    @FXML
-    private Button updateButton;
-
-    @FXML
-    private Button deleteButton;
-
-    @FXML
-    private Button loadButton;
-
-    @FXML
-    private ComboBox historyComboBox;
-
-    @FXML
-    private TextField libraryPathTextField;
-
-    @FXML
-    private TextField driverTextField;
-
-    @FXML
-    private TextField urlTextField;
-
-    @FXML
-    private TextField userTextField;
-
-    @FXML
-    private TextField passwordTextField;
-
-    @FXML
-    private Button okButton;
-
-    @FXML
-    private Button cancelButton;
-
-    @FXML
-    private Button testButton;
+    // Scene overview
+    // +-----------------------------------------------------------------------------------------------+
+    // | +----------------------+-----------------+--------------+---------------+-------------------+ |
+    // | |libraryPathTableColumn|driverTableColumn|urlTableColumn|userTableColumn|passwordTableColumn| |
+    // | |                                                                                           | |
+    // | | connectTableView                                                                          | |
+    // | +-------------------------------------------------------------------------------------------+ |
+    // |                     [addButton] [updateButton] [deleteButton] [loadButton]                    |
+    // | xxxxx historyComboBox                                                                         |
+    // | xxxxx libraryPathTextField                                                                    |
+    // | xxxxx driverTextField                                                                         |
+    // | xxxxx urlTextField                                                                            |
+    // | xxxxx userTextField                                                                           |
+    // | xxxxx passwordTextField                                                                       |
+    // |                                                        [okButton] [cancelButton] [testButton] |
+    // +-----------------------------------------------------------------------------------------------+
+    @FXML private TableView connectTableView;
+    @FXML private TableColumn<Connect, String> libraryPathTableColumn;
+    @FXML private TableColumn<Connect, String> driverTableColumn;
+    @FXML private TableColumn<Connect, String> urlTableColumn;
+    @FXML private TableColumn<Connect, String> userTableColumn;
+    @FXML private TableColumn<Connect, String> passwordTableColumn;
+    @FXML private Button addButton;
+    @FXML private Button updateButton;
+    @FXML private Button deleteButton;
+    @FXML private Button loadButton;
+    @FXML private ComboBox historyComboBox;
+    @FXML private TextField libraryPathTextField;
+    @FXML private TextField driverTextField;
+    @FXML private TextField urlTextField;
+    @FXML private TextField userTextField;
+    @FXML private TextField passwordTextField;
+    @FXML private Button okButton;
+    @FXML private Button cancelButton;
+    @FXML private Button testButton;
 
     private MainControllerInterface mainControllerInterface;
     private Connection connection;
@@ -347,7 +327,7 @@ public class ConnectController implements Initializable {
             list.add(history);
             mapper.save(list);
 
-        } catch (Exception e) {
+        } catch (Throwable e) {
             mainControllerInterface.showAlertDialog("Connect failed.", e.toString());
         }
 

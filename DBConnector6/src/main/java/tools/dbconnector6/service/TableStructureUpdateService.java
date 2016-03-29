@@ -1,48 +1,60 @@
 package tools.dbconnector6.service;
 
-import javafx.collections.ObservableList;
+import javafx.application.Platform;
 import javafx.concurrent.Task;
-import tools.dbconnector6.BackgroundCallbackInterface;
-import tools.dbconnector6.DbStructureTreeItem;
+import tools.dbconnector6.BackgroundServiceInterface;
+import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.TableColumnTab;
+import tools.dbconnector6.entity.TableIndexTab;
 import tools.dbconnector6.entity.TablePropertyTab;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.*;
+import java.util.stream.IntStream;
 
-public class TableStructureUpdateService implements BackgroundCallbackInterface<Void, Void> {
+public class TableStructureUpdateService implements BackgroundServiceInterface<Void, TableStructureUpdateService.TableStructures> {
     private MainControllerInterface mainControllerInterface;
     public TableStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }
 
+    public class TableStructures {
+        public List<TablePropertyTab> tablePropertyList;
+        public List<TableColumnTab> tableColumnList;
+        public List<TableIndexTab> tableIndexList;
+    }
+
     @Override
-    public void run(Task task) throws SQLException {
+    public void run(Task task) throws Exception {
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
         if (tableItem==null || mainControllerInterface.getConnection()==null) {
+            updateUIPreparation(null);
             return ;
         }
 
-        ObservableList<TablePropertyTab> tablePropertyList = mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems();
-        ObservableList<TableColumnTab> tableColumnList = mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems();
-
-        tablePropertyList.clear();
-        tableColumnList.clear();
+        TableStructures tableStructures = new TableStructures();
+        tableStructures.tablePropertyList = new ArrayList<>();
+        tableStructures.tableColumnList = new ArrayList<>();
+        tableStructures.tableIndexList = new ArrayList<>();
 
         DatabaseMetaData metaData = mainControllerInterface.getConnection().getMetaData();
 
         switch (tableItem.getItemType()) {
             case DATABASE:
-                updateTablePropertyFromDatabase(metaData, tablePropertyList);
+                updateTablePropertyFromDatabase(metaData, tableStructures.tablePropertyList);
                 break;
             case TABLE:
-                updateTablePropertyFromTable(tableItem, metaData, tablePropertyList);
-                updateTableColumnFromTable(tableItem, metaData, tableColumnList);
+                updateTablePropertyFromTable(tableItem, metaData, tableStructures.tablePropertyList);
+                updateTableColumnFromTable(tableItem, metaData, tableStructures.tableColumnList);
+                updateTableIndexFromTable(tableItem, metaData, tableStructures.tableIndexList);
                 break;
         }
+        updateUIPreparation(null);
+        updateUI(tableStructures);
 
     }
 
@@ -52,15 +64,49 @@ public class TableStructureUpdateService implements BackgroundCallbackInterface<
     }
 
     @Override
-    public void updateUIPreparation(Void uiParam) throws Exception {
+    public void cancelled() {
+
     }
 
     @Override
-    public void updateUI(Void uiParam) throws Exception {
+    public void failed() {
 
     }
 
-    private void updateTablePropertyFromDatabase(DatabaseMetaData metaData, ObservableList<TablePropertyTab> list) throws SQLException {
+    @Override
+    public void updateUIPreparation(Void uiParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().clear();
+                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().clear();
+                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().clear();
+                mainControllerInterface.getTableStructureTabParam().tableIndexPrimaryKeyTextField.setText("");
+                mainControllerInterface.getTableStructureTabParam().tableIndexUniqueKeyTextField.setText("");
+                mainControllerInterface.getTableStructureTabParam().tableIndexListView.getItems().clear();
+            }
+        });
+    }
+
+    @Override
+    public void updateUI(TableStructures uiParam) throws Exception {
+        final List<TablePropertyTab> tablePropertyList = new ArrayList<>(uiParam.tablePropertyList);
+        final List<TableColumnTab> tableColumnList = new ArrayList<>(uiParam.tableColumnList);
+        final List<TableIndexTab> tableIndexList = new ArrayList<>(uiParam.tableIndexList);
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(tablePropertyList);
+                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(tableColumnList);
+                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(tableIndexList);
+                if (tableIndexList.size()>=1) {
+                    mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getSelectionModel().select(0);
+                }
+            }
+        });
+    }
+
+    private void updateTablePropertyFromDatabase(DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
 
         list.add(TablePropertyTab.builder().key("Database product version").value(metaData.getDatabaseProductVersion()).build());
         list.add(TablePropertyTab.builder().key("Database major version").value(Integer.toString(metaData.getDatabaseMajorVersion())).build());
@@ -104,42 +150,107 @@ public class TableStructureUpdateService implements BackgroundCallbackInterface<
         list.add(TablePropertyTab.builder().key("Max user name length").value(Integer.toString(metaData.getMaxUserNameLength())).build());
     }
 
-    private void updateTablePropertyFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, ObservableList<TablePropertyTab> list) throws SQLException {
-        showResultSet(metaData.getTables(null, tableItem.getSchema(), tableItem.getValue(), null), list);
+    private void updateTablePropertyFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
+        try (ResultSet resultSet = metaData.getTables(null, tableItem.getSchema(), tableItem.getValue(), null)) {
+            showResultSet(resultSet, list);
+        }
     }
 
-    private void showResultSet(ResultSet resultSet, ObservableList<TablePropertyTab> list) throws SQLException {
+    private void showResultSet(ResultSet resultSet, List<TablePropertyTab> list) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
 
-        while(resultSet.next()) {
-            for (int loop=0; loop<columnCount; loop++) {
+        while (resultSet.next()) {
+            for (int loop = 0; loop < columnCount; loop++) {
                 list.add(TablePropertyTab.builder().key(metaData.getColumnName(loop + 1)).value(resultSet.getString(loop + 1)).build());
             }
         }
-        resultSet.close();
     }
 
-    private void updateTableColumnFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, ObservableList<TableColumnTab> tableColumnList) throws SQLException {
-        ResultSet resultSet = metaData.getColumns(null, tableItem.getSchema(), tableItem.getValue(), null);
+    private void updateTableColumnFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableColumnTab> tableColumnList) throws SQLException {
+        try (ResultSet resultSet = metaData.getColumns(null, tableItem.getSchema(), tableItem.getValue(), null)) {
+            while (resultSet.next()) {
+                TableColumnTab data = TableColumnTab.builder()
+                        .name(getStringForce(resultSet, "COLUMN_NAME"))
+                        .type(getStringForce(resultSet, "TYPE_NAME"))
+                        .size(getIntForce(resultSet, "COLUMN_SIZE"))
+                        .decimalDigits(getIntForce(resultSet, "DECIMAL_DIGITS"))
+                        .nullable(getStringForce(resultSet, "NULLABLE"))
+//                        .primaryKey(getStringForce(resultSet, "TYPE_NAME"))
+                        .remarks(getStringForce(resultSet, "REMARKS"))
+                        .columnDefault(getStringForce(resultSet, "COLUMN_DEF"))
+                        .autoincrement(getStringForce(resultSet, "IS_AUTOINCREMENT"))
+                        .generatedColumn(getStringForce(resultSet, "IS_GENERATEDCOLUMN"))
+                        .build();
 
-        while (resultSet.next()) {
-            TableColumnTab data = TableColumnTab.builder()
-                    .name(getStringForce(resultSet, "COLUMN_NAME"))
-                    .type(getStringForce(resultSet, "TYPE_NAME"))
-                    .size(getIntForce(resultSet, "COLUMN_SIZE"))
-                .decimalDigits(getIntForce(resultSet, "DECIMAL_DIGITS"))
-                    .nullable(getStringForce(resultSet, "NULLABLE"))
-//                    .primaryKey(getStringForce(resultSet, "TYPE_NAME"))
-                    .remarks(getStringForce(resultSet, "REMARKS"))
-                .columnDefault(getStringForce(resultSet, "COLUMN_DEF"))
-                .autoincrement(getStringForce(resultSet, "IS_AUTOINCREMENT"))
-                .generatedColumn(getStringForce(resultSet, "IS_GENERATEDCOLUMN"))
-                    .build();
-
-            tableColumnList.add(data);
+                tableColumnList.add(data);
+            }
         }
-        resultSet.close();
+    }
+
+    private void updateTableIndexFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableIndexTab> tableIndexList) throws SQLException {
+
+        // Primary key
+        try (ResultSet resultSet = metaData.getPrimaryKeys(null, tableItem.getSchema(), tableItem.getValue())) {
+            TableIndexTab tableIndexTab = null;
+            Map<Short, String> columns = null;
+
+            while (resultSet.next()) {
+                if (tableIndexTab==null) {
+                    tableIndexTab = TableIndexTab.builder()
+                            .indexName(resultSet.getString("PK_NAME")==null? "Primary key": resultSet.getString("PK_NAME"))
+                            .primaryKey(true)
+                            .uniqueKey(true)
+                            .build();
+                    columns = new HashMap<>();
+                }
+                columns.put(resultSet.getShort("KEY_SEQ"), resultSet.getString("COLUMN_NAME"));
+            }
+
+            if (tableIndexTab!=null) {
+                tableIndexTab.setColumnList(mapToList(columns));
+                tableIndexList.add(tableIndexTab);
+            }
+        }
+
+        // Index
+        try (ResultSet resultSet = metaData.getIndexInfo(null, tableItem.getSchema(), tableItem.getValue(), false, false)) {
+            TableIndexTab tableIndexTab = null;
+            Map<Short, String> columns = null;
+
+            while (resultSet.next()) {
+                // "表のインデックスの記述に連動して返される表の統計情報"は無視
+                if (resultSet.getShort("TYPE")==DatabaseMetaData.tableIndexStatistic) {
+                    continue;
+                }
+
+                if (tableIndexTab==null || !tableIndexTab.getIndexName().equals(resultSet.getString("INDEX_NAME"))) {
+                    if (tableIndexTab!=null) {
+                        tableIndexTab.setColumnList(mapToList(columns));
+                        tableIndexList.add(tableIndexTab);
+                    }
+                    tableIndexTab = TableIndexTab.builder()
+                            .indexName(resultSet.getString("INDEX_NAME") == null ? "Index" : resultSet.getString("INDEX_NAME"))
+                            .primaryKey(false)
+                            .uniqueKey(!resultSet.getBoolean("NON_UNIQUE"))
+                            .build();
+                    columns = new HashMap<>();
+                }
+                columns.put(resultSet.getShort("ORDINAL_POSITION"), resultSet.getString("COLUMN_NAME"));
+            }
+            if (tableIndexTab!=null) {
+                tableIndexTab.setColumnList(mapToList(columns));
+                tableIndexList.add(tableIndexTab);
+            }
+        }
+    }
+
+    private List<String> mapToList(final Map<Short, String> map) {
+        List<String> columnList = new ArrayList<>();
+        Set<Short> keyList = map.keySet();
+        keyList.stream().forEach(i -> columnList.add(map.get(i)));
+
+        return columnList;
     }
 
     private String getStringForce(ResultSet resultSet, String columnName) {

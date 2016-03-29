@@ -9,6 +9,11 @@ public class ConnectMapper extends MapperBase<Connect> {
     }
 
     @Override
+    protected String getArchiveFileSuffix() {
+        return "";
+    }
+
+    @Override
     protected Connect unboxing(String line) {
         String[] data = line.split("\t");
         return Connect.builder()
