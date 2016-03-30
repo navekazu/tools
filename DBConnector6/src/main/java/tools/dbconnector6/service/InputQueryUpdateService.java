@@ -17,19 +17,23 @@ public class InputQueryUpdateService implements BackgroundServiceInterface<Void,
     @Override
     public void run(Task task) throws Exception {
         if (mainControllerInterface.getEditorPath().trim().length()<=0) {
-            mainControllerInterface.writeLog("SQL editor not setup.");
+            mainControllerInterface.writeLog("SQL editor is not available. Please set up the SQL editor.");
             return;
         }
 
+        // テンポラリファイルを作成
         TemporaryQuerySerializer temporaryQuerySerializer = new TemporaryQuerySerializer();
         Path temporaryQueryPath = temporaryQuerySerializer.createTempolaryFile(mainControllerInterface.getSelectedQuery());
 
+        // テンポラリファイルを実行時引数にしてエディタを起動
         Runtime runtime = Runtime.getRuntime();
         Process process = runtime.exec(new String[]{mainControllerInterface.getEditorPath(), temporaryQueryPath.toString()});
 
+        // エディタが終了するまで待機
         updateUIPreparation(null);
         process.waitFor();
 
+        // エディタが編集したテンポラリファイルの内容をクエリエリアに貼り付け
         updateUI(temporaryQuerySerializer.readText(temporaryQueryPath));
     }
 
@@ -62,7 +66,9 @@ public class InputQueryUpdateService implements BackgroundServiceInterface<Void,
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                mainControllerInterface.showWaitDialog("SQL編集の終了まで待機しています。", "編集が完了したらファイルを保存してエディタを終了してください。");
+                mainControllerInterface.showWaitDialog(
+                        "Waiting until the end of SQL edit.",
+                        "Please save and exit the SQL editor.");
             }
         });
     }
