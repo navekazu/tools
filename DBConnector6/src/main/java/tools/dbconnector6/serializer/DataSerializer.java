@@ -28,7 +28,7 @@ public abstract class DataSerializer {
         return writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
     }
     public Path updateText(String text) throws IOException {
-        return writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
+        return writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE, StandardOpenOption.TRUNCATE_EXISTING);
     }
     public Path createTempolaryFile(String text) throws IOException {
         Path path = writeText(getArchiveFilePath(), text, StandardOpenOption.CREATE, StandardOpenOption.WRITE);
