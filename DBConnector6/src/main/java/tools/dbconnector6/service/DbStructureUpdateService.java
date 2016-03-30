@@ -73,6 +73,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
             this.item = item;
 
         }
+
         @Override
         protected Object call() throws Exception {
             List<DbStructureTreeItem> subList = new ArrayList<>();
