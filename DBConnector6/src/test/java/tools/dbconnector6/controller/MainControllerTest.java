@@ -64,4 +64,34 @@ public class MainControllerTest {
         assertEquals("fro",     mainController.inputWord("select *\nfrfoo", 11, "o"));
         assertEquals("from",    mainController.inputWord("select *\nfrofoo", 12, "m"));
     }
+
+    @Test
+    public void getNextEmptyLineCaretPositionのテスト() {
+        MainController mainController = new MainController();
+
+        // 先頭にいるとき
+        assertEquals(0,  mainController.getNextEmptyLineCaretPosition("012345678\n012345678\n", 0, -1));
+
+        // 末尾にいるとき
+        assertEquals(20,  mainController.getNextEmptyLineCaretPosition("012345678\n012345678\n", 20, 1));
+
+        // 2行目の先頭にキャレットがある状態で上キーを押した
+        assertEquals(0,  mainController.getNextEmptyLineCaretPosition("012345678\n012345678\n", 10, -1));
+
+        // 2行目の先頭にキャレットがある状態で下キーを押した
+        assertEquals(20,  mainController.getNextEmptyLineCaretPosition("012345678\n012345678\n", 10, 1));
+
+        // 4行目の先頭にキャレットがある状態で上キーを押した
+        // 2行目が空行で、3行目の先頭にキャレットが移動する
+        assertEquals(4,  mainController.getNextEmptyLineCaretPosition("a0\n\nb0\nc0\n\nd0", 7, -1));
+
+        // 4行目の先頭にキャレットがある状態で下キーを押した
+        // 5行目が空行で、5行目の先頭にキャレットが移動する
+        assertEquals(10,  mainController.getNextEmptyLineCaretPosition("a0\n\nb0\nc0\n\nd0", 7, 1));
+
+        // 5行目の先頭にキャレットがある状態で上キーを押した
+        // 2行目が空行で、3行目の先頭にキャレットが移動する
+        assertEquals(4,  mainController.getNextEmptyLineCaretPosition("a0\n\nb0\nc0\n\nd0", 10, -1));
+
+    }
 }
