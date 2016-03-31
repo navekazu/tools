@@ -6,17 +6,20 @@ import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.event.EventTarget;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.InputMethodRequests;
-import javafx.scene.input.KeyCode;
-import javafx.scene.input.KeyEvent;
+import javafx.scene.input.*;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import tools.dbconnector6.BackgroundService;
@@ -27,7 +30,6 @@ import tools.dbconnector6.serializer.ApplicationLogSerializer;
 import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 
-import java.awt.*;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.*;
@@ -237,6 +239,13 @@ public class MainController extends Application implements Initializable, MainCo
         autoincrementTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("autoincrement"));
         generatedColumnTableColumn.setCellValueFactory(new PropertyValueFactory<TableColumnTab, String>("generatedColumn"));
 
+        // キーワードを右ダブルクリックしたときにクエリとして貼り付ける
+        dbStructureTreeView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
+        tableColumnTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
+        queryResultTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
+        tableIndexListView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
+
+        // service
         queryResultUpdateService = new BackgroundService(new QueryResultUpdateService(this));
         reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList));
         inputQueryUpdateService = new BackgroundService(new InputQueryUpdateService(this));
@@ -530,6 +539,13 @@ public class MainController extends Application implements Initializable, MainCo
         int anchor = queryTextArea.getAnchor();
         queryTextArea.replaceText((anchor<caret? anchor: caret), (anchor>caret? anchor: caret), query);    // "begin<=end" の関係でないとNG
     }
+
+    @Override
+    public void addQueryWord(String word, boolean shiftDown) {
+        updateSelectedQuery(word + (shiftDown? ", ": ""));
+        queryTextArea.requestFocus();
+    }
+
 
     private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
             KeyCode.TAB, KeyCode.DOWN,
@@ -928,6 +944,63 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    ////////////////////////////////////////////////////////////////////////////
+    // queryResultTableView event
+    private void addQueryWordEvent(MouseEvent event) {
+        // 右ダブルクリック以外は終了
+        if ((event.getButton()!=MouseButton.SECONDARY) || (event.getClickCount()!=2)) {
+            return ;
+        }
+
+        Node node = (Node)event.getSource();
+        EventTarget target = event.getTarget();
+        String columnName = null;
+
+        // dbStructureTreeViewの場合、TABLE（テーブル・ビュー・シノニムなど）かFUNCTIONかPROCEDUREのみ許可
+        if (dbStructureTreeView.getId().equals(node.getId())) {
+            Text text = (Text)event.getTarget();
+            TreeCell treeCell = (TreeCell)text.getParent();
+            DbStructureTreeItem item = (DbStructureTreeItem)treeCell.getTreeItem();
+            switch(item.getItemType()) {
+                case DATABASE:
+                case GROUP:
+                case SCHEMA:
+                    return;
+
+                case TABLE:
+                case FUNCTION:
+                case PROCEDURE:
+                    columnName = item.getValue();
+                default:
+            }
+        }
+
+        // TableView・ListViewの場合
+        if (node instanceof TableView || node instanceof ListView) {
+            // Textなら親のLabelを取得
+            //  カラムを縮めて「Test」が「Te...」となったとき、Textから値を取ると「Te...」になる。
+            //  親のLabelから値を取ると、ちゃんと縮める前の「Test」が取れる。
+            if (target instanceof Text) {
+                target = ((Node)target).getParent();    // Labelが取れる
+            }
+
+            if (target instanceof Labeled) {
+                Labeled labeled = (Labeled) target;
+                columnName = labeled.getText();
+
+            } else if (target instanceof TableColumn) {
+                TableColumn tableColumn = (TableColumn)target;
+                columnName = tableColumn.getText();
+
+            }
+        }
+
+        if (columnName==null) {
+            return ;
+        }
+
+        addQueryWord(columnName, event.isShiftDown());
+    }
 
     /***************************************************************************
      *                                                                         *
