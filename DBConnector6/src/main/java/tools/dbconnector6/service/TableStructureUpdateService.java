@@ -14,7 +14,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
-import java.util.stream.IntStream;
 
 public class TableStructureUpdateService implements BackgroundServiceInterface<Void, TableStructureUpdateService.TableStructures> {
     private MainControllerInterface mainControllerInterface;
@@ -31,7 +30,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     @Override
     public void run(Task task) throws Exception {
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
-        if (tableItem==null || mainControllerInterface.getConnection()==null) {
+        if (tableItem==null || !mainControllerInterface.isConnectWithoutMessage()) {
             updateUIPreparation(null);
             return ;
         }

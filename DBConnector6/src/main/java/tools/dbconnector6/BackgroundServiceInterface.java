@@ -2,8 +2,6 @@ package tools.dbconnector6;
 
 import javafx.concurrent.Task;
 
-import java.sql.SQLException;
-
 public interface BackgroundServiceInterface<P, M> {
     public void run(Task task) throws Exception;
     public void cancel() throws Exception;

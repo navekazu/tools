@@ -1,7 +1,5 @@
 package tools.dbconnector6.serializer;
 
-import tools.dbconnector6.serializer.DataSerializer;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.SimpleDateFormat;

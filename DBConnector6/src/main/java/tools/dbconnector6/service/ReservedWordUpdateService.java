@@ -37,59 +37,61 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
             addSQLReservedWord();
         }
 
-        if (mainControllerInterface.getConnection()!=null) {
-            mainControllerInterface.writeLog("Reserved word parsing...");
-            DatabaseMetaData dmd = mainControllerInterface.getConnection().getMetaData();
+        if (!mainControllerInterface.isConnectWithoutMessage()) {
+            return;
+        }
 
-            try {
-                // テーブルタイプの取得
-                List<String> types = new ArrayList<>();
-                try (ResultSet resultSet = dmd.getTableTypes()) {
-                    types = getResultList(resultSet, "TABLE_TYPE");
+        mainControllerInterface.writeLog("Reserved word parsing...");
+        DatabaseMetaData dmd = mainControllerInterface.getConnection().getMetaData();
+
+        try {
+            // テーブルタイプの取得
+            List<String> types = new ArrayList<>();
+            try (ResultSet resultSet = dmd.getTableTypes()) {
+                types = getResultList(resultSet, "TABLE_TYPE");
+            } catch(SQLException e){}
+
+            // スキーマの取得
+            List<String> schemas = new ArrayList<>();
+            try (ResultSet resultSet = dmd.getSchemas()) {
+                schemas = getResultList(resultSet, "TABLE_SCHEM");
+            } catch(SQLException e){}
+            if (schemas.isEmpty()) {
+                schemas.add("");
+            }
+
+            Set<ReservedWord> allTables = new HashSet<>();
+            Set<ReservedWord> allColumns = new HashSet<>();
+            for (String schema : schemas) {
+                mainControllerInterface.writeLog("Reserved word parsing... %s", schema);
+
+                // テーブル一覧
+                Set<ReservedWord> tables = new HashSet<>();
+                try (ResultSet resultSet = dmd.getTables(null, schema, "%", (String[]) types.toArray(new String[0]))) {
+                    tables = getMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, resultSet, "TABLE_NAME");
+                    allTables.addAll(tables);
+                    synchronized (reservedWordList) {
+                        reservedWordList.addAll(tables);
+                    }
                 } catch(SQLException e){}
 
-                // スキーマの取得
-                List<String> schemas = new ArrayList<>();
-                try (ResultSet resultSet = dmd.getSchemas()) {
-                    schemas = getResultList(resultSet, "TABLE_SCHEM");
-                } catch(SQLException e){}
-                if (schemas.isEmpty()) {
-                    schemas.add("");
-                }
-
-                Set<ReservedWord> allTables = new HashSet<>();
-                Set<ReservedWord> allColumns = new HashSet<>();
-                for (String schema : schemas) {
-                    mainControllerInterface.writeLog("Reserved word parsing... %s", schema);
-
-                    // テーブル一覧
-                    Set<ReservedWord> tables = new HashSet<>();
-                    try (ResultSet resultSet = dmd.getTables(null, schema, "%", (String[]) types.toArray(new String[0]))) {
-                        tables = getMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, resultSet, "TABLE_NAME");
-                        allTables.addAll(tables);
+                // カラム一覧
+                for (ReservedWord reservedWord : tables) {
+                    Set<ReservedWord> columns = new HashSet<>();
+                    try (ResultSet resultSet = dmd.getColumns(null, schema, reservedWord.getWord(), null)) {
+                        columns = getMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, resultSet, "COLUMN_NAME");
+                        allColumns.addAll(columns);
                         synchronized (reservedWordList) {
-                            reservedWordList.addAll(tables);
+                            reservedWordList.addAll(columns);
                         }
                     } catch(SQLException e){}
-
-                    // カラム一覧
-                    for (ReservedWord reservedWord : tables) {
-                        Set<ReservedWord> columns = new HashSet<>();
-                        try (ResultSet resultSet = dmd.getColumns(null, schema, reservedWord.getWord(), null)) {
-                            columns = getMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, resultSet, "COLUMN_NAME");
-                            allColumns.addAll(columns);
-                            synchronized (reservedWordList) {
-                                reservedWordList.addAll(columns);
-                            }
-                        } catch(SQLException e){}
-                    }
                 }
-
-                mainControllerInterface.writeLog("Reserved word parsed. table count:%,d, colimn count:%,d ", allTables.size(), allColumns.size());
-
-            } catch(Exception e) {
-                mainControllerInterface.writeLog(e);
             }
+
+            mainControllerInterface.writeLog("Reserved word parsed. table count:%,d, colimn count:%,d ", allTables.size(), allColumns.size());
+
+        } catch(Exception e) {
+            mainControllerInterface.writeLog(e);
         }
     }
 

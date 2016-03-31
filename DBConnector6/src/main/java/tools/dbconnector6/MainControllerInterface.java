@@ -28,6 +28,8 @@ public interface MainControllerInterface {
     public void updateSelectedQuery(String query);
     public void addQueryWord(String word, boolean shiftDown);
     public String getEditorPath();
+    public boolean isConnect();
+    public boolean isConnectWithoutMessage();
 
     public BackgroundService getDbStructureUpdateService();
     public BackgroundService getTableStructureTabPaneUpdateService();

@@ -31,7 +31,7 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
         TabDisableProperty property = new TabDisableProperty();
 
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
-        if (tableItem == null || mainControllerInterface.getConnection() == null) {
+        if (tableItem == null || !mainControllerInterface.isConnectWithoutMessage()) {
             property.tablePropertyTabDisable = true;
             property.tableColumnTabDisable = true;
             property.tableIndexTabDisable = true;

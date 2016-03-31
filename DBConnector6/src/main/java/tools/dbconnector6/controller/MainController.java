@@ -11,10 +11,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
-import javafx.scene.Parent;
 import javafx.scene.control.*;
 import javafx.scene.control.Button;
-import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -308,7 +306,7 @@ public class MainController extends Application implements Initializable, MainCo
         });
     }
     private void closeConnection() {
-        if (connection!=null) {
+        if (isConnectWithoutMessage()) {
             try {
                 connection.close();
             } catch (SQLException e) {
@@ -546,6 +544,23 @@ public class MainController extends Application implements Initializable, MainCo
         queryTextArea.requestFocus();
     }
 
+    @Override
+    public boolean isConnect() {
+        boolean result = isConnectWithoutMessage();
+        if (!result) {
+            writeLog("No connect.");
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isConnectWithoutMessage() {
+        if (connection==null) {
+            return false;
+        }
+        return true;
+    }
+
 
     private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
             KeyCode.TAB, KeyCode.DOWN,
@@ -701,6 +716,9 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCancelQuery(ActionEvent event) {
+        if (!isConnect()) {
+            return ;
+        }
         queryResultUpdateService.cancel();
     }
 
@@ -711,8 +729,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCommit(ActionEvent event) {
-        if (connection==null) {
-            writeLog("No connect.");
+        if (!isConnect()) {
             return ;
         }
         try {
@@ -725,8 +742,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onRollback(ActionEvent event) {
-        if (connection==null) {
-            writeLog("No connect.");
+        if (!isConnect()) {
             return ;
         }
         try {
@@ -747,14 +763,18 @@ public class MainController extends Application implements Initializable, MainCo
     }
     @FXML
     private void onCheckIsolation(ActionEvent event) throws SQLException {
+        if (!isConnect()) {
+            return ;
+        }
         writeLog("Transaction isolation: %s", ISOLATIONS.get(connection.getTransactionIsolation()));
     }
 
     @FXML
     private void onSearchButton(ActionEvent event) {
-        if (connection!=null) {
-            dbStructureUpdateService.restart();
+        if (!isConnect()) {
+            return ;
         }
+        dbStructureUpdateService.restart();
     }
 
     ////////////////////////////////////////////////////////////////////////////

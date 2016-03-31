@@ -1,6 +1,5 @@
 package tools.dbconnector6.mapper;
 
-import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ConnectHistory;
 
 public class ConnectHistoryMapper extends MapperBase<ConnectHistory> {

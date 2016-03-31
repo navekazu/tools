@@ -41,8 +41,7 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
 
     @Override
     public void run(Task task) throws Exception {
-        if (mainControllerInterface.getConnection()==null) {
-            mainControllerInterface.writeLog("No connect.");
+        if (!mainControllerInterface.isConnect()) {
             return ;
         }
 
