@@ -161,6 +161,7 @@ public class ReservedWordController implements Initializable {
     @FXML
     public void onMouseClicked(MouseEvent event){
         if (event.getClickCount()>=2 && event.getButton()== MouseButton.PRIMARY) {
+            mainControllerInterface.hideReservedWordStage();
             selected();
         }
     }

@@ -427,18 +427,19 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    private String inputWord(String text, int caret) {
-        StringBuilder caretForward = new StringBuilder(text.substring(0, caret));
-        caretForward = caretForward.reverse();
+    protected String inputWord(String text, int caret, String inputCharacter) {
+        // キーイベント前の入力内容に、キーイベントで入力した文字をキャレットの位置に入れる
+        StringBuilder realText = new StringBuilder(text);
+        realText.insert(caret, inputCharacter);
 
+        // キャレット位置から前に走査してスペースまでを単語として抜き出す
         StringBuilder inputKeyword = new StringBuilder();
-        for (int loop=0; loop<caretForward.length(); loop++){
-            if (isSpaceInput(caretForward.charAt(loop))) {
+        for (int loop=caret-1 + inputCharacter.length(); loop>=0; loop--){
+            if (isSpaceInput(realText.charAt(loop))) {
                 break;
             }
-            inputKeyword.insert(0, caretForward.charAt(loop));
+            inputKeyword.insert(0, realText.charAt(loop));
         }
-
         return inputKeyword.toString();
     }
 
@@ -446,7 +447,7 @@ public class MainController extends Application implements Initializable, MainCo
     public void selectReservedWord(String word) {
         int caret = queryTextArea.getCaretPosition();
         String text = queryTextArea.getText();
-        String inputKeyword = inputWord(text, caret);       // キャレットより前の単語を取得
+        String inputKeyword = inputWord(text, caret, "");       // キャレットより前の単語を取得
 
         // キャレットより前の単語を削除
         queryTextArea.deleteText(caret-inputKeyword.length(), caret);
@@ -533,11 +534,68 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
-        KeyCode.TAB, KeyCode.DOWN,
+            KeyCode.TAB, KeyCode.DOWN,
+    };
+    private static final String[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_STRING = new String[] {
+            "\t"
     };
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {
+        if(!reservedWordStage.isShowing()) {
+            return false;
+        }
         return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES).anyMatch(c -> c == code);
     }
+    private boolean isChangeFocusForReservedWordStage(String key) {
+        if(!reservedWordStage.isShowing()) {
+            return false;
+        }
+        return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_STRING).anyMatch(s -> s.equals(key));
+    }
+
+    private boolean isHideReservedWordStage(KeyEvent event) {
+        if(!reservedWordStage.isShowing()) {
+            return false;
+        }
+        return (event.isAltDown() || event.isControlDown() || !isTextInput(event.getCode()));
+    }
+
+    private static final KeyCode[] SELECT_NEXT_EMPTY_LINE_CODES = new KeyCode[] {
+            KeyCode.UP, KeyCode.DOWN,
+    };
+    private boolean isSelectNextEmptyLine(KeyEvent event) {
+        return event.isShiftDown() && event.isControlDown()
+                && Arrays.stream(SELECT_NEXT_EMPTY_LINE_CODES).anyMatch(c -> c == event.getCode());
+    }
+
+    protected int getNextEmptyLineCaretPosition(String text, int caret, int direction) {
+        // すでにインデックスを超えていたら抜ける
+        if (caret+direction<0 || caret+direction>=text.length()) {
+            return caret;
+        }
+
+        int nextCaret = caret+direction;
+        char lastCh = text.charAt(caret);
+
+        // 現在位置が改行なら1文字進める
+        if (lastCh=='\n') {
+            lastCh = text.charAt(nextCaret);
+            nextCaret = nextCaret+direction;
+        }
+
+        for (; nextCaret<text.length()&&nextCaret>0; nextCaret+=direction) {
+            if (lastCh=='\n' && text.charAt(nextCaret)=='\n') {
+                if (direction<=-1) {
+                    // "\n\n"の2文字分先行しているので、2文字戻す
+                    nextCaret -= (direction*2);
+                }
+                break;
+            }
+            lastCh = text.charAt(nextCaret);
+        }
+
+        return nextCaret;
+    }
+
 
     private static final Character[] SPACE_INPUT_CHARS = new Character[] {
         ' ', '\t', '\n', '　', '.',
@@ -603,9 +661,6 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCallSqlEditor(ActionEvent event) {
-        // TODO: テンポラリSQLファイルを作成（JVM終了時に削除するようマークすること）
-        // TODO: 外部SQLエディタを起動し、テンポラリSQLファイルを編集させる
-        // TODO: 起動した外部SQLエディタが終了したら、テンポラリSQLファイルの内容をクエリ入力欄に貼り付けて実行する
         inputQueryUpdateService.restart();
     }
 
@@ -705,31 +760,41 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     public void onQueryTextAreaKeyPressed(KeyEvent event) {
-        // フォーカス移動
-        if (reservedWordStage.isShowing() && isChangeFocusForReservedWordStage(event.getCode())) {
+        // 予約語ウィンドウにフォーカス移動
+        if (isChangeFocusForReservedWordStage(event.getCode())) {
             event.consume();
             reservedWordStage.requestFocus();
             return;
         }
 
-        // 非表示
-        if (event.isAltDown() || event.isControlDown() || !isTextInput(event.getCode())) {
+        // 予約語ウィンドウを非表示
+        if (isHideReservedWordStage(event)) {
             reservedWordStage.hide();
+        }
+
+        // 次の空行までを選択
+        if (isSelectNextEmptyLine(event)) {
+            int anchor = queryTextArea.getAnchor();
+            int caret = queryTextArea.getCaretPosition();
+            int direction = event.getCode()==KeyCode.UP? -1: 1;     // 上キーならマイナス方向、下ならプラス方向
+            queryTextArea.selectRange(anchor, getNextEmptyLineCaretPosition(queryTextArea.getText(), caret, direction)-direction);
+        }
+    }
+
+    @FXML
+    public void onQueryTextAreaKeyReleased(KeyEvent event) {
+    }
+
+    @FXML
+    public void onQueryTextAreaKeyTyped(KeyEvent event) {
+        if (isChangeFocusForReservedWordStage(event.getCharacter())) {
             return;
         }
 
+        String text = queryTextArea.getText();
         int caret = queryTextArea.getCaretPosition();
-        String inputText = event.getText();
-
-        // シフトを押していてCAPSロックがOFFの場合、大文字に変換する
-        // シフトを押さずにCAPSロックがONの場合、大文字に変換する
-        if ((event.isShiftDown() && !Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))
-                ||(!event.isShiftDown() && Toolkit.getDefaultToolkit().getLockingKeyState(java.awt.event.KeyEvent.VK_CAPS_LOCK))) {
-            inputText = inputText.toUpperCase();
-        }
-
-        String text = (new StringBuilder(queryTextArea.getText())).insert(caret, inputText).toString();
-        String inputKeyword = inputWord(text, caret + inputText.length());       // キャレットより前の単語を取得
+        String inputText = event.getCharacter();
+        String inputKeyword = inputWord(text, caret, inputText);       // キャレットより前の単語を取得
 
         if (reservedWordController.isInputReservedWord(event, inputKeyword)) {
             // キャレット位置に選択画面を出す
@@ -741,14 +806,6 @@ public class MainController extends Application implements Initializable, MainCo
         } else {
             reservedWordStage.hide();
         }
-    }
-
-    @FXML
-    public void onQueryTextAreaKeyReleased(KeyEvent event) {
-    }
-
-    @FXML
-    public void onQueryTextAreaKeyTyped(KeyEvent event) {
     }
 
     ////////////////////////////////////////////////////////////////////////////

@@ -27,15 +27,18 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
 
     @Override
     public void run(Task task) throws Exception {
+        // クリーンナップ
         updateUIPreparation(null);
 
         if (mainControllerInterface.getConnection()==null) {
             return ;
         }
 
+        // スキーマの一覧を取得
         DatabaseMetaData meta = mainControllerInterface.getConnection().getMetaData();
         List<DbStructureTreeItem> schemaList = getSchemaList(meta);
 
+        // スキーマごとにスレッドを立てて、スキーマ単位に構造を解析
         for (DbStructureTreeItem item: schemaList) {
             Service service = new Service() {
                 @Override
@@ -70,6 +73,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
             this.item = item;
 
         }
+
         @Override
         protected Object call() throws Exception {
             List<DbStructureTreeItem> subList = new ArrayList<>();
@@ -78,6 +82,8 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
             mainControllerInterface.writeLog("Schema parsing...(%s)", item.getSchema());
 
             // サポートされていないAPIを呼ぶと例外が発生するので、そのときは握りつぶして次を呼び出す
+
+            // テーブルタイプの一覧からテーブル一覧（シノニム、テーブル、ビュー、など）を作成
             try {
                 ResultSet resultSet = meta.getTableTypes();
                 itemType = DbStructureTreeItem.ItemType.TABLE;
@@ -89,6 +95,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
             } catch (Throwable e) {
             }
 
+            // ファンクション一覧を作成
             try {
                 itemType = DbStructureTreeItem.ItemType.FUNCTION;
                 subList.add(createGroupItem(meta.getFunctions(null, item.getSchema(), getFilterTextFieldParamValue())
@@ -96,6 +103,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
             } catch (Throwable e) {
             }
 
+            // プロシージャ一覧を作成
             try {
                 itemType = DbStructureTreeItem.ItemType.PROCEDURE;
                 subList.add(createGroupItem(meta.getProcedures(null, item.getSchema(), getFilterTextFieldParamValue())
