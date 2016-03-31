@@ -3,7 +3,6 @@ package tools.dbconnector6.serializer;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.*;
-import java.nio.file.attribute.BasicFileAttributes;
 
 public abstract class DataSerializer {
     protected abstract String getArchiveFileName();

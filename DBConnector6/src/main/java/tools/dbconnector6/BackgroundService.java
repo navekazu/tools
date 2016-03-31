@@ -24,6 +24,10 @@ public class BackgroundService extends Service {
 
     @Override
     public boolean cancel() {
+        if (!isRunning()) {
+            return true;
+        }
+
         boolean cancel = super.cancel();
         try {
             bci.cancel();

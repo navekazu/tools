@@ -5,9 +5,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
-import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
-import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
@@ -43,8 +41,7 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
 
     @Override
     public void run(Task task) throws Exception {
-        if (mainControllerInterface.getConnection()==null) {
-            mainControllerInterface.writeLog("No connect.");
+        if (!mainControllerInterface.isConnect()) {
             return ;
         }
 
@@ -194,7 +191,7 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                         }
                     }
 
-                    evidenceInfo.pasteClipboard();
+                    evidenceInfo.pasteToClipboard();
 
                     if (task.isCancelled()) {
                         return;
@@ -361,7 +358,7 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
             header.append(data);
         }
 
-        public void pasteClipboard() {
+        public void pasteToClipboard() {
             if (!mainControllerInterface.isEvidenceMode()) {
                 return;
             }
