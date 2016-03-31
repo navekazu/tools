@@ -737,9 +737,17 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    private static final Map<Integer, String> ISOLATIONS = new HashMap<>();
+    static {
+        ISOLATIONS.put(Connection.TRANSACTION_READ_UNCOMMITTED, "UNCOMMITTED");
+        ISOLATIONS.put(Connection.TRANSACTION_READ_COMMITTED, "READ_COMMITTED");
+        ISOLATIONS.put(Connection.TRANSACTION_REPEATABLE_READ, "REPEATABLE_READ");
+        ISOLATIONS.put(Connection.TRANSACTION_SERIALIZABLE, "SERIALIZABLE");
+        ISOLATIONS.put(Connection.TRANSACTION_NONE, "NONE");
+    }
     @FXML
-    private void onCheckIsolation(ActionEvent event) {
-        // TODO: 現在のトランザクション分離レベルを表示する
+    private void onCheckIsolation(ActionEvent event) throws SQLException {
+        writeLog("Transaction isolation: %s", ISOLATIONS.get(connection.getTransactionIsolation()));
     }
 
     @FXML
