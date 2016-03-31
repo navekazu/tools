@@ -26,6 +26,7 @@ public interface MainControllerInterface {
     public String getInputQuery();
     public String getSelectedQuery();
     public void updateSelectedQuery(String query);
+    public void addQueryWord(String word, boolean shiftDown);
     public String getEditorPath();
 
     public BackgroundService getDbStructureUpdateService();
