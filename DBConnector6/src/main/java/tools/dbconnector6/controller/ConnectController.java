@@ -37,12 +37,12 @@ public class ConnectController implements Initializable {
     // | | connectTableView                                                                          | |
     // | +-------------------------------------------------------------------------------------------+ |
     // |                     [addButton] [updateButton] [deleteButton] [loadButton]                    |
-    // | xxxxx historyComboBox                                                                         |
-    // | xxxxx libraryPathTextField                                                                    |
-    // | xxxxx driverTextField                                                                         |
-    // | xxxxx urlTextField                                                                            |
-    // | xxxxx userTextField                                                                           |
-    // | xxxxx passwordTextField                                                                       |
+    // |       historyComboBox                                                                         |
+    // |       libraryPathTextField                                                                    |
+    // |       driverTextField                                                                         |
+    // |       urlTextField                                                                            |
+    // |       userTextField                                                                           |
+    // |       passwordTextField                                                                       |
     // |                                                        [okButton] [cancelButton] [testButton] |
     // +-----------------------------------------------------------------------------------------------+
     @FXML private TableView connectTableView;
@@ -51,19 +51,12 @@ public class ConnectController implements Initializable {
     @FXML private TableColumn<Connect, String> urlTableColumn;
     @FXML private TableColumn<Connect, String> userTableColumn;
     @FXML private TableColumn<Connect, String> passwordTableColumn;
-    @FXML private Button addButton;
-    @FXML private Button updateButton;
-    @FXML private Button deleteButton;
-    @FXML private Button loadButton;
     @FXML private ComboBox historyComboBox;
     @FXML private TextField libraryPathTextField;
     @FXML private TextField driverTextField;
     @FXML private TextField urlTextField;
     @FXML private TextField userTextField;
     @FXML private TextField passwordTextField;
-    @FXML private Button okButton;
-    @FXML private Button cancelButton;
-    @FXML private Button testButton;
 
     private MainControllerInterface mainControllerInterface;
     private Connection connection;
@@ -75,6 +68,7 @@ public class ConnectController implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // TableColumnとエンティティの関連付け
         libraryPathTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("libraryPath"));
         driverTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("driver"));
         urlTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("url"));
@@ -84,6 +78,7 @@ public class ConnectController implements Initializable {
         connection = null;
         connect = null;
 
+        // 接続リストの読み込み
         try {
             ObservableList<Connect> tableList = connectTableView.getItems();
             tableList.clear();
@@ -94,7 +89,7 @@ public class ConnectController implements Initializable {
             mainControllerInterface.writeLog(e);
         }
 
-
+        // 接続履歴の読み込み
         try {
             ObservableList<ConnectHistory> connectHistoryList = historyComboBox.getItems();
             connectHistoryList.clear();
@@ -103,7 +98,11 @@ public class ConnectController implements Initializable {
             Collections.reverse(list);
             connectHistoryList.addAll(list);
 
-            historyComboBox.getSelectionModel().selectedItemProperty().addListener(new HistoryComboBoxChangeListener());
+            historyComboBox.getSelectionModel().selectedItemProperty().addListener(new ChangeListener(){
+                @Override public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+                    historyComboBoxChangeHandler(observable, oldValue, newValue);
+                }
+            });
             if (list.size()>=1) {
                 historyComboBox.getSelectionModel().select(0);
             }
@@ -117,23 +116,19 @@ public class ConnectController implements Initializable {
         return connect;
     }
 
-    private class HistoryComboBoxChangeListener implements ChangeListener {
-        @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-            int index = historyComboBox.getSelectionModel().getSelectedIndex();
-            if (index==-1) {
-                return;
-            }
-
-            List<ConnectHistory> list = historyComboBox.getItems();
-            ConnectHistory history = list.get(index);
-            libraryPathTextField.setText(history.getLibraryPath());
-            driverTextField.setText(history.getDriver());
-            urlTextField.setText(history.getUrl());
-            userTextField.setText(history.getUser());
-            passwordTextField.setText(history.getPassword());
-
+    private void historyComboBoxChangeHandler(ObservableValue observable, Object oldValue, Object newValue) {
+        int index = historyComboBox.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            return;
         }
+
+        List<ConnectHistory> list = historyComboBox.getItems();
+        ConnectHistory history = list.get(index);
+        libraryPathTextField.setText(history.getLibraryPath());
+        driverTextField.setText(history.getDriver());
+        urlTextField.setText(history.getUrl());
+        userTextField.setText(history.getUser());
+        passwordTextField.setText(history.getPassword());
     }
 
     @FXML
