@@ -119,18 +119,14 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         }
     }
 
-    private List<DbStructureTreeItem> getSchemaList(DatabaseMetaData meta) {
+    private List<DbStructureTreeItem> getSchemaList(DatabaseMetaData meta) throws SQLException {
         List<DbStructureTreeItem> schemaList = new ArrayList<>();
 
-        try {
-            ResultSet resultSet = meta.getSchemas();
+        ResultSet resultSet = meta.getSchemas();
 
-            while(resultSet.next()) {
-                schemaList.add(new DbStructureTreeItem(DbStructureTreeItem.ItemType.SCHEMA
-                        , resultSet.getString("TABLE_SCHEM"), resultSet.getString("TABLE_SCHEM")));
-            }
-        } catch(Throwable e) {
-            schemaList.clear();
+        while(resultSet.next()) {
+            schemaList.add(new DbStructureTreeItem(DbStructureTreeItem.ItemType.SCHEMA
+                    , resultSet.getString("TABLE_SCHEM"), resultSet.getString("TABLE_SCHEM")));
         }
 
         // 空ならダミーのアイテムを入れる
@@ -142,7 +138,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
     }
 
     @Override
-    public void updateUIPreparation(Void uiParam) throws Exception {
+    public void updateUIPreparation(final Void uiParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -155,14 +151,13 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
     }
 
     @Override
-    public void updateUI(DbStructureTreeItem uiParam) throws Exception {
-        final TreeItem<String> dispatchParam = uiParam;
+    public void updateUI(final DbStructureTreeItem uiParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
                 ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
-                subList.add(dispatchParam);
+                subList.add(uiParam);
                 FXCollections.sort(subList, new Comparator<TreeItem<String>>() {
                     @Override
                     public int compare(TreeItem<String> o1, TreeItem<String> o2) {

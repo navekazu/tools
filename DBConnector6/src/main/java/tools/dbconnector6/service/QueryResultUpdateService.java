@@ -212,8 +212,8 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
     }
 
     @Override
-    public void updateUIPreparation(List<TableColumn<QueryResult, String>> uiParam) throws Exception {
-        final List<TableColumn<QueryResult, String>> dispatchParam = new ArrayList<>(uiParam);
+    public void updateUIPreparation(final List<TableColumn<QueryResult, String>> uiParam) throws Exception {
+//        final List<TableColumn<QueryResult, String>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -221,20 +221,22 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
                 mainControllerInterface.getQueryParam().queryResultTableView.getColumns().clear();
 
                 ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
-                columnList.addAll(dispatchParam);
+//                columnList.addAll(dispatchParam);
+                columnList.addAll(uiParam);
             }
         });
 
     }
 
     @Override
-    public void updateUI(List<List<QueryResultCellValue>> uiParam) throws Exception {
-        final List<List<QueryResultCellValue>> dispatchParam = new ArrayList<>(uiParam);
+    public void updateUI(final List<List<QueryResultCellValue>> uiParam) throws Exception {
+//        final List<List<QueryResultCellValue>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 List<QueryResult> list = new ArrayList<>();
-                for (List<QueryResultCellValue> m: dispatchParam) {
+//                for (List<QueryResultCellValue> m: dispatchParam) {
+                for (List<QueryResultCellValue> m: uiParam) {
                     QueryResult r = new QueryResult();
                     r.setData(m);
                     list.add(r);

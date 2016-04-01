@@ -7,6 +7,6 @@ public interface BackgroundServiceInterface<P, M> {
     public void cancel() throws Exception;
     public void cancelled();
     public void failed();
-    public void updateUIPreparation(P uiParam) throws Exception;
-    public void updateUI(M uiParam) throws Exception;
+    public void updateUIPreparation(final P uiParam) throws Exception;
+    public void updateUI(final M uiParam) throws Exception;
 }
