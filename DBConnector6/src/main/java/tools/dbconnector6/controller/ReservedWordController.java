@@ -11,6 +11,7 @@ import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.ReservedWord;
 
 import java.net.URL;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.Set;
@@ -99,19 +100,14 @@ public class ReservedWordController implements Initializable {
      * @param c 入力文字
      * @return 文字の場合 true、それ以外は false
      */
-    private static final char[] ALPHABETS_ALL = new char[]{
+    private static final Character[] ALPHABETS_ALL = new Character[]{
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     };
-    private boolean isCharacter(char c) {
-        for (char alphabet: ALPHABETS_ALL) {
-            if (c==alphabet) {
-                return true;
-            }
-        }
-        return false;
+    private boolean isCharacter(char ch) {
+        return Arrays.stream(ALPHABETS_ALL).anyMatch(c -> c == ch);
     }
 
     /**
@@ -119,17 +115,12 @@ public class ReservedWordController implements Initializable {
      * @param c 入力文字
      * @return 大文字の場合 true、それ以外は false
      */
-    private static final char[] ALPHABETS_UPPERCASE = new char[]{
+    private static final Character[] ALPHABETS_UPPERCASE = new Character[]{
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     };
-    private boolean isUpperCharacter(char c) {
-        for (char alphabet: ALPHABETS_UPPERCASE) {
-            if (c==alphabet) {
-                return true;
-            }
-        }
-        return false;
+    private boolean isUpperCharacter(char ch) {
+        return Arrays.stream(ALPHABETS_UPPERCASE).anyMatch(c -> c == ch);
     }
 
     @Override

@@ -71,10 +71,4 @@ public class EditorChooserController implements Initializable {
     public String getEditorPath() {
         return editorPathTextField.getText();
     }
-
-    private class EditorChooserShownHandler implements EventHandler<WindowEvent> {
-        @Override
-        public void handle(WindowEvent event) {
-        }
-    }
 }

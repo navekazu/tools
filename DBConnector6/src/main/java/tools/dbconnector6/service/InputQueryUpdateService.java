@@ -62,7 +62,7 @@ public class InputQueryUpdateService implements BackgroundServiceInterface<Void,
     }
 
     @Override
-    public void updateUIPreparation(Void uiParam) throws Exception {
+    public void updateUIPreparation(final Void uiParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {

@@ -73,7 +73,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     }
 
     @Override
-    public void updateUIPreparation(Void uiParam) throws Exception {
+    public void updateUIPreparation(final Void uiParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -88,17 +88,21 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     }
 
     @Override
-    public void updateUI(TableStructures uiParam) throws Exception {
-        final List<TablePropertyTab> tablePropertyList = new ArrayList<>(uiParam.tablePropertyList);
-        final List<TableColumnTab> tableColumnList = new ArrayList<>(uiParam.tableColumnList);
-        final List<TableIndexTab> tableIndexList = new ArrayList<>(uiParam.tableIndexList);
+    public void updateUI(final TableStructures uiParam) throws Exception {
+//        final List<TablePropertyTab> tablePropertyList = new ArrayList<>(uiParam.tablePropertyList);
+//        final List<TableColumnTab> tableColumnList = new ArrayList<>(uiParam.tableColumnList);
+//        final List<TableIndexTab> tableIndexList = new ArrayList<>(uiParam.tableIndexList);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(tablePropertyList);
-                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(tableColumnList);
-                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(tableIndexList);
-                if (tableIndexList.size()>=1) {
+//                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(tablePropertyList);
+//                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(tableColumnList);
+//                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(tableIndexList);
+//                if (tableIndexList.size()>=1) {
+                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(uiParam.tablePropertyList);
+                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(uiParam.tableColumnList);
+                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(uiParam.tableIndexList);
+                if (uiParam.tableIndexList.size()>=1) {
                     mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getSelectionModel().select(0);
                 }
             }

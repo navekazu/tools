@@ -16,12 +16,13 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     private Set<ReservedWord> reservedWordList;
 
     private static final String[] PRESET_RESERVED_WORD = new String[]{
-            "select", "from", "where", "group by", "order by", "asc", "desc", "having",
+            "select", "distinct", "from", "where", "group", "order", "by", "asc", "desc", "having",
+            "insert", "into", "values",
             "update", "set",
-            "delete",
-            "insert into", "values",
-            "create", "drop", "table", "index",
-            "and", "or", "not", "is",
+            "delete", "truncate",
+            "create", "alter", "drop",
+            "table", "unique", "index",
+            "and", "or", "not", "is", "between", "in", "like", "exists",
     };
 
     public ReservedWordUpdateService(MainControllerInterface mainControllerInterface, Set<ReservedWord> reservedWordList) {
@@ -131,10 +132,10 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     }
 
     @Override
-    public void updateUIPreparation(Void uiParam) throws Exception {
+    public void updateUIPreparation(final Void uiParam) throws Exception {
     }
 
     @Override
-    public void updateUI(Void uiParam) throws Exception {
+    public void updateUI(final Void uiParam) throws Exception {
     }
 }
