@@ -51,6 +51,7 @@ public class ConnectController implements Initializable {
     @FXML private TableColumn<Connect, String> urlTableColumn;
     @FXML private TableColumn<Connect, String> userTableColumn;
     @FXML private TableColumn<Connect, String> passwordTableColumn;
+
     @FXML private ComboBox historyComboBox;
     @FXML private TextField libraryPathTextField;
     @FXML private TextField driverTextField;

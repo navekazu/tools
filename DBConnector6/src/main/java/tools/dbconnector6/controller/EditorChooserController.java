@@ -14,7 +14,14 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class EditorChooserController implements Initializable {
+
+    // Scene overview
+    // +--------------------------------------------+
+    // |           editorPathTextField              |
+    // |                                            |
+    // +--------------------------------------------+
     @FXML private TextField editorPathTextField;
+
     private MainControllerInterface mainControllerInterface;
     private boolean ok;
 
