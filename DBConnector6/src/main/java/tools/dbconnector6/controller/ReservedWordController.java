@@ -18,6 +18,12 @@ import java.util.stream.Collectors;
 
 public class ReservedWordController implements Initializable {
 
+    // Scene overview
+    // +----------------------------------+
+    // | reservedWordListView             |
+    // |                                  |
+    // |                                  |
+    // +----------------------------------+
     @FXML private ListView reservedWordListView;
 
     private MainControllerInterface mainControllerInterface;
