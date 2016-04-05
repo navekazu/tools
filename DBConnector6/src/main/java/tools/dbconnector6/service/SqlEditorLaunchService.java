@@ -8,9 +8,9 @@ import tools.dbconnector6.serializer.TemporaryQuerySerializer;
 
 import java.nio.file.Path;
 
-public class InputQueryUpdateService implements BackgroundServiceInterface<Void, String> {
+public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, String> {
     private MainControllerInterface mainControllerInterface;
-    public InputQueryUpdateService(MainControllerInterface mainControllerInterface) {
+    public SqlEditorLaunchService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }
 

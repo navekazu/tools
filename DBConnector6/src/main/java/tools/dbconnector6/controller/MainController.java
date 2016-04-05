@@ -176,7 +176,7 @@ public class MainController extends Application implements Initializable, MainCo
     private BackgroundService tableStructureUpdateService;
     private BackgroundService queryResultUpdateService;
     private BackgroundService reservedWordUpdateService;
-    private BackgroundService inputQueryUpdateService;
+    private BackgroundService sqlEditorLaunchService;
 
     private Stage reservedWordStage;
     private ReservedWordController reservedWordController;
@@ -246,7 +246,7 @@ public class MainController extends Application implements Initializable, MainCo
         // service
         queryResultUpdateService = new BackgroundService(new QueryResultUpdateService(this));
         reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList));
-        inputQueryUpdateService = new BackgroundService(new InputQueryUpdateService(this));
+        sqlEditorLaunchService = new BackgroundService(new SqlEditorLaunchService(this));
 
         dbStructureUpdateService.restart();
         tableStructureTabPaneUpdateService.restart();
@@ -690,7 +690,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCallSqlEditor(ActionEvent event) {
-        inputQueryUpdateService.restart();
+        sqlEditorLaunchService.restart();
     }
 
     @FXML
