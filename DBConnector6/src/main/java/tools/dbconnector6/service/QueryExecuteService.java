@@ -46,7 +46,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         }
 
         // 実行するSQLを取得
-        String[] queries = splitQuery(mainControllerInterface.getInputQuery());
+        String[] queries = splitQuery(mainControllerInterface.getQuery());
 
         // 個々のSQLを実行
         int executeQueryCount = 0;
@@ -186,7 +186,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                         }
 
                         if (rowList.size() >= FLUSH_ROW_COUNT) {
-                            updateUI(rowList);
+                            updateUI(new ArrayList<>(rowList));
                             rowList.clear();
                         }
                     }
@@ -197,7 +197,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                         return;
                     }
 
-                    updateUI(rowList);
+                    updateUI(new ArrayList<>(rowList));
                     endTime = System.currentTimeMillis();
                     mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
                 }

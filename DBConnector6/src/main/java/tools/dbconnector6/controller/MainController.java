@@ -18,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.*;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import tools.dbconnector6.BackgroundService;
@@ -28,8 +29,10 @@ import tools.dbconnector6.serializer.ApplicationLogSerializer;
 import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -171,6 +174,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     private Connection connection;
     private Connect connectParam;
+    private String queryScript = null;
     private BackgroundService dbStructureUpdateService;
     private BackgroundService tableStructureTabPaneUpdateService;
     private BackgroundService tableStructureUpdateService;
@@ -322,6 +326,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     public void writeLog(String message, Object... args) {
         final String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -496,10 +501,9 @@ public class MainController extends Application implements Initializable, MainCo
         return evidenceModeIncludeHeader.isSelected();
     }
 
+    private static final String[] EVIDENCE_DELIMITERS = new String[] {"\t", ",", " "};
     @Override
     public String getEvidenceDelimiter() {
-        String[] delimiters = new String[] {"\t", ",", " "};
-
         int selectedIndex = 0;
         for (Toggle toggle: evidenceDelimiter.getToggles()) {
             if (toggle.isSelected()) {
@@ -508,16 +512,28 @@ public class MainController extends Application implements Initializable, MainCo
             selectedIndex++;
         }
 
-        return delimiters[selectedIndex];
+        return EVIDENCE_DELIMITERS[selectedIndex];
     }
 
     @Override
-    public String getInputQuery() {
-        //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
-        String sql = queryTextArea.getSelectedText();
-        if (sql.length()<=0) {
-            sql = queryTextArea.getText();
+    public String getQuery() {
+        String sql;
+
+        if (queryScript!=null) {
+            // 読み込んだスクリプトがあるなら、それを実行
+            sql = queryScript;
+            queryScript = null;
+
+        } else {
+            // スクリプトを読み込んでいないなら、クエリ入力している内容を実行
+
+            //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
+            sql = queryTextArea.getSelectedText();
+            if (sql.length() <= 0) {
+                sql = queryTextArea.getText();
+            }
         }
+
         return sql;
     }
 
@@ -724,7 +740,27 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onQueryScript(ActionEvent event) {
-        // TODO: SQLファイルを読み込んで実行する
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select SQL script");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Query script", "*.sql"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text file", "*.txt"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+
+        File selectedFile = fileChooser.showOpenDialog(queryTextArea.getScene().getWindow());
+        if (selectedFile == null) {
+            return;
+        }
+
+        try {
+            List<String> allLines = Files.readAllLines(selectedFile.toPath());
+            StringBuilder stringBuilder = new StringBuilder();
+            allLines.stream().forEach(e -> stringBuilder.append(e).append("\n"));
+            queryScript = stringBuilder.toString();
+            queryExecuteService.restart();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML

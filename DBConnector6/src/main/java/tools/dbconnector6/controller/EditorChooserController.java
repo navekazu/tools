@@ -43,8 +43,7 @@ public class EditorChooserController implements Initializable {
     private void onRef(ActionEvent e) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select SQL editor");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
 
         // 入力済みのファイルを基に初期ディレクトリを設定
         if (editorPathTextField.getText().length()>=1) {

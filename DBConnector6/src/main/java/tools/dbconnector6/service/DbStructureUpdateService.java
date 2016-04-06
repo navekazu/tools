@@ -39,7 +39,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         List<DbStructureTreeItem> schemaList = getSchemaList(meta);
 
         // スキーマごとにスレッドを立てて、スキーマ単位に構造を解析
-        for (DbStructureTreeItem item: schemaList) {
+        schemaList.parallelStream().forEach(item -> {
             Service service = new Service() {
                 @Override
                 protected Task createTask() {
@@ -47,7 +47,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
                 }
             };
             service.restart();
-        }
+        });
     }
 
     @Override

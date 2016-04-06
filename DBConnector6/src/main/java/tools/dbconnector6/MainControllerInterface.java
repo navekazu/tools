@@ -23,7 +23,7 @@ public interface MainControllerInterface {
     public boolean isEvidenceMode();
     public boolean isEvidenceModeIncludeHeader();
     public String getEvidenceDelimiter();
-    public String getInputQuery();
+    public String getQuery();
     public String getSelectedQuery();
     public void updateSelectedQuery(String query);
     public void addQueryWord(String word, boolean shiftDown);
