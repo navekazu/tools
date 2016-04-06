@@ -117,7 +117,6 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
 
                     for (int loop=0; loop<metaData.getColumnCount(); loop++) {
                         TableColumn<QueryResult, String> col = new TableColumn<>(metaData.getColumnName(loop+1));
-                        final String key = Integer.toString(loop);
                         final int index = loop;
                         final Pos pos = QueryResultCellValue.getAlignment(loop+1, metaData);
                         col.setCellValueFactory(
@@ -241,7 +240,8 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                     r.setData(m);
                     list.add(r);
                 }
-                mainControllerInterface.getQueryParam().queryResultTableView.getItems().addAll(list);
+                List<QueryResult> items = mainControllerInterface.getQueryParam().queryResultTableView.getItems();
+                items.addAll(list);
             }
         });
     }

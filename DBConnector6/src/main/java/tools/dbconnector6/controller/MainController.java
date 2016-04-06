@@ -41,9 +41,10 @@ import java.util.List;
 
 import static tools.dbconnector6.controller.DbStructureTreeItem.ItemType.DATABASE;
 
+/**
+ * DBConnector6のメイン画面コントローラ
+ */
 public class MainController extends Application implements Initializable, MainControllerInterface {
-    private static SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-
     private Stage primaryStage;
 
     // Scene overview
@@ -164,7 +165,7 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML private TextField tableIndexUniqueKeyTextField;
     @FXML private ListView tableIndexListView;
 
-
+    // other UI
     @FXML private SplitPane primarySplitPane;
     @FXML private SplitPane leftSplitPane;
     @FXML private SplitPane rightSplitPane;
@@ -172,16 +173,7 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML private CheckMenuItem evidenceModeIncludeHeader;
     @FXML private ToggleGroup evidenceDelimiter;
 
-    private Connection connection;
-    private Connect connectParam;
-    private String queryScript = null;
-    private BackgroundService dbStructureUpdateService;
-    private BackgroundService tableStructureTabPaneUpdateService;
-    private BackgroundService tableStructureUpdateService;
-    private BackgroundService queryExecuteService;
-    private BackgroundService reservedWordUpdateService;
-    private BackgroundService sqlEditorLaunchService;
-
+    // stage & controller
     private Stage reservedWordStage;
     private ReservedWordController reservedWordController;
     private Set<ReservedWord> reservedWordList = new HashSet<>();
@@ -195,6 +187,19 @@ public class MainController extends Application implements Initializable, MainCo
     private Stage editorChooserStage;
     private EditorChooserController editorChooserController;
     private AppConfigEditor appConfigEditor = new AppConfigEditor();;
+
+    // service
+    private BackgroundService dbStructureUpdateService;
+    private BackgroundService tableStructureTabPaneUpdateService;
+    private BackgroundService tableStructureUpdateService;
+    private BackgroundService queryExecuteService;
+    private BackgroundService reservedWordUpdateService;
+    private BackgroundService sqlEditorLaunchService;
+
+    // other field
+    private Connection connection;
+    private Connect connectParam;
+    private String queryScript = null;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -213,7 +218,7 @@ public class MainController extends Application implements Initializable, MainCo
         controller.focusQueryTextArea();
     }
 
-    public void focusQueryTextArea() {
+    private void focusQueryTextArea() {
         queryTextArea.requestFocus();
     }
 
@@ -324,8 +329,9 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordUpdateService.restart();
     }
 
+    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
     public void writeLog(String message, Object... args) {
-        final String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
+        final String logText = LOG_DATE_FORMAT.format(new Date())+" " + String.format(message, args);
 
         Platform.runLater(new Runnable() {
             @Override
