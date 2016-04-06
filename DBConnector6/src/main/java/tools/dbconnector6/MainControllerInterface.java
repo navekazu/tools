@@ -34,7 +34,7 @@ public interface MainControllerInterface {
     public BackgroundService getDbStructureUpdateService();
     public BackgroundService getTableStructureTabPaneUpdateService();
     public BackgroundService getTableStructureUpdateService();
-    public BackgroundService getQueryResultUpdateService();
+    public BackgroundService getQueryExecuteService();
 
     public DbStructureParam getDbStructureParam();
     public TableStructureTabParam getTableStructureTabParam();

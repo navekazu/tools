@@ -174,7 +174,7 @@ public class MainController extends Application implements Initializable, MainCo
     private BackgroundService dbStructureUpdateService;
     private BackgroundService tableStructureTabPaneUpdateService;
     private BackgroundService tableStructureUpdateService;
-    private BackgroundService queryResultUpdateService;
+    private BackgroundService queryExecuteService;
     private BackgroundService reservedWordUpdateService;
     private BackgroundService sqlEditorLaunchService;
 
@@ -244,7 +244,7 @@ public class MainController extends Application implements Initializable, MainCo
         tableIndexListView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
 
         // service
-        queryResultUpdateService = new BackgroundService(new QueryResultUpdateService(this));
+        queryExecuteService = new BackgroundService(new QueryExecuteService(this));
         reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList));
         sqlEditorLaunchService = new BackgroundService(new SqlEditorLaunchService(this));
 
@@ -373,8 +373,8 @@ public class MainController extends Application implements Initializable, MainCo
         return tableStructureUpdateService;
     }
 
-    public BackgroundService getQueryResultUpdateService() {
-        return queryResultUpdateService;
+    public BackgroundService getQueryExecuteService() {
+        return queryExecuteService;
     }
 
     public DbStructureParam getDbStructureParam() {
@@ -705,7 +705,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onExecuteQuery(ActionEvent event) {
-        queryResultUpdateService.restart();
+        queryExecuteService.restart();
     }
 
 
@@ -719,7 +719,7 @@ public class MainController extends Application implements Initializable, MainCo
         if (!isConnect()) {
             return ;
         }
-        queryResultUpdateService.cancel();
+        queryExecuteService.cancel();
     }
 
     @FXML

@@ -26,7 +26,7 @@ import java.util.*;
 import java.util.Date;
 import java.util.List;
 
-public class QueryResultUpdateService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<List<QueryResultCellValue>>> {
+public class QueryExecuteService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<List<QueryResultCellValue>>> {
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
@@ -34,7 +34,7 @@ public class QueryResultUpdateService implements BackgroundServiceInterface<List
     private QueryHistorySerializer queryHistorySerializer;
 
     private MainControllerInterface mainControllerInterface;
-    public QueryResultUpdateService(MainControllerInterface mainControllerInterface) {
+    public QueryExecuteService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
         this.queryHistorySerializer = new QueryHistorySerializer();
     }
