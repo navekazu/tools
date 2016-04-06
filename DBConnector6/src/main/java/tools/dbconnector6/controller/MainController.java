@@ -945,8 +945,9 @@ public class MainController extends Application implements Initializable, MainCo
 
                 // 作業中クエリの復元
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
-                controller.queryTextArea.setText(workingQuerySerializer.readText());
-                controller.queryTextArea.positionCaret(controller.queryTextArea.getText().length());
+                String workingQuery = workingQuerySerializer.readText().trim();
+                controller.queryTextArea.setText(workingQuery);
+                controller.queryTextArea.positionCaret(workingQuery.length());
 
                 // DB接続画面を表示
                 controller.showConnect();

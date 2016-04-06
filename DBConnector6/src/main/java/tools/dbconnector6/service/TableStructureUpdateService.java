@@ -192,6 +192,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     }
 
     private void updateTableIndexFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableIndexTab> tableIndexList) throws SQLException {
+        String primaryKeyName = null;
 
         // Primary key
         try (ResultSet resultSet = metaData.getPrimaryKeys(null, tableItem.getSchema(), tableItem.getValue())) {
@@ -206,6 +207,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
                             .uniqueKey(true)
                             .build();
                     columns = new HashMap<>();
+                    primaryKeyName = resultSet.getString("PK_NAME");
                 }
                 columns.put(resultSet.getShort("KEY_SEQ"), resultSet.getString("COLUMN_NAME"));
             }
@@ -227,6 +229,12 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
                     continue;
                 }
 
+                // プライマリキー名が取れていてインデックスと同じ名前なら、既にプライマリキーとして追加しているので読み飛ばす
+                if (primaryKeyName!=null && primaryKeyName.equals(resultSet.getString("INDEX_NAME"))) {
+                    continue;
+                }
+
+                // 名前が変わったらtableIndexTabを作成
                 if (tableIndexTab==null || !tableIndexTab.getIndexName().equals(resultSet.getString("INDEX_NAME"))) {
                     if (tableIndexTab!=null) {
                         tableIndexTab.setColumnList(mapToList(columns));
