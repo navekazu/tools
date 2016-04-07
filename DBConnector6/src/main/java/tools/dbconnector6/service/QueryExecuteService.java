@@ -110,7 +110,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                 return ;
             }
 
-            if (executeResult) {
+            if (!executeResult) {
                 // 結果なし
                 mainControllerInterface.writeLog("Success. count: %S", NUMBER_FORMAT.format(statement.getUpdateCount()));
                 return ;
