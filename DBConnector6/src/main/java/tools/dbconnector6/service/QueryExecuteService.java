@@ -66,7 +66,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
             } else if (queries.length >= 2) {
                 mainControllerInterface.writeLog("Total query count: %d", executeQueryCount);
             }
-        } catch(SQLException e) {
+        } catch(Exception e) {
             mainControllerInterface.writeLog(e);
             // 複数クエリの場合、実行出来たクエリ数を出力
             if (queries.length >= 2) {
@@ -107,117 +107,120 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
             mainControllerInterface.writeLog("Response time: %s sec", RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
 
             if (task.isCancelled()) {
-                return;
+                return ;
             }
 
             if (executeResult) {
-                // 結果あり
-                startTime = System.currentTimeMillis();
-                try (ResultSet resultSet = statement.getResultSet()) {
-                    EvidenceInfo evidenceInfo = new EvidenceInfo();
-
-                    // カラム情報を取得
-                    ResultSetMetaData metaData = resultSet.getMetaData();
-                    List<TableColumn<QueryResult, String>> colList = new ArrayList<>();
-
-                    for (int loop=0; loop<metaData.getColumnCount(); loop++) {
-                        TableColumn<QueryResult, String> col = new TableColumn<>(metaData.getColumnName(loop+1));
-                        final int index = loop;
-                        final Pos pos = QueryResultCellValue.getAlignment(loop+1, metaData);
-                        col.setCellValueFactory(
-                                new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
-                                    @Override
-                                    public ObservableValue<String> call(TableColumn.CellDataFeatures<QueryResult, String> p) {
-                                        return new SimpleStringProperty(p.getValue().getData(index).getFormattedString());
-                                    }
-                                });
-                        col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
-                            @Override
-                            public TableCell<QueryResult, String> call(TableColumn<QueryResult, String> param) {
-                                return new TableCell<QueryResult, String>() {
-                                    @Override
-                                    public void updateItem(String item, boolean empty) {
-                                        if (item == null) {
-                                            return;
-                                        }
-                                        setText(item.toString());
-
-                                        TableRow row = getTableRow();
-                                        if (row == null) {
-                                            return;
-                                        }
-                                        ObservableList<QueryResult> list = getTableView().getItems();
-                                        QueryResult queryResult = list.get(row.getIndex());
-                                        QueryResultCellValue cellValue = queryResult.getData(index);
-                                        if (cellValue.isNullValue()) {
-                                            setAlignment(Pos.CENTER);
-                                            setTextFill(Color.BLUE);
-                                        } else {
-                                            setAlignment(pos);
-                                            setTextFill(Color.BLACK);
-                                        }
-                                    }
-                                };
-                            }
-                        });
-
-                        colList.add(col);
-                        evidenceInfo.appendHeader(metaData.getColumnName(loop + 1));
-                    }
-                    updateUIPreparation(colList);
-                    evidenceInfo.flushHeader();
-
-                    if (task.isCancelled()) {
-                        return;
-                    }
-
-                    // 結果を取得
-                    List<List<QueryResultCellValue>> rowList = new ArrayList<>();
-                    long rowCount = 0;
-                    while (resultSet.next()) {
-                        List<QueryResultCellValue> data = new ArrayList<>();
-                        for (int loop=0; loop<metaData.getColumnCount(); loop++) {
-                            QueryResultCellValue cellValue = QueryResultCellValue.createQueryResultCellValue(loop+1, metaData, resultSet);
-                            data.add(cellValue);
-                            evidenceInfo.appendRow(cellValue.getEvidenceModeString());
-                        }
-                        rowList.add(data);
-                        rowCount++;
-                        evidenceInfo.flushRow();
-
-                        if (task.isCancelled()) {
-                            return;
-                        }
-
-                        if (rowList.size() >= FLUSH_ROW_COUNT) {
-                            updateUI(new ArrayList<>(rowList));
-                            rowList.clear();
-                        }
-                    }
-
-                    evidenceInfo.pasteToClipboard();
-
-                    if (task.isCancelled()) {
-                        return;
-                    }
-
-                    updateUI(new ArrayList<>(rowList));
-                    endTime = System.currentTimeMillis();
-                    mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
-                }
-            } else {
                 // 結果なし
                 mainControllerInterface.writeLog("Success. count: %S", NUMBER_FORMAT.format(statement.getUpdateCount()));
+                return ;
             }
 
-        } catch(Throwable e) {
-            mainControllerInterface.writeLog(e);
+            // 結果あり
+            startTime = System.currentTimeMillis();
+            try (ResultSet resultSet = statement.getResultSet()) {
+                EvidenceInfo evidenceInfo = new EvidenceInfo();
+
+                // カラム情報を取得し、一覧のヘッダ部を作成する
+                ResultSetMetaData metaData = resultSet.getMetaData();
+                List<TableColumn<QueryResult, String>> colList = new ArrayList<>();
+
+                for (int loop=0; loop<metaData.getColumnCount(); loop++) {
+                    TableColumn<QueryResult, String> col = new TableColumn<>(metaData.getColumnName(loop+1));
+                    final int index = loop;
+                    final Pos pos = QueryResultCellValue.getAlignment(loop+1, metaData);
+                    col.setCellValueFactory(
+                            new Callback<TableColumn.CellDataFeatures<QueryResult, String>, ObservableValue<String>>() {
+                                @Override
+                                public ObservableValue<String> call(TableColumn.CellDataFeatures<QueryResult, String> p) {
+                                    return new SimpleStringProperty(p.getValue().getData(index).getFormattedString());
+                                }
+                            });
+                    col.setCellFactory(new Callback<TableColumn<QueryResult, String>, TableCell<QueryResult, String>>() {
+                        @Override
+                        public TableCell<QueryResult, String> call(TableColumn<QueryResult, String> param) {
+                            return new TableCell<QueryResult, String>() {
+                                @Override
+                                public void updateItem(String item, boolean empty) {
+                                    updateCellItem(this, item, empty, index, pos);
+                                }
+                            };
+                        }
+                    });
+
+                    colList.add(col);
+                    evidenceInfo.appendHeader(metaData.getColumnName(loop + 1));
+                }
+                updateUIPreparation(colList);
+                evidenceInfo.flushHeader();
+
+                if (task.isCancelled()) {
+                    return;
+                }
+
+                // 結果を取得し、一覧のボディ部を作成する
+                List<List<QueryResultCellValue>> rowList = new ArrayList<>();
+                long rowCount = 0;
+                while (resultSet.next()) {
+                    List<QueryResultCellValue> data = new ArrayList<>();
+                    for (int loop=0; loop<metaData.getColumnCount(); loop++) {
+                        QueryResultCellValue cellValue = QueryResultCellValue.createQueryResultCellValue(loop+1, metaData, resultSet);
+                        data.add(cellValue);
+                        evidenceInfo.appendRow(cellValue.getEvidenceModeString());
+                    }
+                    rowList.add(data);
+                    rowCount++;
+                    evidenceInfo.flushRow();
+
+                    if (task.isCancelled()) {
+                        return;
+                    }
+
+                    // FLUSH_ROW_COUNT毎に一覧へ反映する
+                    if (rowList.size() >= FLUSH_ROW_COUNT) {
+                        updateUI(new ArrayList<>(rowList));
+                        rowList.clear();
+                    }
+                }
+
+                evidenceInfo.pasteToClipboard();
+
+                if (task.isCancelled()) {
+                    return;
+                }
+
+                updateUI(new ArrayList<>(rowList));
+                endTime = System.currentTimeMillis();
+                mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
+            }
+        }
+    }
+
+    private void updateCellItem(TableCell<QueryResult, String> tableCell, String item, boolean empty, int index, Pos pos) {
+        if (item == null) {
+            return;
+        }
+        tableCell.setText(item.toString());
+
+        TableRow row = tableCell.getTableRow();
+        if (row == null) {
+            return;
+        }
+
+        ObservableList<QueryResult> list = tableCell.getTableView().getItems();
+        QueryResult queryResult = list.get(row.getIndex());
+        QueryResultCellValue cellValue = queryResult.getData(index);
+        if (cellValue.isNullValue()) {
+            tableCell.setAlignment(Pos.CENTER);
+            tableCell.setTextFill(Color.BLUE);
+        } else {
+            tableCell.setAlignment(pos);
+            tableCell.setTextFill(Color.BLACK);
         }
     }
 
     @Override
     public void updateUIPreparation(final List<TableColumn<QueryResult, String>> uiParam) throws Exception {
-//        final List<TableColumn<QueryResult, String>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -225,21 +228,17 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                 mainControllerInterface.getQueryParam().queryResultTableView.getColumns().clear();
 
                 ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
-//                columnList.addAll(dispatchParam);
                 columnList.addAll(uiParam);
             }
         });
-
     }
 
     @Override
     public void updateUI(final List<List<QueryResultCellValue>> uiParam) throws Exception {
-//        final List<List<QueryResultCellValue>> dispatchParam = new ArrayList<>(uiParam);
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
                 List<QueryResult> list = new ArrayList<>();
-//                for (List<QueryResultCellValue> m: dispatchParam) {
                 for (List<QueryResultCellValue> m: uiParam) {
                     QueryResult r = new QueryResult();
                     r.setData(m);
@@ -274,19 +273,6 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
     }
     private boolean isOneWord(String sql) {
         return (sql.length()>=1 && sql.indexOf(" ")==-1 && sql.indexOf("\t")==-1 && sql.indexOf("\n")==-1);
-    }
-
-    private void pasteEvidenceInfo(List<String> evidenceInfo) {
-        StringBuilder stringBuilder = new StringBuilder();
-        evidenceInfo.stream().forEach(e -> {
-            stringBuilder.append(e);
-            stringBuilder.append("\n");
-        });
-
-        Toolkit toolkit = Toolkit.getDefaultToolkit();
-        Clipboard clip = toolkit.getSystemClipboard();
-        StringSelection stringSelection = new StringSelection(stringBuilder.toString());
-        clip.setContents(stringSelection, stringSelection);
     }
 
     private String createQueryHistory(String query) {

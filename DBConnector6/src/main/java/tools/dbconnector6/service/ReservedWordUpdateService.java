@@ -64,21 +64,18 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
             schemas.add("");
         }
 
-        Set<ReservedWord> allTables = new HashSet<>();
-        Set<ReservedWord> allColumns = new HashSet<>();
         final List<String> finalTypes = new ArrayList<>(types);
 
         // スキーマごとにスレッドを立てて、スキーマ単位にテーブル名と絡む姪を解析
         // ToDo: 同時実行スレッド上限(32bit Windowsで2048本)を考慮して実装する必要がある
         // ToDo: 全スレッドが終了したことをユーザーに知らせる仕組みが必要
         schemas.parallelStream().forEach(schema -> {
-            mainControllerInterface.writeLog("Reserved word parsing... %s", schema);
+            mainControllerInterface.writeLog("Reserved word parsing... (%s)", schema);
 
             // テーブル一覧
             Set<ReservedWord> tables = new HashSet<>();
             try (ResultSet resultSet = dmd.getTables(null, schema, "%", (String[]) finalTypes.toArray(new String[0]))) {
                 tables = getMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, resultSet, "TABLE_NAME");
-                allTables.addAll(tables);
                 synchronized (reservedWordList) {
                     reservedWordList.addAll(tables);
                 }
@@ -89,12 +86,13 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
                 Set<ReservedWord> columns = new HashSet<>();
                 try (ResultSet resultSet = dmd.getColumns(null, schema, reservedWord.getWord(), null)) {
                     columns = getMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, resultSet, "COLUMN_NAME");
-                    allColumns.addAll(columns);
                     synchronized (reservedWordList) {
                         reservedWordList.addAll(columns);
                     }
                 } catch(SQLException e){}
             }
+
+            mainControllerInterface.writeLog("Reserved word parsed. (%s)", schema);
         });
     }
 
