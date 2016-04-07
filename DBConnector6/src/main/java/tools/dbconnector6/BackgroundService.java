@@ -3,21 +3,26 @@ package tools.dbconnector6;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 
-public class BackgroundService extends Service {
+public class BackgroundService extends Service<Void> {
     private BackgroundServiceInterface bci;
+    private MainControllerInterface mci;
 
-    public BackgroundService(BackgroundServiceInterface bci) {
+    public BackgroundService(BackgroundServiceInterface bci, MainControllerInterface mci) {
         this.bci = bci;
+        this.mci = mci;
     }
 
     @Override
     protected Task createTask() {
-        return new Task() {
+        return new Task<Void>() {
             @Override
-            protected Object call() throws Exception {
-                bci.run(this);
+            protected Void call() throws Exception {
+                try {
+                    bci.run(this);
+                } catch (Exception e) {
+                    mci.writeLog(e);
+                }
                 return null;
-
             }
         };
     }
@@ -25,6 +30,7 @@ public class BackgroundService extends Service {
     @Override
     public boolean cancel() {
         if (!isRunning()) {
+            mci.writeLog(bci.getNotRunningMessage());
             return true;
         }
 
@@ -33,7 +39,7 @@ public class BackgroundService extends Service {
             bci.cancel();
         } catch (Exception e) {
             cancel = false;
-            e.printStackTrace();
+            mci.writeLog(e);
         }
 
         return cancel;

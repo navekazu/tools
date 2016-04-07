@@ -52,6 +52,11 @@ public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, 
         callHideWaitDialog();
     }
 
+    @Override
+    public String getNotRunningMessage() {
+        return "";
+    }
+
     private void callHideWaitDialog() {
         Platform.runLater(new Runnable() {
             @Override

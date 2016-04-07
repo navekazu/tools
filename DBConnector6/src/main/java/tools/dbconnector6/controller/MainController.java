@@ -228,10 +228,15 @@ public class MainController extends Application implements Initializable, MainCo
         dbStructureTreeView.setRoot(dbStructurRootItem);
         dbStructureTreeView.getSelectionModel().selectedItemProperty().addListener(new DbStructureTreeViewChangeListener());
 
-        dbStructureUpdateService = new BackgroundService(new DbStructureUpdateService(this));
-        tableStructureTabPaneUpdateService = new BackgroundService(new TableStructureTabPaneUpdateService(this));
-        tableStructureUpdateService = new BackgroundService(new TableStructureUpdateService(this));
+        // service
+        queryExecuteService = new BackgroundService(new QueryExecuteService(this), this);
+        reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList), this);
+        sqlEditorLaunchService = new BackgroundService(new SqlEditorLaunchService(this), this);
+        dbStructureUpdateService = new BackgroundService(new DbStructureUpdateService(this), this);
+        tableStructureTabPaneUpdateService = new BackgroundService(new TableStructureTabPaneUpdateService(this), this);
+        tableStructureUpdateService = new BackgroundService(new TableStructureUpdateService(this), this);
 
+        // TableColumnとプロパティの紐付け
         keyTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("key"));
         valueTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("value"));
 
@@ -252,10 +257,6 @@ public class MainController extends Application implements Initializable, MainCo
         queryResultTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
         tableIndexListView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
 
-        // service
-        queryExecuteService = new BackgroundService(new QueryExecuteService(this));
-        reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList));
-        sqlEditorLaunchService = new BackgroundService(new SqlEditorLaunchService(this));
 
         dbStructureUpdateService.restart();
         tableStructureTabPaneUpdateService.restart();
@@ -264,6 +265,7 @@ public class MainController extends Application implements Initializable, MainCo
         queryResultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         // Controllerの読み込み
+        // ToDo: きれいにする
         FXMLLoader loader;
         loader = ControllerManager.getControllerManager().getLoarder("connect");
         try {

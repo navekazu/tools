@@ -73,6 +73,11 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     }
 
     @Override
+    public String getNotRunningMessage() {
+        return "";
+    }
+
+    @Override
     public void updateUIPreparation(final Void uiParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override

@@ -9,4 +9,5 @@ public interface BackgroundServiceInterface<P, M> {
     public void failed();
     public void updateUIPreparation(final P uiParam) throws Exception;
     public void updateUI(final M uiParam) throws Exception;
+    public String getNotRunningMessage();
 }

@@ -39,6 +39,8 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         List<DbStructureTreeItem> schemaList = getSchemaList(meta);
 
         // スキーマごとにスレッドを立てて、スキーマ単位に構造を解析
+        // ToDo: 同時実行スレッド上限(32bit Windowsで2048本)を考慮して実装する必要がある
+        // ToDo: 全スレッドが終了したことをユーザーに知らせる仕組みが必要
         schemaList.parallelStream().forEach(item -> {
             Service service = new Service() {
                 @Override
@@ -63,6 +65,11 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
     @Override
     public void failed() {
 
+    }
+
+    @Override
+    public String getNotRunningMessage() {
+        return "";
     }
 
     private class  SchemaSearchTask extends Task {

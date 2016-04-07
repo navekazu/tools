@@ -90,6 +90,11 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
 
     }
 
+    @Override
+    public String getNotRunningMessage() {
+        return "Not executing now.";
+    }
+
     private void executeQuery(Task task, String query) throws Exception {
         Connection connection = mainControllerInterface.getConnection();
         long startTime, endTime;
@@ -268,7 +273,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                 .toArray(String[]::new);
     }
     private boolean isOneWord(String sql) {
-        return (sql.length()>=1 && sql.indexOf(" ")==-1 && sql.indexOf("\t")==-1);
+        return (sql.length()>=1 && sql.indexOf(" ")==-1 && sql.indexOf("\t")==-1 && sql.indexOf("\n")==-1);
     }
 
     private void pasteEvidenceInfo(List<String> evidenceInfo) {

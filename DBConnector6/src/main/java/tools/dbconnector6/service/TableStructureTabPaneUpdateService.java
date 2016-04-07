@@ -36,6 +36,7 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
             property.tableColumnTabDisable = true;
             property.tableIndexTabDisable = true;
         } else {
+            // ToDo: きれいにする
             switch (tableItem.getItemType()) {
                 case DATABASE:
                     property.tablePropertyTabDisable = false;
@@ -71,6 +72,11 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
     @Override
     public void failed() {
 
+    }
+
+    @Override
+    public String getNotRunningMessage() {
+        return "";
     }
 
     @Override
