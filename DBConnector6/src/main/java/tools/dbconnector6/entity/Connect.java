@@ -15,4 +15,11 @@ public class Connect {
     private String url;
     private String user;
     private String password;
+
+    public String getPasswordSec() {
+        if (password==null || "".equals(password)) {
+            return "";
+        }
+        return "**********";
+    }
 }

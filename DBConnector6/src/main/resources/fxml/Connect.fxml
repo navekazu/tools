@@ -146,11 +146,11 @@
                                     <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
                                  </GridPane.margin>
                               </TextField>
-                              <TextField fx:id="passwordTextField" GridPane.rowIndex="5">
+                              <PasswordField fx:id="passwordTextField" GridPane.rowIndex="5">
                                  <GridPane.margin>
                                     <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
                                  </GridPane.margin>
-                              </TextField>
+                              </PasswordField>
                               <Label text="※クラスパスにJDBCドライバを含めた場合は Library path、Driver は不要" GridPane.rowIndex="6">
                                  <GridPane.margin>
                                     <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />

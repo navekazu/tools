@@ -57,7 +57,7 @@ public class ConnectController implements Initializable {
     @FXML private TextField driverTextField;
     @FXML private TextField urlTextField;
     @FXML private TextField userTextField;
-    @FXML private TextField passwordTextField;
+    @FXML private PasswordField passwordTextField;
 
     private MainControllerInterface mainControllerInterface;
     private Connection connection;
@@ -74,7 +74,7 @@ public class ConnectController implements Initializable {
         driverTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("driver"));
         urlTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("url"));
         userTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("user"));
-        passwordTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("passeord"));
+        passwordTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("passwordSec"));
 
         connection = null;
         connect = null;
