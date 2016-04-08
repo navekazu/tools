@@ -74,7 +74,7 @@ public class ConnectController implements Initializable {
         driverTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("driver"));
         urlTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("url"));
         userTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("user"));
-        passwordTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("passwordSec"));
+        passwordTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("maskedPassword"));
 
         connection = null;
         connect = null;
