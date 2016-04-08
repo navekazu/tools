@@ -16,12 +16,13 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     private Set<ReservedWord> reservedWordList;
 
     private static final String[] PRESET_RESERVED_WORD = new String[]{
-            "select", "from", "where", "group by", "order by", "asc", "desc", "having",
+            "select", "distinct", "from", "where", "group", "order", "by", "asc", "desc", "having",
+            "insert", "into", "values",
             "update", "set",
-            "delete",
-            "insert into", "values",
-            "create", "drop", "table", "index",
-            "and", "or", "not", "is",
+            "delete", "truncate",
+            "create", "alter", "drop",
+            "table", "unique", "index",
+            "and", "or", "not", "is", "between", "in", "like", "exists",
     };
 
     public ReservedWordUpdateService(MainControllerInterface mainControllerInterface, Set<ReservedWord> reservedWordList) {
@@ -44,55 +45,55 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
         mainControllerInterface.writeLog("Reserved word parsing...");
         DatabaseMetaData dmd = mainControllerInterface.getConnection().getMetaData();
 
-        try {
-            // テーブルタイプの取得
-            List<String> types = new ArrayList<>();
-            try (ResultSet resultSet = dmd.getTableTypes()) {
-                types = getResultList(resultSet, "TABLE_TYPE");
+        // テーブルタイプの取得
+        List<String> types = new ArrayList<>();
+        try (ResultSet resultSet = dmd.getTableTypes()) {
+            types = getResultList(resultSet, "TABLE_TYPE");
+        } catch(SQLException e){
+            // テーブルタイプが取得できなければ解析は不可能
+            mainControllerInterface.writeLog("Failed reserved word parsing.");
+            return ;
+        }
+
+        // スキーマの取得
+        List<String> schemas = new ArrayList<>();
+        try (ResultSet resultSet = dmd.getSchemas()) {
+            schemas = getResultList(resultSet, "TABLE_SCHEM");
+        } catch(SQLException e){}
+        if (schemas.isEmpty()) {
+            schemas.add("");
+        }
+
+        final List<String> finalTypes = new ArrayList<>(types);
+
+        // スキーマごとにスレッドを立てて、スキーマ単位にテーブル名と絡む姪を解析
+        // ToDo: 同時実行スレッド上限(32bit Windowsで2048本)を考慮して実装する必要がある
+        // ToDo: 全スレッドが終了したことをユーザーに知らせる仕組みが必要
+        schemas.parallelStream().forEach(schema -> {
+            mainControllerInterface.writeLog("Reserved word parsing... (%s)", schema);
+
+            // テーブル一覧
+            Set<ReservedWord> tables = new HashSet<>();
+            try (ResultSet resultSet = dmd.getTables(null, schema, "%", (String[]) finalTypes.toArray(new String[0]))) {
+                tables = getMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, resultSet, "TABLE_NAME");
+                synchronized (reservedWordList) {
+                    reservedWordList.addAll(tables);
+                }
             } catch(SQLException e){}
 
-            // スキーマの取得
-            List<String> schemas = new ArrayList<>();
-            try (ResultSet resultSet = dmd.getSchemas()) {
-                schemas = getResultList(resultSet, "TABLE_SCHEM");
-            } catch(SQLException e){}
-            if (schemas.isEmpty()) {
-                schemas.add("");
-            }
-
-            Set<ReservedWord> allTables = new HashSet<>();
-            Set<ReservedWord> allColumns = new HashSet<>();
-            for (String schema : schemas) {
-                mainControllerInterface.writeLog("Reserved word parsing... %s", schema);
-
-                // テーブル一覧
-                Set<ReservedWord> tables = new HashSet<>();
-                try (ResultSet resultSet = dmd.getTables(null, schema, "%", (String[]) types.toArray(new String[0]))) {
-                    tables = getMetadataReservedWord(ReservedWord.ReservedWordType.TABLE, resultSet, "TABLE_NAME");
-                    allTables.addAll(tables);
+            // カラム一覧
+            for (ReservedWord reservedWord : tables) {
+                Set<ReservedWord> columns = new HashSet<>();
+                try (ResultSet resultSet = dmd.getColumns(null, schema, reservedWord.getWord(), null)) {
+                    columns = getMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, resultSet, "COLUMN_NAME");
                     synchronized (reservedWordList) {
-                        reservedWordList.addAll(tables);
+                        reservedWordList.addAll(columns);
                     }
                 } catch(SQLException e){}
-
-                // カラム一覧
-                for (ReservedWord reservedWord : tables) {
-                    Set<ReservedWord> columns = new HashSet<>();
-                    try (ResultSet resultSet = dmd.getColumns(null, schema, reservedWord.getWord(), null)) {
-                        columns = getMetadataReservedWord(ReservedWord.ReservedWordType.COLUMN, resultSet, "COLUMN_NAME");
-                        allColumns.addAll(columns);
-                        synchronized (reservedWordList) {
-                            reservedWordList.addAll(columns);
-                        }
-                    } catch(SQLException e){}
-                }
             }
 
-            mainControllerInterface.writeLog("Reserved word parsed. table count:%,d, colimn count:%,d ", allTables.size(), allColumns.size());
-
-        } catch(Exception e) {
-            mainControllerInterface.writeLog(e);
-        }
+            mainControllerInterface.writeLog("Reserved word parsed. (%s)", schema);
+        });
     }
 
     @Override
@@ -108,6 +109,11 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     @Override
     public void failed() {
 
+    }
+
+    @Override
+    public String getNotRunningMessage() {
+        return "";
     }
 
     private List<String> getResultList(ResultSet resultSet, String name) throws SQLException {
@@ -131,10 +137,10 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     }
 
     @Override
-    public void updateUIPreparation(Void uiParam) throws Exception {
+    public void updateUIPreparation(final Void uiParam) throws Exception {
     }
 
     @Override
-    public void updateUI(Void uiParam) throws Exception {
+    public void updateUI(final Void uiParam) throws Exception {
     }
 }

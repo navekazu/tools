@@ -18,6 +18,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.*;
 import javafx.scene.text.Text;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import tools.dbconnector6.BackgroundService;
@@ -28,8 +29,10 @@ import tools.dbconnector6.serializer.ApplicationLogSerializer;
 import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Files;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -38,9 +41,10 @@ import java.util.List;
 
 import static tools.dbconnector6.controller.DbStructureTreeItem.ItemType.DATABASE;
 
+/**
+ * DBConnector6のメイン画面コントローラ
+ */
 public class MainController extends Application implements Initializable, MainControllerInterface {
-    private static SimpleDateFormat logDateFormat = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-
     private Stage primaryStage;
 
     // Scene overview
@@ -161,7 +165,7 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML private TextField tableIndexUniqueKeyTextField;
     @FXML private ListView tableIndexListView;
 
-
+    // other UI
     @FXML private SplitPane primarySplitPane;
     @FXML private SplitPane leftSplitPane;
     @FXML private SplitPane rightSplitPane;
@@ -169,15 +173,7 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML private CheckMenuItem evidenceModeIncludeHeader;
     @FXML private ToggleGroup evidenceDelimiter;
 
-    private Connection connection;
-    private Connect connectParam;
-    private BackgroundService dbStructureUpdateService;
-    private BackgroundService tableStructureTabPaneUpdateService;
-    private BackgroundService tableStructureUpdateService;
-    private BackgroundService queryResultUpdateService;
-    private BackgroundService reservedWordUpdateService;
-    private BackgroundService inputQueryUpdateService;
-
+    // stage & controller
     private Stage reservedWordStage;
     private ReservedWordController reservedWordController;
     private Set<ReservedWord> reservedWordList = new HashSet<>();
@@ -191,6 +187,19 @@ public class MainController extends Application implements Initializable, MainCo
     private Stage editorChooserStage;
     private EditorChooserController editorChooserController;
     private AppConfigEditor appConfigEditor = new AppConfigEditor();;
+
+    // service
+    private BackgroundService dbStructureUpdateService;
+    private BackgroundService tableStructureTabPaneUpdateService;
+    private BackgroundService tableStructureUpdateService;
+    private BackgroundService queryExecuteService;
+    private BackgroundService reservedWordUpdateService;
+    private BackgroundService sqlEditorLaunchService;
+
+    // other field
+    private Connection connection;
+    private Connect connectParam;
+    private String queryScript = null;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -209,7 +218,7 @@ public class MainController extends Application implements Initializable, MainCo
         controller.focusQueryTextArea();
     }
 
-    public void focusQueryTextArea() {
+    private void focusQueryTextArea() {
         queryTextArea.requestFocus();
     }
 
@@ -219,10 +228,15 @@ public class MainController extends Application implements Initializable, MainCo
         dbStructureTreeView.setRoot(dbStructurRootItem);
         dbStructureTreeView.getSelectionModel().selectedItemProperty().addListener(new DbStructureTreeViewChangeListener());
 
-        dbStructureUpdateService = new BackgroundService(new DbStructureUpdateService(this));
-        tableStructureTabPaneUpdateService = new BackgroundService(new TableStructureTabPaneUpdateService(this));
-        tableStructureUpdateService = new BackgroundService(new TableStructureUpdateService(this));
+        // service
+        queryExecuteService = new BackgroundService(new QueryExecuteService(this), this);
+        reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList), this);
+        sqlEditorLaunchService = new BackgroundService(new SqlEditorLaunchService(this), this);
+        dbStructureUpdateService = new BackgroundService(new DbStructureUpdateService(this), this);
+        tableStructureTabPaneUpdateService = new BackgroundService(new TableStructureTabPaneUpdateService(this), this);
+        tableStructureUpdateService = new BackgroundService(new TableStructureUpdateService(this), this);
 
+        // TableColumnとプロパティの紐付け
         keyTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("key"));
         valueTableColumn.setCellValueFactory(new PropertyValueFactory<TablePropertyTab, String>("value"));
 
@@ -243,10 +257,6 @@ public class MainController extends Application implements Initializable, MainCo
         queryResultTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
         tableIndexListView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
 
-        // service
-        queryResultUpdateService = new BackgroundService(new QueryResultUpdateService(this));
-        reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList));
-        inputQueryUpdateService = new BackgroundService(new InputQueryUpdateService(this));
 
         dbStructureUpdateService.restart();
         tableStructureTabPaneUpdateService.restart();
@@ -255,6 +265,7 @@ public class MainController extends Application implements Initializable, MainCo
         queryResultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         // Controllerの読み込み
+        // ToDo: きれいにする
         FXMLLoader loader;
         loader = ControllerManager.getControllerManager().getLoarder("connect");
         try {
@@ -320,8 +331,10 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordUpdateService.restart();
     }
 
+    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
     public void writeLog(String message, Object... args) {
-        final String logText = logDateFormat.format(new Date())+" " + String.format(message, args);
+        final String logText = LOG_DATE_FORMAT.format(new Date())+" " + String.format(message, args);
+
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -373,8 +386,8 @@ public class MainController extends Application implements Initializable, MainCo
         return tableStructureUpdateService;
     }
 
-    public BackgroundService getQueryResultUpdateService() {
-        return queryResultUpdateService;
+    public BackgroundService getQueryExecuteService() {
+        return queryExecuteService;
     }
 
     public DbStructureParam getDbStructureParam() {
@@ -496,10 +509,9 @@ public class MainController extends Application implements Initializable, MainCo
         return evidenceModeIncludeHeader.isSelected();
     }
 
+    private static final String[] EVIDENCE_DELIMITERS = new String[] {"\t", ",", " "};
     @Override
     public String getEvidenceDelimiter() {
-        String[] delimiters = new String[] {"\t", ",", " "};
-
         int selectedIndex = 0;
         for (Toggle toggle: evidenceDelimiter.getToggles()) {
             if (toggle.isSelected()) {
@@ -508,16 +520,28 @@ public class MainController extends Application implements Initializable, MainCo
             selectedIndex++;
         }
 
-        return delimiters[selectedIndex];
+        return EVIDENCE_DELIMITERS[selectedIndex];
     }
 
     @Override
-    public String getInputQuery() {
-        //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
-        String sql = queryTextArea.getSelectedText();
-        if (sql.length()<=0) {
-            sql = queryTextArea.getText();
+    public String getQuery() {
+        String sql;
+
+        if (queryScript!=null) {
+            // 読み込んだスクリプトがあるなら、それを実行
+            sql = queryScript;
+            queryScript = null;
+
+        } else {
+            // スクリプトを読み込んでいないなら、クエリ入力している内容を実行
+
+            //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
+            sql = queryTextArea.getSelectedText();
+            if (sql.length() <= 0) {
+                sql = queryTextArea.getText();
+            }
         }
+
         return sql;
     }
 
@@ -690,7 +714,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCallSqlEditor(ActionEvent event) {
-        inputQueryUpdateService.restart();
+        sqlEditorLaunchService.restart();
     }
 
     @FXML
@@ -705,6 +729,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onExecuteQuery(ActionEvent event) {
+        queryExecuteService.restart();
     }
 
     @FXML
@@ -717,12 +742,32 @@ public class MainController extends Application implements Initializable, MainCo
         if (!isConnect()) {
             return ;
         }
-        queryResultUpdateService.cancel();
+        queryExecuteService.cancel();
     }
 
     @FXML
     private void onQueryScript(ActionEvent event) {
-        // TODO: SQLファイルを読み込んで実行する
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Select SQL script");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Query script", "*.sql"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("Text file", "*.txt"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
+
+        File selectedFile = fileChooser.showOpenDialog(queryTextArea.getScene().getWindow());
+        if (selectedFile == null) {
+            return;
+        }
+
+        try {
+            List<String> allLines = Files.readAllLines(selectedFile.toPath());
+            StringBuilder stringBuilder = new StringBuilder();
+            allLines.stream().forEach(e -> stringBuilder.append(e).append("\n"));
+            queryScript = stringBuilder.toString();
+            queryExecuteService.restart();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
@@ -901,8 +946,9 @@ public class MainController extends Application implements Initializable, MainCo
 
                 // 作業中クエリの復元
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
-                controller.queryTextArea.setText(workingQuerySerializer.readText());
-                controller.queryTextArea.positionCaret(controller.queryTextArea.getText().length());
+                String workingQuery = workingQuerySerializer.readText().trim();
+                controller.queryTextArea.setText(workingQuery);
+                controller.queryTextArea.positionCaret(workingQuery.length());
 
                 // DB接続画面を表示
                 controller.showConnect();

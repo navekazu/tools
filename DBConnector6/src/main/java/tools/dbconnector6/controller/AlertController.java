@@ -19,17 +19,16 @@ public class AlertController implements Initializable {
     // +--------------------------------------------+
     // |           messageLabel                     |
     // |           detailsLabel                     |
-    // |                                            |
+    // |                                 [okButton] |
     // +--------------------------------------------+
     @FXML private Label messageLabel;
     @FXML private Label detailsLabel;
     @FXML private Button okButton;
 
     private MainControllerInterface mainControllerInterface;
-    private boolean waitMode;
 
     public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
-        this.mainControllerInterface = this.mainControllerInterface;
+        this.mainControllerInterface = mainControllerInterface;
     }
 
     @Override
@@ -45,7 +44,6 @@ public class AlertController implements Initializable {
     public void setContents(String message, String details) {
         messageLabel.setText(message);
         detailsLabel.setText(details);
-
     }
 
     public void setWaitMode(boolean waitMode) {

@@ -4,7 +4,7 @@ import org.junit.*;
 
 import static org.junit.Assert.assertEquals;
 
-public class QueryResultUpdateServiceTest {
+public class QueryExecuteServiceTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
     }
@@ -23,7 +23,7 @@ public class QueryResultUpdateServiceTest {
 
     @Test
     public void splitSqlのテスト() {
-        QueryResultUpdateService service = new QueryResultUpdateService(null);
+        QueryExecuteService service = new QueryExecuteService(null);
 
         String[] splitSql;
 

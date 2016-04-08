@@ -8,9 +8,9 @@ import tools.dbconnector6.serializer.TemporaryQuerySerializer;
 
 import java.nio.file.Path;
 
-public class InputQueryUpdateService implements BackgroundServiceInterface<Void, String> {
+public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, String> {
     private MainControllerInterface mainControllerInterface;
-    public InputQueryUpdateService(MainControllerInterface mainControllerInterface) {
+    public SqlEditorLaunchService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }
 
@@ -52,6 +52,11 @@ public class InputQueryUpdateService implements BackgroundServiceInterface<Void,
         callHideWaitDialog();
     }
 
+    @Override
+    public String getNotRunningMessage() {
+        return "";
+    }
+
     private void callHideWaitDialog() {
         Platform.runLater(new Runnable() {
             @Override
@@ -62,7 +67,7 @@ public class InputQueryUpdateService implements BackgroundServiceInterface<Void,
     }
 
     @Override
-    public void updateUIPreparation(Void uiParam) throws Exception {
+    public void updateUIPreparation(final Void uiParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {

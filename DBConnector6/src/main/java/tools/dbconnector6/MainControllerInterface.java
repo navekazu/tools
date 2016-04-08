@@ -23,7 +23,7 @@ public interface MainControllerInterface {
     public boolean isEvidenceMode();
     public boolean isEvidenceModeIncludeHeader();
     public String getEvidenceDelimiter();
-    public String getInputQuery();
+    public String getQuery();
     public String getSelectedQuery();
     public void updateSelectedQuery(String query);
     public void addQueryWord(String word, boolean shiftDown);
@@ -34,7 +34,7 @@ public interface MainControllerInterface {
     public BackgroundService getDbStructureUpdateService();
     public BackgroundService getTableStructureTabPaneUpdateService();
     public BackgroundService getTableStructureUpdateService();
-    public BackgroundService getQueryResultUpdateService();
+    public BackgroundService getQueryExecuteService();
 
     public DbStructureParam getDbStructureParam();
     public TableStructureTabParam getTableStructureTabParam();

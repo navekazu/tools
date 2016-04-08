@@ -14,7 +14,14 @@ import java.net.URL;
 import java.util.ResourceBundle;
 
 public class EditorChooserController implements Initializable {
+
+    // Scene overview
+    // +--------------------------------------------+
+    // |           editorPathTextField              |
+    // |                                            |
+    // +--------------------------------------------+
     @FXML private TextField editorPathTextField;
+
     private MainControllerInterface mainControllerInterface;
     private boolean ok;
 
@@ -36,8 +43,7 @@ public class EditorChooserController implements Initializable {
     private void onRef(ActionEvent e) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Select SQL editor");
-        fileChooser.getExtensionFilters().addAll(
-                new FileChooser.ExtensionFilter("All Files", "*.*"));
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("All files", "*.*"));
 
         // 入力済みのファイルを基に初期ディレクトリを設定
         if (editorPathTextField.getText().length()>=1) {
@@ -70,11 +76,5 @@ public class EditorChooserController implements Initializable {
 
     public String getEditorPath() {
         return editorPathTextField.getText();
-    }
-
-    private class EditorChooserShownHandler implements EventHandler<WindowEvent> {
-        @Override
-        public void handle(WindowEvent event) {
-        }
     }
 }
