@@ -2,7 +2,7 @@ package tools.dbconnector6.entity;
 
 /**
  * アプリケーション設定ファイルのエンティティ基底クラス。<br>
- * ファイルは「~/.DBConnector6/config/app_config」として保存する。<br>
+ * 内容はフラットファイルとして永続化され、「~/.DBConnector6/config/app_config」として保存する。<br>
  * アプリケーション設定ファイルは行の先頭にラベルがあり、そのラベルによってその行が何の情報を保持するかが決定する。<br>
  * <br>
  * ラベルの例：<br>
