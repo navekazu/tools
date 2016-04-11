@@ -14,26 +14,26 @@ import lombok.experimental.Builder;
 @Builder
 public class ReservedWord {
     /**
-     * 予約語のタイプ
+     * 予約語の種類
      */
     public enum ReservedWordType{
         /**
-         * SQL
+         * SQL予約語
          */
         SQL,
 
         /**
-         * テーブル（テーブル、ビュー、シノニムなど）
+         * テーブル名（テーブル、ビュー、シノニムなど）
          */
         TABLE,
 
         /**
-         * カラム
+         * カラム名
          */
         COLUMN,
     }
 
-    private ReservedWordType type;  // 予約語のタイプ
+    private ReservedWordType type;  // 予約語の種類
     private String word;            // 予約語
 
     /**

@@ -7,6 +7,7 @@ import lombok.experimental.Builder;
 
 /**
  * データベース接続用のエンティティクラス。
+ * 内容はフラットファイルとして永続化され、「~/.DBConnector6/config/connection」として保存する。<br>
  */
 @AllArgsConstructor
 @Data
