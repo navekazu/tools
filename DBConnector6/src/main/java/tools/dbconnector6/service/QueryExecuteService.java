@@ -26,8 +26,8 @@ import java.util.Date;
 import java.util.List;
 
 public class QueryExecuteService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<List<QueryResultCellValue>>> {
-    private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
-    private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
+    private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");               // ToDo:書式付き出力に置き換えたい
+    private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");                          // ToDo:書式付き出力に置き換えたい
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
     private static final int FLUSH_ROW_COUNT = 1000;
     private static final int SILENT_MODE_COUNT = 100;
@@ -71,13 +71,13 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
             if (task.isCancelled()) {
                 mainControllerInterface.writeLog("Query cancelled.");
             } else if (queries.length >= 2) {
-                mainControllerInterface.writeLog("Total query count: %d", executeQueryCount);
+                mainControllerInterface.writeLog("Total query count: %,3d", executeQueryCount);
             }
         } catch(Exception e) {
             mainControllerInterface.writeLog(e);
             // 複数クエリの場合、実行出来たクエリ数を出力
             if (queries.length >= 2) {
-                mainControllerInterface.writeLog("Succeeded query count: %d", executeQueryCount);
+                mainControllerInterface.writeLog("Succeeded query count: %,3d", executeQueryCount);
             }
         }
     }
