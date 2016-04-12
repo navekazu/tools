@@ -26,10 +26,11 @@ import java.util.Date;
 import java.util.List;
 
 public class QueryExecuteService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<List<QueryResultCellValue>>> {
-    private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");
-    private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");
+    private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");               // ToDo:書式付き出力に置き換えたい
+    private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");                          // ToDo:書式付き出力に置き換えたい
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
     private static final int FLUSH_ROW_COUNT = 1000;
+    private static final int SILENT_MODE_COUNT = 100;
     private QueryHistorySerializer queryHistorySerializer;
 
     private MainControllerInterface mainControllerInterface;
@@ -47,12 +48,19 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         // 実行するSQLを取得
         String[] queries = splitQuery(mainControllerInterface.getQuery());
 
+        // SILENT_MODE_COUNTを超えたらサイレントモードで実行し、ログを抑制する
+        boolean silentMode = false;
+        if (SILENT_MODE_COUNT<=queries.length) {
+            mainControllerInterface.writeLog("Execute in silent mode. (Because too many queries. %,3d counts)", queries.length);
+            silentMode = true;
+        }
+
         // 個々のSQLを実行
         int executeQueryCount = 0;
         try {
             for (String query: queries) {
                 queryHistorySerializer.appendText(createQueryHistory(query));
-                executeQuery(task, query);
+                executeQuery(task, query, silentMode);
                 if (task.isCancelled()) {
                     break;
                 }
@@ -63,13 +71,13 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
             if (task.isCancelled()) {
                 mainControllerInterface.writeLog("Query cancelled.");
             } else if (queries.length >= 2) {
-                mainControllerInterface.writeLog("Total query count: %d", executeQueryCount);
+                mainControllerInterface.writeLog("Total query count: %,3d", executeQueryCount);
             }
         } catch(Exception e) {
             mainControllerInterface.writeLog(e);
             // 複数クエリの場合、実行出来たクエリ数を出力
             if (queries.length >= 2) {
-                mainControllerInterface.writeLog("Succeeded query count: %d", executeQueryCount);
+                mainControllerInterface.writeLog("Succeeded query count: %,3d", executeQueryCount);
             }
         }
     }
@@ -94,16 +102,20 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         return "Not executing now.";
     }
 
-    private void executeQuery(Task task, String query) throws Exception {
+    private void executeQuery(Task task, String query, boolean silentMode) throws Exception {
         Connection connection = mainControllerInterface.getConnection();
         long startTime, endTime;
 
         try (Statement statement = connection.createStatement()) {
-            mainControllerInterface.writeLog("Executing...");
+            if (!silentMode) {
+                mainControllerInterface.writeLog("Executing...");
+            }
             startTime = System.currentTimeMillis();
             boolean executeResult = statement.execute(query);
             endTime = System.currentTimeMillis();
-            mainControllerInterface.writeLog("Response time: %s sec", RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
+            if (!silentMode) {
+                mainControllerInterface.writeLog("Response time: %s sec", RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
+            }
 
             if (task.isCancelled()) {
                 return ;
@@ -111,7 +123,9 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
 
             if (!executeResult) {
                 // 結果なし
-                mainControllerInterface.writeLog("Success. count: %S", NUMBER_FORMAT.format(statement.getUpdateCount()));
+                if (!silentMode) {
+                    mainControllerInterface.writeLog("Success. count: %S", NUMBER_FORMAT.format(statement.getUpdateCount()));
+                }
                 return ;
             }
 
@@ -188,7 +202,9 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
 
                 updateUI(new ArrayList<>(rowList));
                 endTime = System.currentTimeMillis();
-                mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime))/1000.0));
+                if (!silentMode) {
+                    mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime)) / 1000.0));
+                }
             }
         }
     }
