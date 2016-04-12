@@ -10,7 +10,6 @@ import java.util.Date;
 
 /**
  * データベース接続履歴用のエンティティクラス。
- * 内容はフラットファイルとして永続化され、「~/.DBConnector6/config/connection_history」として保存する。<br>
  */
 @AllArgsConstructor
 @Data

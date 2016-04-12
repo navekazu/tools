@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 /**
- * アプリケーション設定ファイルのうち、メインステージの設定を保持するエンティティクラス。<br>
+ * アプリケーション設定のうち、メインステージの設定を保持するエンティティクラス。<br>
  * 起動時の座標などを保持する。
  */
 @AllArgsConstructor

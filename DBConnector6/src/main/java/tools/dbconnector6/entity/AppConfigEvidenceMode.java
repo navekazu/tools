@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 /**
- * アプリケーション設定ファイルのうち、エビデンス取得モードの設定を保持するエンティティクラス。<br>
+ * アプリケーション設定のうち、エビデンス取得モードの設定を保持するエンティティクラス。<br>
  */
 @AllArgsConstructor
 @Data
