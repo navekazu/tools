@@ -175,7 +175,25 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    private static final Map<Integer, String> NULLABLE_MAP = new HashMap<>();
+    static {
+        NULLABLE_MAP.put(DatabaseMetaData.columnNoNulls, "No Null");
+        NULLABLE_MAP.put(DatabaseMetaData.columnNullable, "");
+        NULLABLE_MAP.put(DatabaseMetaData.columnNullableUnknown, "Unknown");
+    }
     private void updateTableColumnFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableColumnTab> tableColumnList) throws SQLException {
+        Map<String, Integer> primaryKeys = new HashMap<>();
+
+        // プライマリーキーの一覧を作成
+        // key -> プライマリーキーとなる列名
+        // value -> 順序
+        try (ResultSet resultSet = metaData.getPrimaryKeys(null, tableItem.getSchema(), tableItem.getValue())) {
+            while (resultSet.next()) {
+                primaryKeys.put(resultSet.getString("COLUMN_NAME"), resultSet.getInt("KEY_SEQ"));
+            }
+        }
+
+        // tableColumnListの更新
         try (ResultSet resultSet = metaData.getColumns(null, tableItem.getSchema(), tableItem.getValue(), null)) {
             while (resultSet.next()) {
                 TableColumnTab data = TableColumnTab.builder()
@@ -183,8 +201,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
                         .type(getStringForce(resultSet, "TYPE_NAME"))
                         .size(getIntForce(resultSet, "COLUMN_SIZE"))
                         .decimalDigits(getIntForce(resultSet, "DECIMAL_DIGITS"))
-                        .nullable(getStringForce(resultSet, "NULLABLE"))
-//                        .primaryKey(getStringForce(resultSet, "TYPE_NAME"))
+                        .nullable(NULLABLE_MAP.get(getIntForce(resultSet, "NULLABLE")))
+                        .primaryKey(primaryKeys.get(getStringForce(resultSet, "COLUMN_NAME")))
                         .remarks(getStringForce(resultSet, "REMARKS"))
                         .columnDefault(getStringForce(resultSet, "COLUMN_DEF"))
                         .autoincrement(getStringForce(resultSet, "IS_AUTOINCREMENT"))

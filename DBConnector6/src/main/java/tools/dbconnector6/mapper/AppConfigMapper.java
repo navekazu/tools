@@ -5,17 +5,42 @@ import tools.dbconnector6.entity.AppConfigEditor;
 import tools.dbconnector6.entity.AppConfigEvidenceMode;
 import tools.dbconnector6.entity.AppConfigMainStage;
 
+/**
+ * アプリケーション設定エンティティの永続化を行う。<br>
+ * 内容はフラットファイルとして永続化され、「~/.DBConnector6/config/app_config」として保存する。<br>
+ * アプリケーション設定ファイルは行の先頭にラベルがあり、そのラベルによってその行が何の情報を保持するかが決定する。<br>
+ * <br>
+ * ラベルの例：<br>
+ * ・Editor -&gt; エディタの設定を保持する<br>
+ * ・EvidenceMode -&gt; エビデンス取得モードの設定を保持する<br>
+ * ・MainStage -&gt; メインステージの設定を保持する<br>
+ */
 public class AppConfigMapper extends MapperBase<AppConfig> {
+    /**
+     * 永続化時の（拡張子を除く）ファイル名を返す。<br>
+     * アプリケーション設定は「app_config」を返す。
+     * @return 永続化時のファイル名
+     */
     @Override
     protected String getArchiveFileName() {
         return "app_config";
     }
 
+    /**
+     * 永続化時のファイルの拡張子を返す。
+     * アプリケーション設定は拡張子はないので空文字を返す。
+     * @return 永続化時のファイルの拡張子
+     */
     @Override
     protected String getArchiveFileSuffix() {
         return "";
     }
 
+    /**
+     * 永続化結果（テキストファイルの1行）からエンティティを復元する
+     * @param line テキストファイルの1行
+     * @return 復元したエンティティインスタンス
+     */
     @Override
     protected AppConfig unboxing(String line) {
         String[] data = line.split("\t");
@@ -54,6 +79,11 @@ public class AppConfigMapper extends MapperBase<AppConfig> {
         return appConfig;
     }
 
+    /**
+     * エンティティから永続化を行う
+     * @param appConfig エンティティインスタンス
+     * @return 永続化結果 （テキストファイルの1行）
+     */
     @Override
     protected String autoboxing(AppConfig appConfig) {
         if (appConfig instanceof AppConfigMainStage) {
