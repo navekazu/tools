@@ -25,9 +25,13 @@ import tools.dbconnector6.BackgroundService;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.*;
 import tools.dbconnector6.mapper.AppConfigMapper;
+import tools.dbconnector6.queryresult.QueryResult;
+import tools.dbconnector6.queryresult.QueryResultCellValue;
 import tools.dbconnector6.serializer.ApplicationLogSerializer;
 import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
+import tools.dbconnector6.transfer.ResultDataTransfer;
+import tools.dbconnector6.transfer.ResultDataTransferClipboard;
 
 import java.io.File;
 import java.io.IOException;
@@ -699,7 +703,17 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onCopy(ActionEvent event) {
-        // TODO: SQL実行結果の表をクリップボードにコピーする
+        // 実行結果一覧にフォーカスがあるなら、一覧の選択している内容をクリップボードにコピーする
+        if (!queryResultTableView.isFocused()) {
+            return ;
+        }
+
+        ResultDataTransfer resultDataTransfer = new ResultDataTransferClipboard(isEvidenceMode(), isEvidenceModeIncludeHeader(), getEvidenceDelimiter());
+        resultDataTransfer.setHeader(queryResultTableView.getColumns());
+        List<QueryResult> list = queryResultTableView.getSelectionModel().getSelectedItems();
+        list.stream().forEach(item -> resultDataTransfer.addData(item.getList()));
+        resultDataTransfer.transfer();
+        event.consume();
     }
 
     @FXML

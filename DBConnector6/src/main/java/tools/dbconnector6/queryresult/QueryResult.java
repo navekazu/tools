@@ -14,4 +14,7 @@ public class QueryResult {
     public QueryResultCellValue getData(int index) {
         return record.get().get(index);
     }
+    public List<QueryResultCellValue> getList() {
+        return record.get();
+    }
 }
