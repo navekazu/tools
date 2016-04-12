@@ -6,7 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
 /**
- * アプリケーション設定ファイルのうち、エディタの設定を保持するエンティティクラス。<br>
+ * アプリケーション設定のうち、エディタの設定を保持するエンティティクラス。<br>
  */
 @AllArgsConstructor
 @Data
