@@ -37,8 +37,8 @@ public abstract class MapperBase<T> extends DataSerializer {
 
     /**
      * 値がnullかtrimした結果が空文字の場合に空文字を返す
-     * @param s
-     * @return
+     * @param s 評価値
+     * @return 評価値がnullかtrimした結果が空文字の場合に空文字を、それ以外は評価値をそのまま返す
      */
     protected String blankToOneSpace(String s) {
         if (s==null || "".equals(s.trim())) {
@@ -90,8 +90,8 @@ public abstract class MapperBase<T> extends DataSerializer {
     }
 
     /**
-     * 永続化する際のファイル名を取得する
-     * @return
+     * 永続化する際のファイル名を含むパスを取得する
+     * @return 永続化パス
      * @throws IOException
      */
     protected Path getArchiveFilePath() throws IOException {
