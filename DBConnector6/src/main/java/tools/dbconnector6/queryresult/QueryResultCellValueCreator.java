@@ -8,6 +8,7 @@ import java.sql.Types;
  * QueryResultCellValueを生成する
  */
 public class QueryResultCellValueCreator {
+    // インスタンス生成させない
     private QueryResultCellValueCreator() {
 
     }
