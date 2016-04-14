@@ -254,7 +254,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                 List<QueryResult> list = new ArrayList<>();
                 for (List<QueryResultCellValue> m: uiParam) {
                     QueryResult r = new QueryResult();
-                    r.setData(m);
+                    r.setRecordData(m);
                     list.add(r);
                 }
                 List<QueryResult> items = mainControllerInterface.getQueryParam().queryResultTableView.getItems();

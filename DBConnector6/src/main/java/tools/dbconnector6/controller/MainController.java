@@ -26,7 +26,6 @@ import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.*;
 import tools.dbconnector6.mapper.AppConfigMapper;
 import tools.dbconnector6.queryresult.QueryResult;
-import tools.dbconnector6.queryresult.QueryResultCellValue;
 import tools.dbconnector6.serializer.ApplicationLogSerializer;
 import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
@@ -711,7 +710,7 @@ public class MainController extends Application implements Initializable, MainCo
         ResultDataTransfer resultDataTransfer = new ResultDataTransferClipboard(isEvidenceMode(), isEvidenceModeIncludeHeader(), getEvidenceDelimiter());
         resultDataTransfer.setHeader(queryResultTableView.getColumns());
         List<QueryResult> list = queryResultTableView.getSelectionModel().getSelectedItems();
-        list.stream().forEach(item -> resultDataTransfer.addData(item.getList()));
+        list.stream().forEach(item -> resultDataTransfer.addData(item.getRecordData()));
         resultDataTransfer.transfer();
         event.consume();
     }
