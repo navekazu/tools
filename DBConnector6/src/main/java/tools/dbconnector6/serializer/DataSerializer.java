@@ -14,7 +14,7 @@ public abstract class DataSerializer {
         DataSerializer.utMode = utMode;
     }
 
-    protected Path getArchiveFilePath(String kind) throws IOException {
+    protected Path getArchiveFilePath(String kind) {
         return Paths.get(System.getProperty("user.home"), ".DBConnector6", kind, getArchiveFileName() + getArchiveFileSuffix() + (utMode? "_test": ""));
     }
     protected Path getTempFilePath(String kind) throws IOException {

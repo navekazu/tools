@@ -92,9 +92,8 @@ public abstract class MapperBase<T> extends DataSerializer {
     /**
      * 永続化する際のファイル名を含むパスを取得する
      * @return 永続化パス
-     * @throws IOException
      */
-    protected Path getArchiveFilePath() throws IOException {
+    protected Path getArchiveFilePath() {
         return getArchiveFilePath("config");
     }
 

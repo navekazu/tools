@@ -8,15 +8,56 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.text.Format;
 
+/**
+ * クエリ実行結果一覧に使用するセル情報の基底クラス
+ */
 public abstract class QueryResultCellValue<V> {
-    protected static final String NULL_PROMPT = "(null)";
+
+    /**
+     * セルの値<br>
+     */
     protected V value;
 
-    public QueryResultCellValue build(V value) {
-        this.value = value;
-        return this;
-    }
+    /**
+     * 値がnullの場合に一覧へ表示する値「(null)」<br>
+     */
+    protected static final String NULL_PROMPT = "(null)";
 
+    /**
+     * セル値の初期化。<br>
+     * 与えられたResultSetから所定のカラムインデックスの値を取得する際の方法は、各具象クラスで決定する。
+     * @param resultSet 値を取得する際のResultSet
+     * @param column 値を取得する際のカラムインデックス
+     * @throws SQLException 値の取得に失敗した場合
+     */
+    protected abstract void initValue(ResultSet resultSet, int column) throws SQLException;
+
+    /**
+     * クエリ実行結果一覧に出力する際のFormatを返す。<br>
+     * （数値の場合カンマ編集をする、等）
+     * @return クエリ実行結果一覧に出力する際のFormat
+     */
+    protected abstract Format getStandardFormat();
+
+    /**
+     * エビデンスとして出力する際のFormatを返す。<br>
+     * （数値の場合でもカンマ編集しない、等）
+     * @return エビデンスとして出力する際のFormat
+     */
+    protected abstract Format getEvidenceModeFormat();
+
+    /**
+     * 値がある場合（nullではない場合）のクエリ実行結果一覧に出力する際のアライメントを返す。<br>
+     * （数値の場合は右寄せ、それ以外は左寄せ）
+     * @return クエリ実行結果一覧に出力する際のアライメント
+     */
+    protected abstract Pos getAlignment();
+
+    /**
+     * 値の文字列表現を返す。<br>
+     * クエリ実行結果一覧に出力する際のFormatを使用する。<br>
+     * @return 値の文字列表現
+     */
     @Override
     public String toString() {
         if (value==null) {
@@ -25,97 +66,65 @@ public abstract class QueryResultCellValue<V> {
         return getFormattedString();
     }
 
-    protected abstract Format getStandardFormat();
-    protected abstract Format getEvidenceModeFormat();
-    protected abstract Pos getAlignment();
-
+    /**
+     * 値がnullの場合は true を、それ以外は false を返す。<br>
+     * @return 値がnullの場合は true を、それ以外は false
+     */
     public boolean isNullValue() {
         return value==null;
     }
 
+    /**
+     * クエリ実行結果一覧に出力する際のFormatを使用して値の文字列表現を作成する。<br>
+     * 値がnullの場合はNULL_PROMPTを返す。<br>
+     * @return 値の文字列表現
+     */
     public String getFormattedString() {
         return value==null? NULL_PROMPT: getValueString(getStandardFormat());
     }
+
+    /**
+     * エビデンスとして値の文字列表現を作成する。<br>
+     * 値がnullの場合は空文字を返す。<br>
+     * @return エビデンスとしての値の文字列表現
+     */
     public String getEvidenceModeString() {
         return getValueString(getEvidenceModeFormat());
     }
+
+    /**
+     * 指定されたFormatを使用して値の文字列表現を作成する。<br>
+     * 値がnullの場合は空文字を返す。<br>
+     * @param f 文字列表現を作成する際のFormat
+     * @return 値の文字列表現
+     */
     protected String getValueString(Format f) {
         return value==null? "": (f==null? value.toString(): f.format(value));
     }
 
-    public static Pos getAlignment(int column, ResultSetMetaData meta) throws SQLException {
-        QueryResultCellValue queryResultCellValue = QueryResultCellValue.createQueryResultCellValue(column, meta);
+    /**
+     * 指定されたResultSetMetaDataのカラムインデックスのアライメントを返す。<br>
+     * @param meta クエリ実行結果のResultSetMetaData
+     * @param column カラムインデックス
+     * @return アライメント
+     * @throws SQLException ResultSetMetaDataに対する操作に失敗した場合
+     */
+    public static Pos getAlignment(ResultSetMetaData meta, int column) throws SQLException {
+        QueryResultCellValue queryResultCellValue = QueryResultCellValueCreator.createQueryResultCellValue(meta, column);
         return queryResultCellValue.getAlignment();
     }
 
-    public static QueryResultCellValue createQueryResultCellValue(int column, ResultSetMetaData meta, ResultSet resultSet) throws SQLException {
-        QueryResultCellValue queryResultCellValue = QueryResultCellValue.createQueryResultCellValue(column, meta);
-
-        if (queryResultCellValue instanceof QueryResultCellValueNumber
-            ||queryResultCellValue instanceof QueryResultCellValueReal) {
-            queryResultCellValue.build(resultSet.getBigDecimal(column));
-        } else if (queryResultCellValue instanceof QueryResultCellValueDate) {
-            queryResultCellValue.build(resultSet.getDate(column));
-        } else {
-            queryResultCellValue.build(resultSet.getString(column));
-        }
-
+    /**
+     * 指定されたResultSetMetaDataのカラムインデックスからQueryResultCellValueを作成し、値を初期化したインスタンスを返す。<br>
+     * @param meta クエリ実行結果のResultSetMetaData
+     * @param resultSet クエリ実行結果
+     * @param column カラムインデックス
+     * @return 作成し値の初期化をしたQueryResultCellValue
+     * @throws SQLException ResultSetMetaDataとResultSetに対する操作に失敗した場合
+     */
+    public static QueryResultCellValue createQueryResultCellValue(ResultSetMetaData meta, ResultSet resultSet, int column) throws SQLException {
+        QueryResultCellValue queryResultCellValue = QueryResultCellValueCreator.createQueryResultCellValue(meta, column);
+        queryResultCellValue.initValue(resultSet, column);
         return queryResultCellValue;
-
-    }
-    private static QueryResultCellValue createQueryResultCellValue(int column, ResultSetMetaData meta) throws SQLException {
-        int type = meta.getColumnType(column);
-
-        switch(type) {
-            case Types.BIGINT:                  // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型BIGINTを識別します。
-            case Types.DECIMAL:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型DECIMALを識別します。
-            case Types.DOUBLE:                  // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型DOUBLEを識別します。
-            case Types.FLOAT:                   // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型FLOATを識別します。
-            case Types.INTEGER:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型INTEGERを識別します。
-            case Types.NUMERIC:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型NUMERICを識別します。
-            case Types.REAL:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型REALを識別します。
-            case Types.TINYINT:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TINYINTを識別します。
-                if (meta.getScale(column)==0) {
-                    return new QueryResultCellValueNumber();
-                }
-                return new QueryResultCellValueReal();
-
-            case Types.DATE:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型DATEを識別します。
-            case Types.TIME:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TIMEを識別します。
-            case Types.TIME_WITH_TIMEZONE:      // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TIME WITH TIMEZONEを識別します。
-            case Types.TIMESTAMP:               // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TIMESTAMPを識別します。
-            case Types.TIMESTAMP_WITH_TIMEZONE: // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TIMESTAMP WITH TIMEZONEを識別します。
-                return new QueryResultCellValueDate();
-
-/*
-            case Types.ARRAY:                   // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型ARRAYを識別します。
-            case Types.BINARY:                  // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型BINARYを識別します。
-            case Types.BIT:                     // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型BITを識別します。
-            case Types.BLOB:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型BLOBを識別します。
-            case Types.BOOLEAN:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型BOOLEANを識別します。
-            case Types.CHAR:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型CHARを識別します。
-            case Types.CLOB:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型CLOBを識別します。
-            case Types.DATALINK:                // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型DATALINKを識別します。
-            case Types.DISTINCT:                // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型DISTINCTを識別します。
-            case Types.JAVA_OBJECT:             // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型JAVA_OBJECTを識別します。
-            case Types.LONGNVARCHAR:            // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型LONGNVARCHARを識別します。
-            case Types.LONGVARBINARY:           // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型LONGVARBINARYを識別します。
-            case Types.LONGVARCHAR:             // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型LONGVARCHARを識別します。
-            case Types.NCHAR:                   // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型NCHARを識別します。
-            case Types.NCLOB:                   // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型NCLOBを識別します。
-            case Types.NULL:                    // Javaプログラミング言語の定数で、ジェネリックSQL値NULLを識別します。
-            case Types.NVARCHAR:                // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型NVARCHARを識別します。
-            case Types.OTHER:                   // SQL型がデータベース固有のものであり、getObjectメソッドとsetObjectメソッドを介してアクセスできるJavaオブジェクトにマッピングされることを示す、Javaプログラミング言語の定数です。
-            case Types.REF:                     // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型REFを識別します。
-            case Types.REF_CURSOR:              // 汎用SQL型REF CURSORを識別するJavaプログラミング言語の定数(型コードとも呼ばれる)。
-            case Types.ROWID:                   // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型ROWIDを識別します。
-            case Types.SMALLINT:                // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型SMALLINTを識別します。
-            case Types.SQLXML:                  // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型XMLを識別します。
-            case Types.STRUCT:                  // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型STRUCTを識別します。
-            case Types.VARBINARY:               // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型VARBINARYを識別します。
-            case Types.VARCHAR:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型VARCHARを識別します。
-*/
-        }
-        return new QueryResultCellValueString();
     }
 }

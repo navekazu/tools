@@ -6,7 +6,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import java.util.List;
 
 /**
- * クエリ実行結果一覧に使用する列表現
+ * クエリ実行結果一覧に使用する列情報
  */
 public class QueryResult {
     // 列の情報
