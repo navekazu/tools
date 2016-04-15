@@ -82,6 +82,37 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
     }
 
     @Override
+    public void prepareUpdate(final List<TableColumn<QueryResult, String>> prepareUpdateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.getQueryParam().queryResultTableView.getItems().clear();
+                mainControllerInterface.getQueryParam().queryResultTableView.getColumns().clear();
+
+                ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
+                columnList.addAll(prepareUpdateParam);
+            }
+        });
+    }
+
+    @Override
+    public void update(final List<List<QueryResultCellValue>> updateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                List<QueryResult> list = new ArrayList<>();
+                for (List<QueryResultCellValue> m: updateParam) {
+                    QueryResult r = new QueryResult();
+                    r.setRecordData(m);
+                    list.add(r);
+                }
+                List<QueryResult> items = mainControllerInterface.getQueryParam().queryResultTableView.getItems();
+                items.addAll(list);
+            }
+        });
+    }
+
+    @Override
     public void cancel() throws Exception {
         mainControllerInterface.writeLog("Query cancelling...");
     }
@@ -162,7 +193,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
 
                     colList.add(col);
                 }
-                updateUIPreparation(colList);
+                prepareUpdate(colList);
                 resultDataTransfer.setHeader(colList);
 
                 if (task.isCancelled()) {
@@ -188,7 +219,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
 
                     // FLUSH_ROW_COUNT毎に一覧へ反映する
                     if (rowList.size() >= FLUSH_ROW_COUNT) {
-                        updateUI(new ArrayList<>(rowList));
+                        update(new ArrayList<>(rowList));
                         rowList.clear();
                     }
                 }
@@ -199,7 +230,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                     return;
                 }
 
-                updateUI(new ArrayList<>(rowList));
+                update(new ArrayList<>(rowList));
                 endTime = System.currentTimeMillis();
                 if (!silentMode) {
                     mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime)) / 1000.0));
@@ -229,37 +260,6 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
             tableCell.setAlignment(pos);
             tableCell.setTextFill(Color.BLACK);
         }
-    }
-
-    @Override
-    public void updateUIPreparation(final List<TableColumn<QueryResult, String>> uiParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getQueryParam().queryResultTableView.getItems().clear();
-                mainControllerInterface.getQueryParam().queryResultTableView.getColumns().clear();
-
-                ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
-                columnList.addAll(uiParam);
-            }
-        });
-    }
-
-    @Override
-    public void updateUI(final List<List<QueryResultCellValue>> uiParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                List<QueryResult> list = new ArrayList<>();
-                for (List<QueryResultCellValue> m: uiParam) {
-                    QueryResult r = new QueryResult();
-                    r.setRecordData(m);
-                    list.add(r);
-                }
-                List<QueryResult> items = mainControllerInterface.getQueryParam().queryResultTableView.getItems();
-                items.addAll(list);
-            }
-        });
     }
 
     protected String[] splitQuery(String sql) {

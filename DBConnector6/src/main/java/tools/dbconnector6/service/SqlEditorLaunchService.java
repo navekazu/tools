@@ -29,13 +29,35 @@ public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, 
         Process process = runtime.exec(new String[]{mainControllerInterface.getEditorPath(), temporaryQueryPath.toString()});
 
         // エディタが終了するまで待機
-        updateUIPreparation(null);
+        prepareUpdate(null);
         process.waitFor();
 
         // エディタが編集したテンポラリファイルの内容をクエリエリアに貼り付け
-        updateUI(temporaryQuerySerializer.readText(temporaryQueryPath));
+        update(temporaryQuerySerializer.readText(temporaryQueryPath));
     }
 
+    @Override
+    public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.showWaitDialog(
+                        "Waiting until the end of SQL edit.",
+                        "Please save and exit the SQL editor.");
+            }
+        });
+    }
+
+    @Override
+    public void update(final String updateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.updateSelectedQuery(updateParam);
+                mainControllerInterface.hideWaitDialog();
+            }
+        });
+    }
     @Override
     public void cancel() throws Exception {
         callHideWaitDialog();
@@ -60,29 +82,6 @@ public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, 
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                mainControllerInterface.hideWaitDialog();
-            }
-        });
-    }
-
-    @Override
-    public void updateUIPreparation(final Void uiParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.showWaitDialog(
-                        "Waiting until the end of SQL edit.",
-                        "Please save and exit the SQL editor.");
-            }
-        });
-    }
-
-    @Override
-    public void updateUI(final String uiParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.updateSelectedQuery(uiParam);
                 mainControllerInterface.hideWaitDialog();
             }
         });

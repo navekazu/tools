@@ -55,7 +55,26 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
             }
         }
 
-        updateUI(property);
+        update(property);
+    }
+
+    @Override
+    public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
+    }
+
+    @Override
+    public void update(final TabDisableProperty updateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                MainControllerInterface.TableStructureTabParam tabParam = mainControllerInterface.getTableStructureTabParam();
+                tabParam.tablePropertyTab.setDisable(updateParam.tablePropertyTabDisable);
+                tabParam.tableColumnTab.setDisable(updateParam.tableColumnTabDisable);
+                tabParam.tableIndexTab.setDisable(updateParam.tableIndexTabDisable);
+
+                mainControllerInterface.getTableStructureUpdateService().restart();
+            }
+        });
     }
 
     @Override
@@ -76,28 +95,5 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
     @Override
     public String getNotRunningMessage() {
         return "";
-    }
-
-    @Override
-    public void updateUIPreparation(final Void uiParam) throws Exception {
-    }
-
-    @Override
-    public void updateUI(final TabDisableProperty uiParam) throws Exception {
-//        final TabDisableProperty dispatchParam = new TabDisableProperty(uiParam.tablePropertyTabDisable, uiParam.tableColumnTabDisable, uiParam.tableIndexTabDisable);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                MainControllerInterface.TableStructureTabParam tabParam = mainControllerInterface.getTableStructureTabParam();
-//                tabParam.tablePropertyTab.setDisable(dispatchParam.tablePropertyTabDisable);
-//                tabParam.tableColumnTab.setDisable(dispatchParam.tableColumnTabDisable);
-//                tabParam.tableIndexTab.setDisable(dispatchParam.tableIndexTabDisable);
-                tabParam.tablePropertyTab.setDisable(uiParam.tablePropertyTabDisable);
-                tabParam.tableColumnTab.setDisable(uiParam.tableColumnTabDisable);
-                tabParam.tableIndexTab.setDisable(uiParam.tableIndexTabDisable);
-
-                mainControllerInterface.getTableStructureUpdateService().restart();
-            }
-        });
     }
 }

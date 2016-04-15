@@ -30,7 +30,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     public void run(Task task) throws Exception {
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
         if (tableItem==null || !mainControllerInterface.isConnectWithoutMessage()) {
-            updateUIPreparation(null);
+            prepareUpdate(null);
             return ;
         }
 
@@ -51,9 +51,39 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
                 updateTableIndexFromTable(tableItem, metaData, tableStructures.tableIndexList);
                 break;
         }
-        updateUIPreparation(null);
-        updateUI(tableStructures);
+        prepareUpdate(null);
+        update(tableStructures);
 
+    }
+
+    @Override
+    public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().clear();
+                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().clear();
+                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().clear();
+                mainControllerInterface.getTableStructureTabParam().tableIndexPrimaryKeyTextField.setText("");
+                mainControllerInterface.getTableStructureTabParam().tableIndexUniqueKeyTextField.setText("");
+                mainControllerInterface.getTableStructureTabParam().tableIndexListView.getItems().clear();
+            }
+        });
+    }
+
+    @Override
+    public void update(final TableStructures updateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(updateParam.tablePropertyList);
+                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(updateParam.tableColumnList);
+                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(updateParam.tableIndexList);
+                if (updateParam.tableIndexList.size()>=1) {
+                    mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getSelectionModel().select(0);
+                }
+            }
+        });
     }
 
     @Override
@@ -74,43 +104,6 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     @Override
     public String getNotRunningMessage() {
         return "";
-    }
-
-    @Override
-    public void updateUIPreparation(final Void uiParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().clear();
-                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().clear();
-                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().clear();
-                mainControllerInterface.getTableStructureTabParam().tableIndexPrimaryKeyTextField.setText("");
-                mainControllerInterface.getTableStructureTabParam().tableIndexUniqueKeyTextField.setText("");
-                mainControllerInterface.getTableStructureTabParam().tableIndexListView.getItems().clear();
-            }
-        });
-    }
-
-    @Override
-    public void updateUI(final TableStructures uiParam) throws Exception {
-//        final List<TablePropertyTab> tablePropertyList = new ArrayList<>(uiParam.tablePropertyList);
-//        final List<TableColumnTab> tableColumnList = new ArrayList<>(uiParam.tableColumnList);
-//        final List<TableIndexTab> tableIndexList = new ArrayList<>(uiParam.tableIndexList);
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-//                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(tablePropertyList);
-//                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(tableColumnList);
-//                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(tableIndexList);
-//                if (tableIndexList.size()>=1) {
-                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(uiParam.tablePropertyList);
-                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(uiParam.tableColumnList);
-                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(uiParam.tableIndexList);
-                if (uiParam.tableIndexList.size()>=1) {
-                    mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getSelectionModel().select(0);
-                }
-            }
-        });
     }
 
     private void updateTablePropertyFromDatabase(DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {

@@ -96,18 +96,23 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     }
 
     @Override
-    public void cancel() throws Exception {
+    public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
+    }
 
+    @Override
+    public void update(final Void updateParam) throws Exception {
+    }
+
+    @Override
+    public void cancel() throws Exception {
     }
 
     @Override
     public void cancelled() {
-
     }
 
     @Override
     public void failed() {
-
     }
 
     @Override
@@ -133,13 +138,5 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
 
     private void addSQLReservedWord() {
         Arrays.stream(PRESET_RESERVED_WORD).forEach(word -> reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, word)));
-    }
-
-    @Override
-    public void updateUIPreparation(final Void uiParam) throws Exception {
-    }
-
-    @Override
-    public void updateUI(final Void uiParam) throws Exception {
     }
 }
