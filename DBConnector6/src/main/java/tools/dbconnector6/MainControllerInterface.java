@@ -9,6 +9,11 @@ import tools.dbconnector6.service.BackgroundService;
 
 import java.sql.Connection;
 
+/**
+ * メイン画面へのアクセスを限定するためのインターフェース。<br>
+ * 実装はMainController。<br>
+ * @see tools.dbconnector6.controller@MainController
+ */
 public interface MainControllerInterface {
     public void writeLog(String message, Object... args);
     public void writeLog(Throwable e);
