@@ -6,7 +6,9 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 
 /**
- * アプリケーションログ用のシリアライザ。
+ * アプリケーションログ用のシリアライザ。<br>
+ * 例外発生時のメッセージなどを保存するシリアライザ。<br>
+ * 月ごとにローテーションする。<br>
  */
 public class ApplicationLogSerializer extends DataSerializer {
 
@@ -28,7 +30,7 @@ public class ApplicationLogSerializer extends DataSerializer {
     }
 
     /**
-     * 永続化時のファイルの拡張子を返す。
+     * 永続化時のファイルの拡張子を返す。<br>
      * アプリケーションログは「.log」を返す。<br>
      * @return 永続化時のファイルの拡張子
      */
@@ -38,7 +40,7 @@ public class ApplicationLogSerializer extends DataSerializer {
     }
 
     /**
-     * 永続化する際のファイル名を含むパスを取得する
+     * 永続化する際のファイル名を含むパスを取得する<br>
      * @return 永続化パス
      */
     @Override
