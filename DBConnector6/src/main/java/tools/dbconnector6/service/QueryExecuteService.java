@@ -9,7 +9,6 @@ import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
-import tools.dbconnector6.BackgroundServiceInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.queryresult.QueryResult;

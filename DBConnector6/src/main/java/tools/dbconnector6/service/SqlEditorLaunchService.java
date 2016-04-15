@@ -2,7 +2,6 @@ package tools.dbconnector6.service;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import tools.dbconnector6.BackgroundServiceInterface;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.serializer.TemporaryQuerySerializer;
 

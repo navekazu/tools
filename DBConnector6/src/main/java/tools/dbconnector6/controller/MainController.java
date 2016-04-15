@@ -21,7 +21,7 @@ import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import tools.dbconnector6.BackgroundService;
+import tools.dbconnector6.service.BackgroundService;
 import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.*;
 import tools.dbconnector6.mapper.AppConfigMapper;

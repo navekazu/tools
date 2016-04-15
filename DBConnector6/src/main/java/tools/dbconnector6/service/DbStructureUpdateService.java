@@ -7,7 +7,6 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
-import tools.dbconnector6.BackgroundServiceInterface;
 import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 

@@ -1,4 +1,4 @@
-package tools.dbconnector6;
+package tools.dbconnector6.service;
 
 import javafx.concurrent.Task;
 

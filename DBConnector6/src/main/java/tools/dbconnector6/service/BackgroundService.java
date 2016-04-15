@@ -1,7 +1,8 @@
-package tools.dbconnector6;
+package tools.dbconnector6.service;
 
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
+import tools.dbconnector6.MainControllerInterface;
 
 public class BackgroundService extends Service<Void> {
     private BackgroundServiceInterface bci;
