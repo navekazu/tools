@@ -110,26 +110,45 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         });
     }
 
+    /**
+     * バックグラウンド実行をキャンセルするたびに呼び出される。<br>
+     */
     @Override
     public void cancel() throws Exception {
+        // ToDo:実行したスレッドを終了しないといけないはず・・・
     }
 
+    /**
+     * Serviceの状態がCANCELLED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void cancelled() {
     }
 
+    /**
+     * Serviceの状態がFAILED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void failed() {
     }
 
+    /**
+     * もし実行中ではない時にキャンセル要求があった場合のメッセージ。<br>
+     * 何も返さない。<br>
+     * @return メッセージ
+     */
     @Override
     public String getNotRunningMessage() {
         return "";
     }
 
+    /**
+     * スキーマから、テーブル一覧（シノニム、テーブル、ビュー、など）、ファンクション一覧、プロシージャ一覧を取得し画面更新を行う。
+     * スキーマ単位にインスタンスを作成すること。
+     */
     private class  SchemaSearchTask extends Task {
-        DatabaseMetaData meta;
-        DbStructureTreeItem item;
+        private DatabaseMetaData meta;
+        private DbStructureTreeItem item;
         public SchemaSearchTask(DatabaseMetaData meta, DbStructureTreeItem item) {
             this.meta = meta;
             this.item = item;
