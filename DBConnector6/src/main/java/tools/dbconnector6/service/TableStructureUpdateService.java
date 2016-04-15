@@ -15,7 +15,13 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class TableStructureUpdateService implements BackgroundServiceInterface<Void, TableStructureUpdateService.TableStructures> {
+    // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
+
+    /**
+     * コンストラクタ。<br>
+     * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     */
     public TableStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }

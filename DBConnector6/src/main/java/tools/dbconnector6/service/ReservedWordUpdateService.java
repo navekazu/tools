@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 public class ReservedWordUpdateService implements BackgroundServiceInterface<Void, Void> {
-
+    // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
     private Set<ReservedWord> reservedWordList;
 
@@ -24,6 +24,10 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
             "and", "or", "not", "is", "between", "in", "like", "exists",
     };
 
+    /**
+     * コンストラクタ。<br>
+     * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     */
     public ReservedWordUpdateService(MainControllerInterface mainControllerInterface, Set<ReservedWord> reservedWordList) {
         this.mainControllerInterface = mainControllerInterface;
         this.reservedWordList = reservedWordList;

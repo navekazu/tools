@@ -8,7 +8,13 @@ import tools.dbconnector6.serializer.TemporaryQuerySerializer;
 import java.nio.file.Path;
 
 public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, String> {
+    // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
+
+    /**
+     * コンストラクタ。<br>
+     * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     */
     public SqlEditorLaunchService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }

@@ -32,7 +32,13 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
     private static final int SILENT_MODE_COUNT = 100;
     private QueryHistorySerializer queryHistorySerializer;
 
+    // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
+
+    /**
+     * コンストラクタ。<br>
+     * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     */
     public QueryExecuteService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
         this.queryHistorySerializer = new QueryHistorySerializer();

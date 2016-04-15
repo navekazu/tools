@@ -6,7 +6,13 @@ import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 
 public class TableStructureTabPaneUpdateService implements BackgroundServiceInterface<Void, TableStructureTabPaneUpdateService.TabDisableProperty> {
+    // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
+
+    /**
+     * コンストラクタ。<br>
+     * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     */
     public TableStructureTabPaneUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }

@@ -18,12 +18,28 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * 画面左上のデータベース構造を解析し表示するサービス。<br>
+ */
 public class DbStructureUpdateService implements BackgroundServiceInterface<Void, DbStructureTreeItem> {
+    // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
+
+    /**
+     * コンストラクタ。<br>
+     * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     */
     public DbStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }
 
+    /**
+     * 接続先データベースのスキーマから、テーブル一覧（シノニム、テーブル、ビュー、など）、
+     * ファンクション一覧、プロシージャ一覧を取得し、データベース構造を画面左上にツリー形式で表示する。<br>
+     * 解析はスキーマごとにスレッドを立てて行う。<br>
+     * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
+     * @throws Exception 何らかのエラーが発生し処理を中断する場合
+     */
     @Override
     public void run(Task task) throws Exception {
         // クリーンナップ
@@ -51,6 +67,11 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         });
     }
 
+    /**
+     * データベース構造のツリーをクリアする。<br>
+     * @param prepareUpdateParam 不使用
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
     public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
         Platform.runLater(new Runnable() {
@@ -64,6 +85,12 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         });
     }
 
+    /**
+     * データベース構造のツリーを更新する。<br>
+     * 呼び出しはスキーマ単位で行われる。<br>
+     * @param updateParam ツリーのルートにぶら下がる子要素
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
     public void update(final DbStructureTreeItem updateParam) throws Exception {
         Platform.runLater(new Runnable() {
@@ -85,17 +112,14 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
 
     @Override
     public void cancel() throws Exception {
-
     }
 
     @Override
     public void cancelled() {
-
     }
 
     @Override
     public void failed() {
-
     }
 
     @Override
