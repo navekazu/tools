@@ -146,17 +146,34 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
      * スキーマから、テーブル一覧（シノニム、テーブル、ビュー、など）、ファンクション一覧、プロシージャ一覧を取得し画面更新を行う。
      * スキーマ単位にインスタンスを作成すること。
      */
-    private class  SchemaSearchTask extends Task {
+    private class  SchemaSearchTask extends Task<Void> {
+        // 現在接続中のデータベースメタデータ
         private DatabaseMetaData meta;
+
+        // 更新先のツリーアイテム
         private DbStructureTreeItem item;
+
+        /**
+         * コンストラクタ
+         * @param meta 現在接続中のデータベースメタデータ。
+         * @param item 更新先のツリーアイテム。ここから取得対象のスキーマ名を取得する。
+         */
         public SchemaSearchTask(DatabaseMetaData meta, DbStructureTreeItem item) {
             this.meta = meta;
             this.item = item;
 
         }
 
+        /**
+         * 更新先のツリーアイテムから対象のスキーマ名を取得し、
+         * そのスキーマのテーブル一覧（シノニム、テーブル、ビュー、など）、
+         * ファンクション一覧、プロシージャ一覧を取得しツリーアイテムに追加する。<br>
+         * @return nullを返す
+         * @throws Exception バックグラウンド操作中に発生した未処理の例外。
+         *                  データベース操作で発生した例外は握りつぶす。（後続の一覧取得は続行したい為）
+         */
         @Override
-        protected Object call() throws Exception {
+        protected Void call() throws Exception {
             List<DbStructureTreeItem> subList = new ArrayList<>();
             DbStructureTreeItem.ItemType itemType;
 
@@ -200,12 +217,17 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         }
     }
 
+    /**
+     * 現在接続中のデータベースのスキーマ一覧を取得する。<br>
+     * @param meta 現在接続中のデータベースメタデータ
+     * @return スキーマ一覧
+     * @throws SQLException スキーマ取得に失敗した場合
+     */
     private List<DbStructureTreeItem> getSchemaList(DatabaseMetaData meta) throws SQLException {
         List<DbStructureTreeItem> schemaList = new ArrayList<>();
-
         ResultSet resultSet = meta.getSchemas();
 
-        while(resultSet.next()) {
+        while (resultSet.next()) {
             schemaList.add(new DbStructureTreeItem(DbStructureTreeItem.ItemType.SCHEMA
                     , resultSet.getString("TABLE_SCHEM"), resultSet.getString("TABLE_SCHEM")));
         }
@@ -218,27 +240,40 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         return schemaList;
     }
 
+    /**
+     * 指定されたルート要素名を親とするツリーアイテムを作成する。子の要素をResultSetから作成する。<br>
+     * @param resultSet 取得元のResultSet
+     * @param colName ResultSetから取得する列
+     * @param schemaName ツリーアイテムに指定するスキーマ名
+     * @param name 作成するツリーアイテムのルート要素名
+     * @param itemType 作成するツリーアイテムのルート要素タイプ
+     * @return 作成したツリーアイテム
+     * @throws SQLException ResultSetからのデータ取得に失敗した場合
+     */
     private DbStructureTreeItem createGroupItem(ResultSet resultSet, String colName, String schemaName, String name, DbStructureTreeItem.ItemType itemType) throws SQLException {
-        DbStructureTreeItem tableItem = new DbStructureTreeItem(DbStructureTreeItem.ItemType.GROUP, name, null);
 
-        List<DbStructureTreeItem> l = new ArrayList<>();
+        List<DbStructureTreeItem> subList = new ArrayList<>();
         while (resultSet.next()) {
-            l.add(new DbStructureTreeItem(itemType, resultSet.getString(colName), resultSet.getString(schemaName)));
+            subList.add(new DbStructureTreeItem(itemType, resultSet.getString(colName), resultSet.getString(schemaName)));
         }
-        Collections.sort(l);
+        Collections.sort(subList);
 
+        DbStructureTreeItem tableItem = new DbStructureTreeItem(DbStructureTreeItem.ItemType.GROUP, name, null);
         ObservableList<TreeItem<String>> tableList = tableItem.getChildren();
-        tableList.addAll(l);
+        tableList.addAll(subList);
 
         resultSet.close();
         return tableItem;
     }
 
+    /**
+     * メイン画面のフィルタ入力欄の値を取得する。<br>
+     * 値は前後に "%" を入れる。値が空の場合はnullを返す。
+     * @return 前後に "%" を入れたフィルタ入力欄の値を返す。値が空の場合はnullを返す。
+     */
     private String getFilterTextFieldParamValue() {
-        return getTextFieldParamValue(mainControllerInterface.getDbStructureParam().filterTextField);
-    }
-
-    private String getTextFieldParamValue(TextField textField) {
-        return "".equals(textField.getText()) ? null : String.format("%%%s%%", textField.getText());
+        TextField textField = mainControllerInterface.getDbStructureParam().filterTextField;
+        String text = textField.getText();
+        return "".equals(text) ? null: String.format("%%%s%%", text);
     }
 }
