@@ -582,10 +582,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @Override
     public boolean isConnectWithoutMessage() {
-        if (connection==null) {
-            return false;
-        }
-        return true;
+        return connection!=null;
     }
 
 

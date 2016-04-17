@@ -34,7 +34,21 @@ public interface MainControllerInterface {
     public void updateSelectedQuery(String query);
     public void addQueryWord(String word, boolean shiftDown);
     public String getEditorPath();
+
+    /**
+     * データベース接続確認。未接続時にログエリアへメッセージを出力する。<br/>
+     * ログエリアへメッセージを出力しない場合はisConnectWithoutMessage()メソッドを利用する。<br/>
+     * @return データベース接続時は true 、それ以外は false を返す。
+     * @see tools.dbconnector6.MainControllerInterface#isConnectWithoutMessage
+     */
     public boolean isConnect();
+
+    /**
+     * データベース接続確認。未接続時にログエリアへメッセージを出力しない。
+     * ログエリアへメッセージを出力する場合はisConnect()メソッドを利用する。<br/>
+     * @return データベース接続時は true 、それ以外は false を返す。
+     * @see tools.dbconnector6.MainControllerInterface#isConnect
+     */
     public boolean isConnectWithoutMessage();
 
     public BackgroundService getDbStructureUpdateService();
