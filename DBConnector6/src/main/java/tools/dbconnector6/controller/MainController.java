@@ -35,6 +35,7 @@ import tools.dbconnector6.transfer.ResultDataTransferClipboard;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.sql.*;
 import java.text.SimpleDateFormat;
@@ -756,6 +757,14 @@ public class MainController extends Application implements Initializable, MainCo
         queryExecuteService.cancel();
     }
 
+    private static final Charset[] AVAILABLE_CHARSETS;
+    static {
+        AVAILABLE_CHARSETS = new Charset[] {
+                Charset.forName("MS932"),
+                Charset.forName("UTF-8"),
+                Charset.forName("EUC-JP"),
+        };
+    }
     @FXML
     private void onQueryScript(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
