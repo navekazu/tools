@@ -777,7 +777,7 @@ public class MainController extends Application implements Initializable, MainCo
             queryExecuteService.restart();
 
         } catch (IOException e) {
-            e.printStackTrace();
+            writeLog(e);
         }
     }
 
