@@ -44,7 +44,7 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
 
     /**
      * バックグラウンドで実行する処理を実装する。<br>
-     *
+     * スキーマ一覧を取得し、スキーマごとにスレッドを立てて、スキーマ単位にテーブル名とカラム名を解析する。
      * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
      * @throws Exception 何らかのエラーが発生し処理を中断する場合
      */
@@ -83,7 +83,7 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
 
         final List<String> finalTypes = new ArrayList<>(types);
 
-        // スキーマごとにスレッドを立てて、スキーマ単位にテーブル名と絡む姪を解析
+        // スキーマごとにスレッドを立てて、スキーマ単位にテーブル名とカラム名を解析
         // ToDo: 同時実行スレッド上限(32bit Windowsで2048本)を考慮して実装する必要がある
         // ToDo: 全スレッドが終了したことをユーザーに知らせる仕組みが必要
         schemas.parallelStream().forEach(schema -> {
@@ -113,31 +113,63 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
         });
     }
 
+    /**
+     * 更新の前処理。<br>
+     * runメソッド内で立ち上げたスレッドで更新を行うので、ここでは何も行わない。<br>
+     * @param prepareUpdateParam 前処理に必要なパラメータ
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
     public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
     }
 
+    /**
+     * 更新処理。<br>
+     * runメソッド内で立ち上げたスレッドで更新を行うので、ここでは何も行わない。<br>
+     * @param updateParam 更新処理に必要なパラメータ
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
     public void update(final Void updateParam) throws Exception {
     }
 
+    /**
+     * バックグラウンド実行をキャンセルするたびに呼び出される。<br>
+     */
     @Override
     public void cancel() {
     }
 
+    /**
+     * Serviceの状態がCANCELLED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void cancelled() {
     }
 
+    /**
+     * Serviceの状態がFAILED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void failed() {
     }
 
+    /**
+     * もし実行中ではない時にキャンセル要求があった場合のメッセージ。<br>
+     * @return メッセージ
+     */
     @Override
     public String getNotRunningMessage() {
         return "";
     }
 
+    /**
+     * ResultSetから指定されたカラムの値を取得し、リストで返す。<br>
+     * @param resultSet 取得元のResultSet
+     * @param name 取得するカラム
+     * @return 指定されたカラムの値のリスト
+     * @throws SQLException ResultSetからの取得に失敗した場合
+     */
     private List<String> getResultList(ResultSet resultSet, String name) throws SQLException {
         List<String> list = new ArrayList<>();
         while(resultSet.next()) {
@@ -146,6 +178,15 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
         return list;
     }
 
+    /**
+     * ResultSetから指定されたカラムの値を取得し、ReservedWordのセットで返す。<br>
+     * セットなので重複する値はない。<br>
+     * @param reservedWordType ReservedWordに設定する予約語のタイプ
+     * @param resultSet 取得元のResultSet
+     * @param name 取得するカラム
+     * @return 指定されたカラムの値で初期化したReservedWordのセット
+     * @throws SQLException ResultSetからの取得に失敗した場合
+     */
     private Set<ReservedWord> getMetadataReservedWord(ReservedWord.ReservedWordType reservedWordType, ResultSet resultSet, String name) throws SQLException {
         Set<ReservedWord> set = new HashSet<>();
         while (resultSet.next()) {
@@ -154,7 +195,9 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
         return set;
     }
 
+    // reservedWordListにSQL予約語を追加する
     private void addSQLReservedWord() {
-        Arrays.stream(PRESET_RESERVED_WORD).forEach(word -> reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, word)));
+        Arrays.stream(PRESET_RESERVED_WORD).
+                forEach(word -> reservedWordList.add(new ReservedWord(ReservedWord.ReservedWordType.SQL, word)));
     }
 }
