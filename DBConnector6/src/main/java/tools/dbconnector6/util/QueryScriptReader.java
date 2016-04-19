@@ -14,14 +14,11 @@ import java.util.List;
  */
 public class QueryScriptReader {
     // トライする文字コード
-    private static final Charset[] AVAILABLE_CHARSETS;
-    static {
-        AVAILABLE_CHARSETS = new Charset[] {
-                Charset.forName("MS932"),
-                Charset.forName("UTF-8"),
-                Charset.forName("EUC-JP"),
-        };
-    }
+    private static final Charset[] AVAILABLE_CHARSETS = new Charset[]{
+            Charset.forName("MS932"),
+            Charset.forName("UTF-8"),
+            Charset.forName("EUC-JP"),
+    };
 
     /**
      * 指定されたパスのテキストファイルを読み込む。<br>
