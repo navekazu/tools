@@ -36,8 +36,8 @@ public interface MainControllerInterface {
     public String getEditorPath();
 
     /**
-     * データベース接続確認。未接続時にログエリアへメッセージを出力する。<br/>
-     * ログエリアへメッセージを出力しない場合はisConnectWithoutMessage()メソッドを利用する。<br/>
+     * データベース接続確認。未接続時にログエリアへメッセージを出力する。<br>
+     * ログエリアへメッセージを出力しない場合はisConnectWithoutMessage()メソッドを利用する。<br>
      * @return データベース接続時は true 、それ以外は false を返す。
      * @see tools.dbconnector6.MainControllerInterface#isConnectWithoutMessage
      */
@@ -45,7 +45,7 @@ public interface MainControllerInterface {
 
     /**
      * データベース接続確認。未接続時にログエリアへメッセージを出力しない。
-     * ログエリアへメッセージを出力する場合はisConnect()メソッドを利用する。<br/>
+     * ログエリアへメッセージを出力する場合はisConnect()メソッドを利用する。<br>
      * @return データベース接続時は true 、それ以外は false を返す。
      * @see tools.dbconnector6.MainControllerInterface#isConnect
      */

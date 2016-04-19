@@ -84,7 +84,7 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
     }
 
     @Override
-    public void cancel() throws Exception {
+    public void cancel() {
 
     }
 

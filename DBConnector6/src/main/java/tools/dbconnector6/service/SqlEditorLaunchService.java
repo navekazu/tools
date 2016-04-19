@@ -65,7 +65,7 @@ public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, 
         });
     }
     @Override
-    public void cancel() throws Exception {
+    public void cancel() {
         callHideWaitDialog();
     }
 

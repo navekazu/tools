@@ -114,7 +114,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
      * バックグラウンド実行をキャンセルするたびに呼び出される。<br>
      */
     @Override
-    public void cancel() throws Exception {
+    public void cancel() {
         // ToDo:実行したスレッドを終了しないといけないはず・・・
     }
 

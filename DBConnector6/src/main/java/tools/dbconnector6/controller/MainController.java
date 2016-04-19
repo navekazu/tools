@@ -31,6 +31,7 @@ import tools.dbconnector6.serializer.WorkingQuerySerializer;
 import tools.dbconnector6.service.*;
 import tools.dbconnector6.transfer.ResultDataTransfer;
 import tools.dbconnector6.transfer.ResultDataTransferClipboard;
+import tools.dbconnector6.util.QueryScriptReader;
 
 import java.io.File;
 import java.io.IOException;
@@ -757,14 +758,6 @@ public class MainController extends Application implements Initializable, MainCo
         queryExecuteService.cancel();
     }
 
-    private static final Charset[] AVAILABLE_CHARSETS;
-    static {
-        AVAILABLE_CHARSETS = new Charset[] {
-                Charset.forName("MS932"),
-                Charset.forName("UTF-8"),
-                Charset.forName("EUC-JP"),
-        };
-    }
     @FXML
     private void onQueryScript(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -779,7 +772,7 @@ public class MainController extends Application implements Initializable, MainCo
         }
 
         try {
-            List<String> allLines = Files.readAllLines(selectedFile.toPath());
+            List<String> allLines = QueryScriptReader.readAllLines(selectedFile.toPath());
             StringBuilder stringBuilder = new StringBuilder();
             allLines.stream().forEach(e -> stringBuilder.append(e).append("\n"));
             queryScript = stringBuilder.toString();

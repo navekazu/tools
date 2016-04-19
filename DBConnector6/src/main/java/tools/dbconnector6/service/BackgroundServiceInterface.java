@@ -35,7 +35,7 @@ public interface BackgroundServiceInterface<P, U> {
     /**
      * バックグラウンド実行をキャンセルするたびに呼び出される。<br>
      */
-    public void cancel() throws Exception;
+    public void cancel();
 
     /**
      * Serviceの状態がCANCELLED状態に遷移するたびに呼び出される。<br>

@@ -93,7 +93,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     }
 
     @Override
-    public void cancel() throws Exception {
+    public void cancel() {
 
     }
 

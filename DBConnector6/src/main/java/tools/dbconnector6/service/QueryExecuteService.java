@@ -123,7 +123,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
     }
 
     @Override
-    public void cancel() throws Exception {
+    public void cancel() {
         mainControllerInterface.writeLog("Query cancelling...");
     }
 

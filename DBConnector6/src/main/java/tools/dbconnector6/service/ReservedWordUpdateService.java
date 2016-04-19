@@ -27,6 +27,7 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     /**
      * コンストラクタ。<br>
      * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     * @param reservedWordList 予約語の格納先
      */
     public ReservedWordUpdateService(MainControllerInterface mainControllerInterface, Set<ReservedWord> reservedWordList) {
         this.mainControllerInterface = mainControllerInterface;
@@ -108,7 +109,7 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     }
 
     @Override
-    public void cancel() throws Exception {
+    public void cancel() {
     }
 
     @Override
