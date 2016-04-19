@@ -28,12 +28,22 @@ import java.util.List;
  * SQLクエリを実行するサービス。
  */
 public class QueryExecuteService implements BackgroundServiceInterface<List<TableColumn<QueryResult, String>>, List<List<QueryResultCellValue>>> {
-    // クエリ実行時の経過時間を表示する際のフォーマット
+    // ログフォーマット：クエリ実行時の経過時間を表示する際に使用
     private static final DecimalFormat RESPONSE_TIME_FORMAT = new DecimalFormat("#,##0.000");               // ToDo:書式付き出力に置き換えたい
+
+    // ログフォーマット：数値を出力する際に使用
     private static final DecimalFormat NUMBER_FORMAT = new DecimalFormat("#,##0");                          // ToDo:書式付き出力に置き換えたい
+
+    // ログフォーマット：クエリ実行時のログ出力時に使用
     private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+
+    // 画面上にフラッシュするしきい値
     private static final int FLUSH_ROW_COUNT = 1000;
+
+    // 一括実行する際、ログ出力を抑制するしきい値
     private static final int SILENT_MODE_COUNT = 100;
+
+    // 実行したクエリを保存するシリアライザ
     private QueryHistorySerializer queryHistorySerializer;
 
     // メイン画面へのアクセス用インターフェース
