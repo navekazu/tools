@@ -10,7 +10,7 @@ import java.sql.SQLException;
 import java.util.*;
 
 /**
- * データベース接続時、データベース内のテーブル名とカラム名を走査し、予約語として登録する。
+ * データベース接続時、データベース内のテーブル名とカラム名を走査し、予約語として登録するサービス。
  * 走査データは入力補完としてクエリ入力時にポップアップ表示する。<br>
  */
 public class ReservedWordUpdateService implements BackgroundServiceInterface<Void, Void> {
