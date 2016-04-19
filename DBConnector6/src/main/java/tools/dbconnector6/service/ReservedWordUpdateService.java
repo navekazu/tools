@@ -9,11 +9,19 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * データベース接続時、データベース内のテーブル名とカラム名を走査し、予約語として登録する。
+ * 走査データは入力補完としてクエリ入力時にポップアップ表示する。<br>
+ */
 public class ReservedWordUpdateService implements BackgroundServiceInterface<Void, Void> {
     // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
+
+    // 走査した予約語を格納する参照
     private Set<ReservedWord> reservedWordList;
 
+    // SQL予約語
+    // 初期化時に強制的に予約語として登録する
     private static final String[] PRESET_RESERVED_WORD = new String[]{
             "select", "distinct", "from", "where", "group", "order", "by", "asc", "desc", "having",
             "insert", "into", "values",
@@ -34,7 +42,12 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
         this.reservedWordList = reservedWordList;
     }
 
-
+    /**
+     * バックグラウンドで実行する処理を実装する。<br>
+     *
+     * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
+     * @throws Exception 何らかのエラーが発生し処理を中断する場合
+     */
     @Override
     public void run(Task task) throws Exception {
         synchronized (reservedWordList) {

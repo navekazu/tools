@@ -58,6 +58,11 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         this.queryHistorySerializer = new QueryHistorySerializer();
     }
 
+    /**
+     * SQLクエリをバックグラウンド実行する。<br>
+     * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
+     * @throws Exception 何らかのエラーが発生し処理を中断する場合
+     */
     @Override
     public void run(Task task) throws Exception {
         if (!mainControllerInterface.isConnect()) {
@@ -101,6 +106,11 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         }
     }
 
+    /**
+     * クエリ実行結果一覧の内容をクリアし、列の初期化を行う。<br>
+     * @param prepareUpdateParam 列情報
+     * @throws Exception 何らかのエラーが発生し処理を中断する場合
+     */
     @Override
     public void prepareUpdate(final List<TableColumn<QueryResult, String>> prepareUpdateParam) throws Exception {
         Platform.runLater(new Runnable() {
@@ -115,6 +125,11 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         });
     }
 
+    /**
+     * クエリ実行結果一覧の内容を更新（追加）する。<br>
+     * @param updateParam 一覧の内容
+     * @throws Exception 何らかのエラーが発生し処理を中断する場合
+     */
     @Override
     public void update(final List<List<QueryResultCellValue>> updateParam) throws Exception {
         Platform.runLater(new Runnable() {
@@ -132,26 +147,49 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         });
     }
 
+    /**
+     * バックグラウンド実行をキャンセルするたびに呼び出される。<br>
+     * キャンセルを行っているとメッセージを出力する。<br>
+     * キャンセルできたかは、本体のスレッドのほうで結果を出力する。<br>
+     */
     @Override
     public void cancel() {
         mainControllerInterface.writeLog("Query cancelling...");
     }
 
+    /**
+     * Serviceの状態がCANCELLED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void cancelled() {
 
     }
 
+    /**
+     * Serviceの状態がFAILED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void failed() {
 
     }
 
+    /**
+     * もし実行中ではない時にキャンセル要求があった場合のメッセージ。<br>
+     * クエリを実行中ではない旨のメッセージを返す。<br>
+     * @return メッセージ
+     */
     @Override
     public String getNotRunningMessage() {
         return "Not executing now.";
     }
 
+    /**
+     * SQLクエリの実行をする
+     * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
+     * @param query 実行するSQLクエリ
+     * @param silentMode サイレントモードフラグ。trueの場合はログ出力を抑制する。
+     * @throws Exception SQLエラーを含む、何らかのエラーが発生した場合。
+     */
     private void executeQuery(Task task, String query, boolean silentMode) throws Exception {
         Connection connection = mainControllerInterface.getConnection();
         long startTime, endTime;
@@ -171,8 +209,8 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                 return ;
             }
 
+            // 結果なしならメソッドを抜ける
             if (!executeResult) {
-                // 結果なし
                 if (!silentMode) {
                     mainControllerInterface.writeLog("Success. count: %S", NUMBER_FORMAT.format(statement.getUpdateCount()));
                 }
@@ -182,7 +220,8 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
             // 結果あり
             startTime = System.currentTimeMillis();
             try (ResultSet resultSet = statement.getResultSet()) {
-                ResultDataTransfer resultDataTransfer = new ResultDataTransferClipboard(mainControllerInterface.isEvidenceMode(), mainControllerInterface.isEvidenceModeIncludeHeader(), mainControllerInterface.getEvidenceDelimiter());
+                ResultDataTransfer resultDataTransfer = new ResultDataTransferClipboard(
+                        mainControllerInterface.isEvidenceMode(), mainControllerInterface.isEvidenceModeIncludeHeader(), mainControllerInterface.getEvidenceDelimiter());
 
                 // カラム情報を取得し、一覧のヘッダ部を作成する
                 ResultSetMetaData metaData = resultSet.getMetaData();
@@ -253,12 +292,50 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
                 update(new ArrayList<>(rowList));
                 endTime = System.currentTimeMillis();
                 if (!silentMode) {
-                    mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec", NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime)) / 1000.0));
+                    mainControllerInterface.writeLog("Success. count: %s  recieved data time: %s sec",
+                            NUMBER_FORMAT.format(rowCount), RESPONSE_TIME_FORMAT.format(((double) (endTime - startTime)) / 1000.0));
                 }
             }
         }
     }
 
+    /**
+     * ひとかたまりのクエリを分割する。<br>
+     * 分割は「行末の;」もしくは「行末の/」単位で行う。<br>
+     * コメントは考慮しないので「-- SQL;」もひとつのクエリとして返す。<br>
+     * 分割した結果がひとつの単語だった場合、テーブル名と仮定してその単語の前に「select * from 」を付加する。<br>
+     * @param sql 複数のクエリがひとかたまりになった文字列
+     * @return 分割したクエリ
+     */
+    protected String[] splitQuery(String sql) {
+        String[] split = sql.trim().split("(;\n|/\n)");
+        return Arrays.stream(split)
+                .map(s -> {
+                    return s.trim();
+                })
+                .map(s -> {
+                    return s.endsWith(";")? s.substring(0, s.length()-1): s;
+                })
+                .map(s -> {
+                    return s.endsWith("/")? s.substring(0, s.length()-1): s;
+                })
+                .map(s -> {
+                    return s.trim();
+                })
+                .map(s -> {
+                    return isOneWord(s)? String.format("select * from %s", s): s;
+                })
+                .filter(s -> s.length()>=1)
+                .toArray(String[]::new);
+    }
+
+    // ひとつの単語か判断する
+    private boolean isOneWord(String sql) {
+        return (sql.length()>=1 && sql.indexOf(" ")==-1 && sql.indexOf("\t")==-1 && sql.indexOf("\n")==-1);
+    }
+
+    // セル内容の更新を行う。
+    // セル値がNULL値の場合は青字のセンタリングで出力する。
     private void updateCellItem(TableCell<QueryResult, String> tableCell, String item, boolean empty, int index, Pos pos) {
         if (item == null) {
             return;
@@ -282,31 +359,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         }
     }
 
-    protected String[] splitQuery(String sql) {
-        String[] split = sql.trim().split("(;\n|/\n)");
-        return Arrays.stream(split)
-                .map(s -> {
-                    return s.trim();
-                })
-                .map(s -> {
-                    return s.endsWith(";")? s.substring(0, s.length()-1): s;
-                })
-                .map(s -> {
-                    return s.endsWith("/")? s.substring(0, s.length()-1): s;
-                })
-                .map(s -> {
-                    return s.trim();
-                })
-                .map(s -> {
-                    return isOneWord(s)? String.format("select * from %s", s): s;
-                })
-                .filter(s -> s.length()>=1)
-                .toArray(String[]::new);
-    }
-    private boolean isOneWord(String sql) {
-        return (sql.length()>=1 && sql.indexOf(" ")==-1 && sql.indexOf("\t")==-1 && sql.indexOf("\n")==-1);
-    }
-
+    // 接続情報をヘッダ情報としたクエリ実行結果ログを返す
     private String createQueryHistory(String query) {
         Connect connect = mainControllerInterface.getConnectParam();
         StringBuilder builder = new StringBuilder();
