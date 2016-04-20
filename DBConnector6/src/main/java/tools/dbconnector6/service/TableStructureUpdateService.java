@@ -146,7 +146,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         return "";
     }
 
-    // メイン画面左上のデータベース構造で、「DATABASE」を選択した際に表示するgetDatabaseXXXメソッドで取得したデータベース情報を返す
+    // メイン画面左上のデータベース構造で、「DATABASE」を
+    // 選択した際に表示するgetDatabaseXXXメソッドで取得したデータベース情報を返す。<br>
     private void updateTablePropertyFromDatabase(DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
 
         list.add(TablePropertyTab.builder().key("Database product version").value(metaData.getDatabaseProductVersion()).build());
@@ -191,17 +192,20 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         list.add(TablePropertyTab.builder().key("Max user name length").value(Integer.toString(metaData.getMaxUserNameLength())).build());
     }
 
-    // メイン画面左上のデータベース構造で、「DATABASE」を選択した際に表示するgetDatabaseXXXメソッドで取得したデータベース情報を返す
+    // メイン画面左上のデータベース構造で、「TABLE」（や、「VIEW」など）を
+    // 選択した際に表示するgetTablesメソッドで取得したテーブル情報を返す。<br>
     private void updateTablePropertyFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
         try (ResultSet resultSet = metaData.getTables(null, tableItem.getSchema(), tableItem.getValue(), null)) {
             showResultSet(resultSet, list);
         }
     }
 
+    // ResultSetから全カラムの値を取得して指定されたlistに入れる。
     private void showResultSet(ResultSet resultSet, List<TablePropertyTab> list) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
 
+        // ループはしているが、1レコードを想定
         while (resultSet.next()) {
             for (int loop = 0; loop < columnCount; loop++) {
                 list.add(TablePropertyTab.builder().key(metaData.getColumnName(loop + 1)).value(resultSet.getString(loop + 1)).build());
@@ -209,12 +213,15 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    // DatabaseMetaDataの各値と、その文字列表現のマッピング
     private static final Map<Integer, String> NULLABLE_MAP = new HashMap<>();
     static {
         NULLABLE_MAP.put(DatabaseMetaData.columnNoNulls, "No Null");
         NULLABLE_MAP.put(DatabaseMetaData.columnNullable, "");
         NULLABLE_MAP.put(DatabaseMetaData.columnNullableUnknown, "Unknown");
     }
+
+    //
     private void updateTableColumnFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableColumnTab> tableColumnList) throws SQLException {
         Map<String, Integer> primaryKeys = new HashMap<>();
 
