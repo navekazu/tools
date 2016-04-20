@@ -14,6 +14,9 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * メイン画面左下のテーブル構造表示欄を更新するサービス。
+ */
 public class TableStructureUpdateService implements BackgroundServiceInterface<Void, TableStructureUpdateService.TableStructures> {
     // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
@@ -26,12 +29,21 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         this.mainControllerInterface = mainControllerInterface;
     }
 
+    /**
+     * 3つのタブそれぞれのモデルデータをまとめた構造体
+     */
     public class TableStructures {
         public List<TablePropertyTab> tablePropertyList;
         public List<TableColumnTab> tableColumnList;
         public List<TableIndexTab> tableIndexList;
     }
 
+    /**
+     * バックグラウンドで実行する処理を実装する。<br>
+     * メイン画面左上のデータベース構造の選択状態に応じて、メイン画面左下のテーブル構造表示欄の内容を更新する。<br>
+     * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
+     * @throws Exception 何らかのエラーが発生し処理を中断する場合
+     */
     @Override
     public void run(Task task) throws Exception {
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
@@ -62,6 +74,12 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
 
     }
 
+    /**
+     * 更新の前処理。<br>
+     * 各タブ内の画面項目を全クリアする。<br>
+     * @param prepareUpdateParam null
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
     public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
         Platform.runLater(new Runnable() {
@@ -77,6 +95,12 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         });
     }
 
+    /**
+     * 更新処理。<br>
+     * バックグラウンドで実行した結果を画面等に反映する。<br>
+     * @param updateParam 3つのタブそれぞれのモデルデータをまとめた構造体
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
     public void update(final TableStructures updateParam) throws Exception {
         Platform.runLater(new Runnable() {
@@ -92,21 +116,31 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         });
     }
 
+    /**
+     * バックグラウンド実行をキャンセルするたびに呼び出される。<br>
+     */
     @Override
     public void cancel() {
-
     }
 
+    /**
+     * Serviceの状態がCANCELLED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void cancelled() {
-
     }
 
+    /**
+     * Serviceの状態がFAILED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void failed() {
-
     }
 
+    /**
+     * もし実行中ではない時にキャンセル要求があった場合のメッセージ。<br>
+     * @return 空文字
+     */
     @Override
     public String getNotRunningMessage() {
         return "";

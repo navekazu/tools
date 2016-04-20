@@ -48,7 +48,7 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
 
     /**
      * バックグラウンドで実行する処理を実装する。<br>
-     * メイン画面左上のデータベース構造の選択状態に応じて、メイン画面左下のテーブル構造表示欄を更新する。<br>
+     * メイン画面左上のデータベース構造の選択状態に応じて、メイン画面左下のテーブル構造表示欄のタブ状態を更新する。<br>
      * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
      * @throws Exception 何らかのエラーが発生し処理を中断する場合
      */
