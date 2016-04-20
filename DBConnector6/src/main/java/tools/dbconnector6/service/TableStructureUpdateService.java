@@ -146,6 +146,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         return "";
     }
 
+    // メイン画面左上のデータベース構造で、「DATABASE」を選択した際に表示するgetDatabaseXXXメソッドで取得したデータベース情報を返す
     private void updateTablePropertyFromDatabase(DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
 
         list.add(TablePropertyTab.builder().key("Database product version").value(metaData.getDatabaseProductVersion()).build());
@@ -190,6 +191,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         list.add(TablePropertyTab.builder().key("Max user name length").value(Integer.toString(metaData.getMaxUserNameLength())).build());
     }
 
+    // メイン画面左上のデータベース構造で、「DATABASE」を選択した際に表示するgetDatabaseXXXメソッドで取得したデータベース情報を返す
     private void updateTablePropertyFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
         try (ResultSet resultSet = metaData.getTables(null, tableItem.getSchema(), tableItem.getValue(), null)) {
             showResultSet(resultSet, list);
