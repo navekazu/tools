@@ -2,6 +2,7 @@ package tools.dbconnector6.service;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
+import lombok.experimental.Builder;
 import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
 
@@ -26,33 +27,23 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
     /**
      * 3つのタブの状態を表現する構造体
      */
+    @Builder
     public static class TabDisableProperty {
         boolean tablePropertyTabDisable;        // テーブルプロパティのタブ
         boolean tableColumnTabDisable;          // カラム一覧のタブ
         boolean tableIndexTabDisable;           // インデックス一覧のタブ
-
-        /**
-         * コンストラクタ
-         */
-        public TabDisableProperty() {
-        }
-
-        /**
-         * 初期化コンストラクタ
-         * @param tablePropertyTabDisable テーブルプロパティのタブ状態
-         * @param tableColumnTabDisable カラム一覧のタブ状態
-         * @param tableIndexTabDisable インデックス一覧のタブ状態
-         */
-        public TabDisableProperty(boolean tablePropertyTabDisable, boolean tableColumnTabDisable, boolean tableIndexTabDisable) {
-            this.tablePropertyTabDisable = tablePropertyTabDisable;
-            this.tableColumnTabDisable = tableColumnTabDisable;
-            this.tableIndexTabDisable = tableIndexTabDisable;
-        }
     }
 
     private static final Map<DbStructureTreeItem.ItemType, TabDisableProperty> TAB_MAP = new HashMap<>();
     static {
-        TAB_MAP.put(DbStructureTreeItem.ItemType.DATABASE, new TabDisableProperty());
+        TAB_MAP.put(DbStructureTreeItem.ItemType.DATABASE,  TabDisableProperty.builder().tablePropertyTabDisable(false).tableColumnTabDisable(true).tableIndexTabDisable(true).build());
+        TAB_MAP.put(DbStructureTreeItem.ItemType.TABLE,     TabDisableProperty.builder().tablePropertyTabDisable(false).tableColumnTabDisable(false).tableIndexTabDisable(false).build());
+
+        // 以下すべて利用不可
+        TAB_MAP.put(DbStructureTreeItem.ItemType.GROUP,     TabDisableProperty.builder().tablePropertyTabDisable(true).tableColumnTabDisable(true).tableIndexTabDisable(true).build());
+        TAB_MAP.put(DbStructureTreeItem.ItemType.FUNCTION,  TabDisableProperty.builder().tablePropertyTabDisable(true).tableColumnTabDisable(true).tableIndexTabDisable(true).build());
+        TAB_MAP.put(DbStructureTreeItem.ItemType.PROCEDURE, TabDisableProperty.builder().tablePropertyTabDisable(true).tableColumnTabDisable(true).tableIndexTabDisable(true).build());
+        TAB_MAP.put(DbStructureTreeItem.ItemType.SCHEMA,    TabDisableProperty.builder().tablePropertyTabDisable(true).tableColumnTabDisable(true).tableIndexTabDisable(true).build());
     }
 
     /**
@@ -63,32 +54,16 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
      */
     @Override
     public void run(Task task) throws Exception {
-        TabDisableProperty property = new TabDisableProperty();
+        TabDisableProperty property = TabDisableProperty.builder()
+                .tablePropertyTabDisable(true)
+                .tableColumnTabDisable(true)
+                .tableIndexTabDisable(true)
+                .build();
 
+        // データベースに接続していて、かつ何らかのデータベース構造を選択している場合、規定値に則ってタブ状態を更新
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
-        if (tableItem == null || !mainControllerInterface.isConnectWithoutMessage()) {
-            property.tablePropertyTabDisable = true;
-            property.tableColumnTabDisable = true;
-            property.tableIndexTabDisable = true;
-        } else {
-            // ToDo: きれいにする
-            switch (tableItem.getItemType()) {
-                case DATABASE:
-                    property.tablePropertyTabDisable = false;
-                    property.tableColumnTabDisable = true;
-                    property.tableIndexTabDisable = true;
-                    break;
-                case TABLE:
-                    property.tablePropertyTabDisable = false;
-                    property.tableColumnTabDisable = false;
-                    property.tableIndexTabDisable = false;
-                    break;
-                default:
-                    property.tablePropertyTabDisable = true;
-                    property.tableColumnTabDisable = true;
-                    property.tableIndexTabDisable = true;
-                    break;
-            }
+        if (mainControllerInterface.isConnectWithoutMessage() && tableItem != null) {
+            property = TAB_MAP.get(tableItem.getItemType());
         }
 
         update(property);

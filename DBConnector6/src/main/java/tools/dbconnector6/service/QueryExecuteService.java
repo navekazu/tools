@@ -83,7 +83,7 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
         int executeQueryCount = 0;
         try {
             for (String query: queries) {
-                queryHistorySerializer.appendText(createQueryHistory(query));
+                queryHistorySerializer.appendText(createQueryHistory(query));       // 成功/失敗問わずすべて履歴に残す
                 executeQuery(task, query, silentMode);
                 if (task.isCancelled()) {
                     break;
@@ -162,7 +162,6 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
      */
     @Override
     public void cancelled() {
-
     }
 
     /**
@@ -170,7 +169,6 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
      */
     @Override
     public void failed() {
-
     }
 
     /**
