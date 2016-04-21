@@ -21,7 +21,7 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
     private Set<ReservedWord> reservedWordList;
 
     // SQL予約語
-    // 初期化時に強制的に予約語として登録する
+    // 初期化時に予約語として登録する
     private static final String[] PRESET_RESERVED_WORD = new String[]{
             "select", "distinct", "from", "where", "group", "order", "by", "asc", "desc", "having",
             "insert", "into", "values",
