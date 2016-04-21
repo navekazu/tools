@@ -147,7 +147,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     }
 
     // メイン画面左上のデータベース構造で、「DATABASE」を
-    // 選択した際に表示するgetDatabaseXXXメソッドで取得したデータベース情報を返す。<br>
+    // 選択した際に表示するgetDatabaseXXXメソッドで取得したデータベース情報を返す。
     private void updateTablePropertyFromDatabase(DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
 
         list.add(TablePropertyTab.builder().key("Database product version").value(metaData.getDatabaseProductVersion()).build());
@@ -193,7 +193,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     }
 
     // メイン画面左上のデータベース構造で、「TABLE」（や、「VIEW」など）を
-    // 選択した際に表示するgetTablesメソッドで取得したテーブル情報を返す。<br>
+    // 選択した際に表示するgetTablesメソッドで取得したテーブル情報を返す。
     private void updateTablePropertyFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
         try (ResultSet resultSet = metaData.getTables(null, tableItem.getSchema(), tableItem.getValue(), null)) {
             showResultSet(resultSet, list);
@@ -221,7 +221,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         NULLABLE_MAP.put(DatabaseMetaData.columnNullableUnknown, "Unknown");
     }
 
-    //
+    // メイン画面左上のデータベース構造で、「TABLE」（や、「VIEW」など）を
+    // 選択した際に表示するカラムの一覧を返す。
     private void updateTableColumnFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableColumnTab> tableColumnList) throws SQLException {
         Map<String, Integer> primaryKeys = new HashMap<>();
 
@@ -255,6 +256,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    // メイン画面左上のデータベース構造で、「TABLE」（や、「VIEW」など）を
+    // 選択した際に表示するインデックスの一覧を返す。
     private void updateTableIndexFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableIndexTab> tableIndexList) throws SQLException {
         String primaryKeyName = null;
 
@@ -320,6 +323,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    // mapの値をlistに変換して返す
     private List<String> mapToList(final Map<Short, String> map) {
         List<String> columnList = new ArrayList<>();
         Set<Short> keyList = map.keySet();
@@ -328,6 +332,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         return columnList;
     }
 
+    // ResultSetから指定された列の文字列を取り出す。
+    // もし取得に失敗した場合は空文字を返す。
     private String getStringForce(ResultSet resultSet, String columnName) {
         try {
             return resultSet.getString(columnName);
@@ -336,6 +342,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    // ResultSetから指定された列の数値を取り出す。
+    // もし取得に失敗した場合は0を返す。
     private int getIntForce(ResultSet resultSet, String columnName) {
         try {
             return resultSet.getInt(columnName);
