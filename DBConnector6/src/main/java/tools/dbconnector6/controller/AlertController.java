@@ -13,7 +13,7 @@ import java.util.ResourceBundle;
 /**
  * アラート画面コントローラ
  */
-public class AlertController implements Initializable {
+public class AlertController extends SubController implements Initializable {
 
     // Scene overview
     // +--------------------------------------------+
@@ -24,12 +24,6 @@ public class AlertController implements Initializable {
     @FXML private Label messageLabel;
     @FXML private Label detailsLabel;
     @FXML private Button okButton;
-
-    private MainControllerInterface mainControllerInterface;
-
-    public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
-        this.mainControllerInterface = mainControllerInterface;
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

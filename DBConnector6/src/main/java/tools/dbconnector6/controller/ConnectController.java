@@ -27,7 +27,7 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.*;
 
-public class ConnectController implements Initializable {
+public class ConnectController extends SubController implements Initializable {
 
     // Scene overview
     // +-----------------------------------------------------------------------------------------------+
@@ -59,13 +59,8 @@ public class ConnectController implements Initializable {
     @FXML private TextField userTextField;
     @FXML private PasswordField passwordTextField;
 
-    private MainControllerInterface mainControllerInterface;
     private Connection connection;
     private Connect connect;
-
-    public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
-        this.mainControllerInterface = mainControllerInterface;
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

@@ -13,7 +13,7 @@ import java.io.File;
 import java.net.URL;
 import java.util.ResourceBundle;
 
-public class EditorChooserController implements Initializable {
+public class EditorChooserController extends SubController implements Initializable {
 
     // Scene overview
     // +--------------------------------------------+
@@ -22,12 +22,7 @@ public class EditorChooserController implements Initializable {
     // +--------------------------------------------+
     @FXML private TextField editorPathTextField;
 
-    private MainControllerInterface mainControllerInterface;
     private boolean ok;
-
-    public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
-        this.mainControllerInterface = this.mainControllerInterface;
-    }
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {

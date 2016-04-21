@@ -17,7 +17,7 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class ReservedWordController implements Initializable {
+public class ReservedWordController extends SubController implements Initializable {
 
     // Scene overview
     // +----------------------------------+
@@ -27,14 +27,8 @@ public class ReservedWordController implements Initializable {
     // +----------------------------------+
     @FXML private ListView reservedWordListView;
 
-    private MainControllerInterface mainControllerInterface;
-
     // 予約語の一覧（SQLの予約語・全テーブル名・全カラム名が入る）
     private Set<ReservedWord> reservedWordList;
-
-    public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
-        this.mainControllerInterface = mainControllerInterface;
-    }
 
     public void setRservedWordList(Set<ReservedWord> reservedWordList) {
         this.reservedWordList = reservedWordList;
