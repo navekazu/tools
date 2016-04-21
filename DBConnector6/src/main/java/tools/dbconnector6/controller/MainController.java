@@ -36,8 +36,6 @@ import tools.dbconnector6.util.QueryScriptReader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.Charset;
-import java.nio.file.Files;
 import java.sql.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -322,7 +320,7 @@ public class MainController extends Application implements Initializable, MainCo
         });
     }
     private void closeConnection() {
-        if (isConnectWithoutMessage()) {
+        if (isConnectWithoutOutputMessage()) {
             try {
                 connection.close();
             } catch (SQLException e) {
@@ -575,7 +573,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @Override
     public boolean isConnect() {
-        boolean result = isConnectWithoutMessage();
+        boolean result = isConnectWithoutOutputMessage();
         if (!result) {
             writeLog("No connect.");
         }
@@ -583,7 +581,7 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     @Override
-    public boolean isConnectWithoutMessage() {
+    public boolean isConnectWithoutOutputMessage() {
         return connection!=null;
     }
 

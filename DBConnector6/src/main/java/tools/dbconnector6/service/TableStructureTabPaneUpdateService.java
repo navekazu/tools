@@ -62,7 +62,7 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
 
         // データベースに接続していて、かつ何らかのデータベース構造を選択している場合、規定値に則ってタブ状態を更新
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
-        if (mainControllerInterface.isConnectWithoutMessage() && tableItem != null) {
+        if (mainControllerInterface.isConnectWithoutOutputMessage() && tableItem != null) {
             property = TAB_MAP.get(tableItem.getItemType());
         }
 

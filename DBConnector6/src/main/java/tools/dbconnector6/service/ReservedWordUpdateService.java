@@ -55,7 +55,7 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
             addSQLReservedWord();
         }
 
-        if (!mainControllerInterface.isConnectWithoutMessage()) {
+        if (!mainControllerInterface.isConnectWithoutOutputMessage()) {
             return;
         }
 

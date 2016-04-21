@@ -15,31 +15,36 @@ import java.sql.Connection;
  * @see tools.dbconnector6.controller.MainController
  */
 public interface MainControllerInterface {
+
     public void writeLog(String message, Object... args);
     public void writeLog(Throwable e);
-    public void connectNotify();
-    public Connection getConnection();
-    public Connect getConnectParam();
     public void selectReservedWord(String word);
     public void mainControllerRequestFocus();
     public void hideReservedWordStage();
     public void showAlertDialog(String message, String detail);
     public void showWaitDialog(String message, String detail);
     public void hideWaitDialog();
+
     public boolean isEvidenceMode();
     public boolean isEvidenceModeIncludeHeader();
     public String getEvidenceDelimiter();
+
     public String getQuery();
     public String getSelectedQuery();
     public void updateSelectedQuery(String query);
     public void addQueryWord(String word, boolean shiftDown);
+
     public String getEditorPath();
+
+    public void connectNotify();
+    public Connection getConnection();
+    public Connect getConnectParam();
 
     /**
      * データベース接続確認。未接続時にログエリアへメッセージを出力する。<br>
      * ログエリアへメッセージを出力しない場合はisConnectWithoutMessage()メソッドを利用する。<br>
      * @return データベース接続時は true 、それ以外は false を返す。
-     * @see tools.dbconnector6.MainControllerInterface#isConnectWithoutMessage
+     * @see tools.dbconnector6.MainControllerInterface#isConnectWithoutOutputMessage
      */
     public boolean isConnect();
 
@@ -49,16 +54,12 @@ public interface MainControllerInterface {
      * @return データベース接続時は true 、それ以外は false を返す。
      * @see tools.dbconnector6.MainControllerInterface#isConnect
      */
-    public boolean isConnectWithoutMessage();
+    public boolean isConnectWithoutOutputMessage();
 
     public BackgroundService getDbStructureUpdateService();
     public BackgroundService getTableStructureTabPaneUpdateService();
     public BackgroundService getTableStructureUpdateService();
     public BackgroundService getQueryExecuteService();
-
-    public DbStructureParam getDbStructureParam();
-    public TableStructureTabParam getTableStructureTabParam();
-    public QueryParam getQueryParam();
 
     public class DbStructureParam {
         public TextField filterTextField;
@@ -98,4 +99,8 @@ public interface MainControllerInterface {
         public TableView queryResultTableView;
 
     }
+
+    public DbStructureParam getDbStructureParam();
+    public TableStructureTabParam getTableStructureTabParam();
+    public QueryParam getQueryParam();
 }

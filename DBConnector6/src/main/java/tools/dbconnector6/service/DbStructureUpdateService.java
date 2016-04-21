@@ -45,7 +45,7 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         // クリーンナップ
         prepareUpdate(null);
 
-        if (!mainControllerInterface.isConnectWithoutMessage()) {
+        if (!mainControllerInterface.isConnectWithoutOutputMessage()) {
             return ;
         }
 

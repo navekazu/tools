@@ -8,7 +8,7 @@ import tools.dbconnector6.controller.MainController;
  */
 public class App {
     /**
-     * 唯一のエントリポイント。<br>
+     * エントリポイント。<br>
      * @param args 実行時引数
      */
     public static void main( String[] args ) {

@@ -47,7 +47,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
     @Override
     public void run(Task task) throws Exception {
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
-        if (tableItem==null || !mainControllerInterface.isConnectWithoutMessage()) {
+        if (tableItem==null || !mainControllerInterface.isConnectWithoutOutputMessage()) {
             prepareUpdate(null);
             return ;
         }
