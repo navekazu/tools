@@ -177,18 +177,11 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML private ToggleGroup evidenceDelimiter;
 
     // stage & controller
-    private Stage reservedWordStage;
-    private ReservedWordController reservedWordController;
+    private StageAndControllerPair<ConnectController> connectPair;
+    private StageAndControllerPair<AlertController> alertDialogPair;
+    private StageAndControllerPair<EditorChooserController> editorChooserPair;
+    private StageAndControllerPair<ReservedWordController> reservedWordPair;
     private Set<ReservedWord> reservedWordList = new HashSet<>();
-
-    private Stage alertDialogStage;
-    private AlertController alertDialogController;
-
-    private Stage connectStage;
-    private ConnectController connectController;
-
-    private Stage editorChooserStage;
-    private EditorChooserController editorChooserController;
     private AppConfigEditor appConfigEditor = new AppConfigEditor();;
 
     // service
@@ -268,46 +261,17 @@ public class MainController extends Application implements Initializable, MainCo
         queryResultTableView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         // Controllerの読み込み
-        // ToDo: きれいにする
-        FXMLLoader loader;
-        loader = ControllerManager.getControllerManager().getLoarder("connect");
         try {
-            connectStage = ControllerManager.getControllerManager().getSubStage(loader, "connect");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        connectController = loader.getController();
-        connectController.setMainControllerInterface(this);
+            connectPair = SubController.createStageAndControllerPair("connect", this);
+            reservedWordPair = SubController.createTransparentStageAndControllerPair("reservedWord", this);
+            alertDialogPair = SubController.createStageAndControllerPair("alertDialog", this);
+            editorChooserPair = SubController.createStageAndControllerPair("editorChooser", this);
 
-        loader = ControllerManager.getControllerManager().getLoarder("reservedWord");
-        try {
-            reservedWordStage = ControllerManager.getControllerManager().getTransparentSubStage(loader, "reservedWord");
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        reservedWordController = loader.getController();
-        reservedWordController.setMainControllerInterface(this);
-        reservedWordController.setRservedWordList(reservedWordList);
+            reservedWordPair.controller.setRservedWordList(reservedWordList);
 
-        loader = ControllerManager.getControllerManager().getLoarder("alertDialog");
-        try {
-            alertDialogStage = ControllerManager.getControllerManager().getSubStage(loader, "alertDialog");
-            alertDialogStage.setResizable(false);
-        } catch (IOException e) {
+        } catch(IOException e) {
             e.printStackTrace();
         }
-        alertDialogController = loader.getController();
-        alertDialogController.setMainControllerInterface(this);
-
-        loader = ControllerManager.getControllerManager().getLoarder("editorChooser");
-        try {
-            editorChooserStage = ControllerManager.getControllerManager().getSubStage(loader, "editorChooser");
-            editorChooserStage.setResizable(false);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        editorChooserController = loader.getController();
-        editorChooserController.setMainControllerInterface(this);
     }
 
     private void showConnect() {
@@ -315,7 +279,7 @@ public class MainController extends Application implements Initializable, MainCo
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-                connectStage.showAndWait();
+                connectPair.stage.showAndWait();
             }
         });
     }
@@ -359,11 +323,11 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     public void connectNotify() {
-        Connection con = connectController.getConnection();
+        Connection con = connectPair.controller.getConnection();
         if (con!=null) {
             writeLog("Connected.");
             connection = con;
-            connectParam = connectController.getConnect();
+            connectParam = connectPair.controller.getConnect();
             dbStructureUpdateService.restart();
             reservedWordUpdateService.restart();
         }
@@ -484,22 +448,22 @@ public class MainController extends Application implements Initializable, MainCo
 
     @Override
     public void hideReservedWordStage() {
-        reservedWordStage.hide();
+        reservedWordPair.stage.hide();
     }
 
     @Override
     public void showAlertDialog(String message, String detail) {
-        alertDialogController.setContents(message, detail);
-        alertDialogController.setWaitMode(false);
-        alertDialogStage.showAndWait();
+        alertDialogPair.controller.setContents(message, detail);
+        alertDialogPair.controller.setWaitMode(false);
+        alertDialogPair.stage.showAndWait();
     }
     public void showWaitDialog(String message, String detail) {
-        alertDialogController.setContents(message, detail);
-        alertDialogController.setWaitMode(true);
-        alertDialogStage.showAndWait();
+        alertDialogPair.controller.setContents(message, detail);
+        alertDialogPair.controller.setWaitMode(true);
+        alertDialogPair.stage.showAndWait();
     }
     public void hideWaitDialog() {
-        alertDialogStage.hide();
+        alertDialogPair.stage.hide();
     }
 
     @Override
@@ -593,20 +557,20 @@ public class MainController extends Application implements Initializable, MainCo
             "\t"
     };
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {
-        if(!reservedWordStage.isShowing()) {
+        if(!reservedWordPair.stage.isShowing()) {
             return false;
         }
         return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES).anyMatch(c -> c == code);
     }
     private boolean isChangeFocusForReservedWordStage(String key) {
-        if(!reservedWordStage.isShowing()) {
+        if(!reservedWordPair.stage.isShowing()) {
             return false;
         }
         return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_STRING).anyMatch(s -> s.equals(key));
     }
 
     private boolean isHideReservedWordStage(KeyEvent event) {
-        if(!reservedWordStage.isShowing()) {
+        if(!reservedWordPair.stage.isShowing()) {
             return false;
         }
         return (event.isAltDown() || event.isControlDown() || !isTextInput(event.getCode()));
@@ -714,11 +678,11 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onSettingSqlEditor(ActionEvent event) {
-        editorChooserController.setContents(appConfigEditor.getEditorPath());
-        editorChooserStage.showAndWait();
+        editorChooserPair.controller.setContents(appConfigEditor.getEditorPath());
+        editorChooserPair.stage.showAndWait();
 
-        if (editorChooserController.isOk()) {
-            appConfigEditor.setEditorPath(editorChooserController.getEditorPath());
+        if (editorChooserPair.controller.isOk()) {
+            appConfigEditor.setEditorPath(editorChooserPair.controller.getEditorPath());
         }
     }
 
@@ -861,13 +825,13 @@ public class MainController extends Application implements Initializable, MainCo
         // 予約語ウィンドウにフォーカス移動
         if (isChangeFocusForReservedWordStage(event.getCode())) {
             event.consume();
-            reservedWordStage.requestFocus();
+            reservedWordPair.stage.requestFocus();
             return;
         }
 
         // 予約語ウィンドウを非表示
         if (isHideReservedWordStage(event)) {
-            reservedWordStage.hide();
+            reservedWordPair.stage.hide();
         }
 
         // 次の空行までを選択
@@ -894,15 +858,15 @@ public class MainController extends Application implements Initializable, MainCo
         String inputText = event.getCharacter();
         String inputKeyword = inputWord(text, caret, inputText);       // キャレットより前の単語を取得
 
-        if (reservedWordController.isInputReservedWord(event, inputKeyword)) {
+        if (reservedWordPair.controller.isInputReservedWord(event, inputKeyword)) {
             // キャレット位置に選択画面を出す
             InputMethodRequests imr = queryTextArea.getInputMethodRequests();
-            reservedWordStage.setX(imr.getTextLocation(0).getX());
-            reservedWordStage.setY(imr.getTextLocation(0).getY());
-            reservedWordStage.show();
+            reservedWordPair.stage.setX(imr.getTextLocation(0).getX());
+            reservedWordPair.stage.setY(imr.getTextLocation(0).getY());
+            reservedWordPair.stage.show();
             primaryStage.requestFocus();    // フォーカスは移動させない
         } else {
-            reservedWordStage.hide();
+            reservedWordPair.stage.hide();
         }
     }
 
