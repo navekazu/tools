@@ -218,6 +218,12 @@ public class MainController extends Application implements Initializable, MainCo
         queryTextArea.requestFocus();
     }
 
+    /**
+     * コントローラのルート要素が完全に処理された後に、コントローラを初期化するためにコールされます。<br>
+     * @param location ルート・オブジェクトの相対パスの解決に使用される場所、または場所が不明の場合は、null
+     * @param resources ート・オブジェクトのローカライズに使用されるリソース、
+     *                  またはルート・オブジェクトがローカライズされていない場合は、null。
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         dbStructurRootItem = new DbStructureTreeItem(DATABASE, DATABASE.getName(), null);

@@ -89,41 +89,47 @@ public class ReservedWordController extends SubController implements Initializab
         return false;
     }
 
-    /**
-     * 入力文字が文字なのか判定
-     * @param c 入力文字
-     * @return 文字の場合 true、それ以外は false
-     */
     private static final Character[] ALPHABETS_ALL = new Character[]{
             'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
             'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     };
+    /**
+     * 入力文字が文字なのか判定
+     * @param ch 入力文字
+     * @return 文字の場合 true、それ以外は false
+     */
     private boolean isCharacter(char ch) {
         return Arrays.stream(ALPHABETS_ALL).anyMatch(c -> c == ch);
     }
 
-    /**
-     * 入力文字が大文字なのか判定
-     * @param c 入力文字
-     * @return 大文字の場合 true、それ以外は false
-     */
     private static final Character[] ALPHABETS_UPPERCASE = new Character[]{
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
     };
+    /**
+     * 入力文字が大文字なのか判定
+     * @param ch 入力文字
+     * @return 大文字の場合 true、それ以外は false
+     */
     private boolean isUpperCharacter(char ch) {
         return Arrays.stream(ALPHABETS_UPPERCASE).anyMatch(c -> c == ch);
     }
 
+    /**
+     * コントローラのルート要素が完全に処理された後に、コントローラを初期化するためにコールされます。<br>
+     * @param location ルート・オブジェクトの相対パスの解決に使用される場所、または場所が不明の場合は、null
+     * @param resources ート・オブジェクトのローカライズに使用されるリソース、
+     *                  またはルート・オブジェクトがローカライズされていない場合は、null。
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
     }
 
     @FXML
-    public void onKeyPressed(KeyEvent event){
+    private void onKeyPressed(KeyEvent event){
         switch (event.getCode()) {
             case ENTER:
                 mainControllerInterface.hideReservedWordStage();
@@ -142,24 +148,22 @@ public class ReservedWordController extends SubController implements Initializab
     }
 
     @FXML
-    public void onKeyReleased(KeyEvent event){
+    private void onKeyReleased(KeyEvent event){
     }
 
     @FXML
-    public void onKeyTyped(KeyEvent event){
+    private void onKeyTyped(KeyEvent event){
     }
 
     @FXML
-    public void onMouseClicked(MouseEvent event){
+    private void onMouseClicked(MouseEvent event){
         if (event.getClickCount()>=2 && event.getButton()== MouseButton.PRIMARY) {
             mainControllerInterface.hideReservedWordStage();
             selected();
         }
     }
 
-    /**
-     * 選択した予約語をメイン画面に通知する
-     */
+    // 選択した予約語をメイン画面に通知する
     private void selected() {
         int index = reservedWordListView.getSelectionModel().getSelectedIndex();
         if (index==-1) {
