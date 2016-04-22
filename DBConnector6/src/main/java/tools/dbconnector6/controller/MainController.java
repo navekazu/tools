@@ -253,7 +253,7 @@ public class MainController extends Application implements Initializable, MainCo
         queryResultTableView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
         tableIndexListView.addEventHandler(MouseEvent.MOUSE_CLICKED, event -> { addQueryWordEvent(event); });
 
-
+        // 初期化のために一度サービスを実行する
         dbStructureUpdateService.restart();
         tableStructureTabPaneUpdateService.restart();
         tableStructureUpdateService.restart();
