@@ -12,7 +12,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ConnectHistory;
 import tools.dbconnector6.mapper.ConnectHistoryMapper;
