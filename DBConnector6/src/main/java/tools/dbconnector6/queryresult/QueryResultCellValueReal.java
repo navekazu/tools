@@ -13,10 +13,10 @@ import java.text.Format;
  */
 public class QueryResultCellValueReal extends QueryResultCellValue<BigDecimal> {
     // クエリ実行結果一覧に出力する際のFormat
-    private static final Format STANDARD_FORMAT = new DecimalFormat("#,##0.0");
+    private static final Format STANDARD_FORMAT = new DecimalFormat("#,##0.0##################");      // 小数点は20桁まで・・・（無限に出来ないのか？）
 
     // エビデンスとして出力する際のFormat
-    private static final Format EVIDENCE_MODE_FORMAT = new DecimalFormat("0.0");
+    private static final Format EVIDENCE_MODE_FORMAT = new DecimalFormat("0.0##################");      // 小数点は20桁まで・・・（無限に出来ないのか？）
 
     /**
      * セル値の初期化。<br>

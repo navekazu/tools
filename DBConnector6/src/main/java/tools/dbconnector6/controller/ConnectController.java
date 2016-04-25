@@ -27,6 +27,9 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.*;
 
+/**
+ * 接続先データベースの登録・選択画面用コントローラ。<br>
+ */
 public class ConnectController extends SubController implements Initializable {
 
     // Scene overview
@@ -45,19 +48,19 @@ public class ConnectController extends SubController implements Initializable {
     // |       passwordTextField                                                                       |
     // |                                                        [okButton] [cancelButton] [testButton] |
     // +-----------------------------------------------------------------------------------------------+
-    @FXML private TableView connectTableView;
-    @FXML private TableColumn<Connect, String> libraryPathTableColumn;
-    @FXML private TableColumn<Connect, String> driverTableColumn;
-    @FXML private TableColumn<Connect, String> urlTableColumn;
-    @FXML private TableColumn<Connect, String> userTableColumn;
-    @FXML private TableColumn<Connect, String> passwordTableColumn;
+    @FXML private TableView connectTableView;                           // 接続先一覧
+    @FXML private TableColumn<Connect, String> libraryPathTableColumn;  //   列：ライブラリパス
+    @FXML private TableColumn<Connect, String> driverTableColumn;       //   列：ドライバ名
+    @FXML private TableColumn<Connect, String> urlTableColumn;          //   列：URL
+    @FXML private TableColumn<Connect, String> userTableColumn;         //   列：ユーザー名
+    @FXML private TableColumn<Connect, String> passwordTableColumn;     //   列：パスワード
 
-    @FXML private ComboBox historyComboBox;
-    @FXML private TextField libraryPathTextField;
-    @FXML private TextField driverTextField;
-    @FXML private TextField urlTextField;
-    @FXML private TextField userTextField;
-    @FXML private PasswordField passwordTextField;
+    @FXML private ComboBox historyComboBox;                             // 接続履歴
+    @FXML private TextField libraryPathTextField;                       // ライブラリパス入力欄
+    @FXML private TextField driverTextField;                            // ドライバ名入力欄
+    @FXML private TextField urlTextField;                               // URL入力欄
+    @FXML private TextField userTextField;                              // ユーザー名入力欄
+    @FXML private PasswordField passwordTextField;                      // パスワード入力欄
 
     private Connection connection;
     private Connect connect;

@@ -110,7 +110,7 @@ public abstract class QueryResultCellValue<V> {
      * @throws SQLException ResultSetMetaDataに対する操作に失敗した場合
      */
     public static Pos getAlignment(ResultSetMetaData meta, int column) throws SQLException {
-        QueryResultCellValue queryResultCellValue = QueryResultCellValueCreator.createQueryResultCellValue(meta, column);
+        QueryResultCellValue queryResultCellValue = QueryResultCellValueCreator.createQueryResultCellValue(meta, column, null);
         return queryResultCellValue.getAlignment();
     }
 
@@ -123,7 +123,8 @@ public abstract class QueryResultCellValue<V> {
      * @throws SQLException ResultSetMetaDataとResultSetに対する操作に失敗した場合
      */
     public static QueryResultCellValue createQueryResultCellValue(ResultSetMetaData meta, ResultSet resultSet, int column) throws SQLException {
-        QueryResultCellValue queryResultCellValue = QueryResultCellValueCreator.createQueryResultCellValue(meta, column);
+        QueryResultCellValue queryResultCellValue = QueryResultCellValueCreator.createQueryResultCellValue(meta, column, resultSet);
+        System.out.println(String.format("%s.%s value:%s", meta.getTableName(column), meta.getColumnName(column), resultSet.getString(column)));
         queryResultCellValue.initValue(resultSet, column);
         return queryResultCellValue;
     }

@@ -1,8 +1,10 @@
 package tools.dbconnector6.queryresult;
 
+import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Types;
+import java.util.Optional;
 
 /**
  * QueryResultCellValueを生成する
@@ -17,10 +19,11 @@ public class QueryResultCellValueCreator {
      * 指定されたResultSetMetaDataのカラムインデックスからSQLタイプを取得し、それに応じたQueryResultCellValueを作成する
      * @param meta クエリ実行結果のResultSetMetaData
      * @param column カラムインデックス
+     * @param resultSet もし呼び出し側にResultSetがある場合は指定する。数値型の場合の小数があるかの判定に使用する。
      * @return 作成したQueryResultCellValue
      * @throws java.sql.SQLException ResultSetMetaDataに対する操作に失敗した場合
      */
-    static QueryResultCellValue createQueryResultCellValue(ResultSetMetaData meta, int column) throws SQLException {
+    static QueryResultCellValue createQueryResultCellValue(ResultSetMetaData meta, int column, ResultSet resultSet) throws SQLException {
         int type = meta.getColumnType(column);
 
         switch(type) {
@@ -32,7 +35,15 @@ public class QueryResultCellValueCreator {
             case Types.NUMERIC:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型NUMERICを識別します。
             case Types.REAL:                    // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型REALを識別します。
             case Types.TINYINT:                 // Javaプログラミング言語の定数で、型コードとも呼ばれ、汎用SQL型TINYINTを識別します。
-                if (meta.getScale(column)<=0) { // Oracleでなぜか-127が返ってくるときがあるので、0ではなく、0以下は小数なしとする
+
+                // 一部のJDBCドライバで、実数が格納されているのにgetScaleメソッドの戻り値が0の時があるため、
+                // ResultSetからgetStringで値を取り出し、ピリオドがあったら実数型と判定するよう修正した。
+                // もしresultSetがない（null）場合は実数型として返す。
+//                if (meta.getScale(column)<=0) { // Oracleでなぜか-127が返ってくるときがあるので、0ではなく、0以下は小数なしとする
+//                    return new QueryResultCellValueNumber();
+//                }
+//                return new QueryResultCellValueReal();
+                if (resultSet!=null && resultSet.getString(column).indexOf(".")==-1) {
                     return new QueryResultCellValueNumber();
                 }
                 return new QueryResultCellValueReal();
