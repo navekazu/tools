@@ -5,6 +5,8 @@ import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javafx.scene.Parent;
@@ -29,7 +31,10 @@ public class App extends Application implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        timerLabel.setText("bbbb");
+        Image image = new Image("image/tomato.png");
+        ImageView iv1 = new ImageView();
+        iv1.setImage(image);
+        timerLabel.setGraphic(iv1);
     }
 
     public static void main( String[] args ) {
