@@ -46,7 +46,6 @@ public class App extends Application implements Initializable {
         // 常に前画面
         primaryStage.setAlwaysOnTop(true);
 
-        primaryStage.show();
 
         // シーンのドラッグ
         scene.setOnMousePressed(e -> {
@@ -60,6 +59,8 @@ public class App extends Application implements Initializable {
 
         TimerService timerService = new TimerService();
         timerService.restart();
+
+        primaryStage.show();
     }
 
     @Override
