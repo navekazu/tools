@@ -17,6 +17,10 @@ public class AppTest {
 
     @Test
     public void test() {
-        assertEquals(true, true);
+        App app = new App();
+        assertEquals(true,  app.isDoingTime(0));
+        assertEquals(true,  app.isDoingTime(24));
+        assertEquals(false, app.isDoingTime(25));
+        assertEquals(false, app.isDoingTime(29));
     }
 }
