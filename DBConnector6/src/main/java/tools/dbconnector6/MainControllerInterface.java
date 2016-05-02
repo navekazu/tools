@@ -56,10 +56,7 @@ public interface MainControllerInterface {
      */
     public boolean isConnectWithoutOutputMessage();
 
-    public BackgroundService getDbStructureUpdateService();
-    public BackgroundService getTableStructureTabPaneUpdateService();
     public BackgroundService getTableStructureUpdateService();
-    public BackgroundService getQueryExecuteService();
 
     public class DbStructureParam {
         public TextField filterTextField;

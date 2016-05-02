@@ -12,7 +12,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.control.*;
-import javafx.scene.control.Button;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.control.cell.PropertyValueFactory;
@@ -48,6 +47,7 @@ import static tools.dbconnector6.controller.DbStructureTreeItem.ItemType.DATABAS
  * DBConnector6のメイン画面コントローラ
  */
 public class MainController extends Application implements Initializable, MainControllerInterface {
+    // 起動時のメインステージ（自分自身）
     private Stage primaryStage;
 
     // Scene overview
@@ -67,11 +67,11 @@ public class MainController extends Application implements Initializable, MainCo
     // |                 | Log area                                          |
     // |                 |   logTextArea                                     |
     // +-----------------+---------------------------------------------------+
-    @FXML private TextArea queryTextArea;
-    @FXML private TableView queryResultTableView;
-    @FXML private TextArea logTextArea;
+    @FXML private TextArea queryTextArea;               // メイン画面右側の、上に表示するクエリ入力欄
+    @FXML private TableView queryResultTableView;       // メイン画面右側の、中央に表示するクエリ実行結果表示欄
+    @FXML private TextArea logTextArea;                 // メイン画面右側の、下に表示するログ出力エリア
 
-    // DB structure
+    // DB structure                                     メイン画面左上のデータベース構造を表示するエリア
     // +------------------------------------+
     // | xxx filterTextField [searchButton] |
     // | +--------------------------------+ |
@@ -80,12 +80,11 @@ public class MainController extends Application implements Initializable, MainCo
     // | |                                | |
     // | +--------------------------------+ |
     // +------------------------------------+
-    @FXML private TextField filterTextField;
-    @FXML private Button searchButton;
-    @FXML private TreeView dbStructureTreeView;
-    private DbStructureTreeItem dbStructurRootItem;
+    @FXML private TextField filterTextField;            // フィルタ文字列の入力欄
+    @FXML private TreeView dbStructureTreeView;         // データベース構造を表示するTreeView
+    private DbStructureTreeItem dbStructureRootItem;    // データベース構造を表示するTreeViewのルート要素
 
-    // Table structure overview
+    // Table structure overview                         メイン画面左下のテーブル構造を表示するエリア（データベース構造で選択したテーブル等の構造を表示する）
     // +-----------------------------------------------------------+
     // | +-------------------+-----------------+-----------------+ |
     // | | tablePropertyTab  | tableColumnTab  | tableIndexTab   | |
@@ -97,12 +96,12 @@ public class MainController extends Application implements Initializable, MainCo
     // | |                                                       | |
     // | +-------------------------------------------------------+ |
     // +-----------------------------------------------------------+
-    @FXML private TabPane tableStructureTabPane;
-    @FXML private Tab tablePropertyTab;
-    @FXML private Tab tableColumnTab;
-    @FXML private Tab tableIndexTab;
+    @FXML private TabPane tableStructureTabPane;        // タブコントロールペイン
+    @FXML private Tab tablePropertyTab;                 // テーブルのプロパティを表示するタブ
+    @FXML private Tab tableColumnTab;                   // テーブルのカラム一覧を表示するタブ
+    @FXML private Tab tableIndexTab;                    // テーブルのインデックスを表示するタブ
 
-    // tablePropertyTab
+    // tablePropertyTab                                 メイン画面左下のテーブル構造のうち、テーブルのプロパティを表示するタブ
     // +-----------------------------------------------------------+
     // | +-------------------+-----------------+-----------------+ |
     // | | tablePropertyTab  |                 |                 | |
@@ -115,12 +114,11 @@ public class MainController extends Application implements Initializable, MainCo
     // | | +---------------------------------------------------+ | |
     // | +-------------------------------------------------------+ |
     // +-----------------------------------------------------------+
-    @FXML private TableView tablePropertyTableView;
+    @FXML private TableView tablePropertyTableView;     // テーブルのプロパティを表示するTableView
     @FXML private TableColumn<TablePropertyTab, String> keyTableColumn;
     @FXML private TableColumn<TablePropertyTab, String> valueTableColumn;
-    @FXML private TableView tableColumnTableView;
 
-    // tablePropertyTab
+    // tablePropertyTab                                 メイン画面左下のテーブル構造のうち、テーブルのカラム一覧を表示するタブ
     // +-----------------------------------------------------------+
     // | +-------------------+-----------------+-----------------+ |
     // | |                   | tableColumnTab  |                 | |
@@ -137,6 +135,7 @@ public class MainController extends Application implements Initializable, MainCo
     // | | +---------------------------------------------------+ | |
     // | +-------------------------------------------------------+ |
     // +-----------------------------------------------------------+
+    @FXML private TableView tableColumnTableView;       // テーブルのカラム一覧を表示するTableView
     @FXML private TableColumn<TableColumnTab, String> nameTableColumn;
     @FXML private TableColumn<TableColumnTab, String> typeTableColumn;
     @FXML private TableColumn<TableColumnTab, Integer> sizeTableColumn;
@@ -148,7 +147,7 @@ public class MainController extends Application implements Initializable, MainCo
     @FXML private TableColumn<TableColumnTab, String> autoincrementTableColumn;
     @FXML private TableColumn<TableColumnTab, String> generatedColumnTableColumn;
 
-    // tableIndexTab
+    // tableIndexTab                                    メイン画面左下のテーブル構造のうち、テーブルのインデックスを表示するタブ
     // +-----------------------------------------------------------+
     // | +-------------------+-----------------+-----------------+ |
     // | |                   |                 | tableIndexTab   | |
@@ -163,39 +162,46 @@ public class MainController extends Application implements Initializable, MainCo
     // | | +---------------------------------------------------+ | |
     // | +-------------------------------------------------------+ |
     // +-----------------------------------------------------------+
-    @FXML private ComboBox tableIndexNameComboBox;
-    @FXML private TextField tableIndexPrimaryKeyTextField;
-    @FXML private TextField tableIndexUniqueKeyTextField;
-    @FXML private ListView tableIndexListView;
+    @FXML private ComboBox tableIndexNameComboBox;          // 表示するインデックスを選択するComboBox
+    @FXML private TextField tableIndexPrimaryKeyTextField;  // 選択したインデックスがプライマリキーかを表す
+    @FXML private TextField tableIndexUniqueKeyTextField;   // 選択したインデックスがユニークキーかを表す
+    @FXML private ListView tableIndexListView;              // インデックスに使用するカラムの一覧
 
     // other UI
-    @FXML private SplitPane primarySplitPane;
-    @FXML private SplitPane leftSplitPane;
-    @FXML private SplitPane rightSplitPane;
-    @FXML private CheckMenuItem evidenceMode;
-    @FXML private CheckMenuItem evidenceModeIncludeHeader;
-    @FXML private ToggleGroup evidenceDelimiter;
+    @FXML private SplitPane primarySplitPane;               // メイン画面を左右に分けるペイン
+    @FXML private SplitPane leftSplitPane;                  // メイン画面左側を上下に分けるペイン
+    @FXML private SplitPane rightSplitPane;                 // メイン画面右側を上下に分けるペイン
+    @FXML private CheckMenuItem evidenceMode;               // メニュー「Evidence mode > Evidence mode」のチェック状態
+    @FXML private CheckMenuItem evidenceModeIncludeHeader;  // メニュー「Evidence mode > Include header」のチェック状態
+    @FXML private ToggleGroup evidenceDelimiter;            // メニュー「Evidence mode > Evidence delimiter」の選択状態
 
     // stage & controller
-    private StageAndControllerPair<ConnectController> connectPair;
-    private StageAndControllerPair<AlertController> alertDialogPair;
-    private StageAndControllerPair<EditorChooserController> editorChooserPair;
-    private StageAndControllerPair<ReservedWordController> reservedWordPair;
-    private Set<ReservedWord> reservedWordList = new HashSet<>();
-    private AppConfigEditor appConfigEditor = new AppConfigEditor();;
+    private StageAndControllerPair<ConnectController> connectPair;              // 接続するデータベースを選択・登録するステージとコントローラ
+    private StageAndControllerPair<AlertController> alertDialogPair;            // 警告を表示するステージとコントローラ
+    private StageAndControllerPair<EditorChooserController> editorChooserPair;  // エディタ選択を表示するステージとコントローラ
+    private StageAndControllerPair<ReservedWordController> reservedWordPair;    // 予約語を表示するステージとコントローラ
+
+    private Set<ReservedWord> reservedWordList = new HashSet<>();               // 予約語を格納する一覧
+    private AppConfigEditor appConfigEditor = new AppConfigEditor();            // アプリケーション設定内容の永続化クラス
 
     // background service
-    private BackgroundService dbStructureUpdateService;
-    private BackgroundService tableStructureTabPaneUpdateService;
-    private BackgroundService tableStructureUpdateService;
-    private BackgroundService queryExecuteService;
-    private BackgroundService reservedWordUpdateService;
-    private BackgroundService sqlEditorLaunchService;
+    private BackgroundService dbStructureUpdateService;                         // メイン画面左上のデータベース構造を更新するサービス
+    private BackgroundService tableStructureTabPaneUpdateService;               // メイン画面左下のタブを状態するサービス
+    private BackgroundService tableStructureUpdateService;                      // メイン画面左下のテーブル構造を更新するサービス
+    private BackgroundService queryExecuteService;                              // クエリを実行するサービス
+    private BackgroundService reservedWordUpdateService;                        // 予約語一覧を更新するサービス
+    private BackgroundService sqlEditorLaunchService;                           // SQLエディタを起動するサービス
 
     // other field
-    private Connect connectParam;
-    private String queryScript = null;
+    private Connect connectParam;                                               // データベース接続パラメータ
+    private String queryScript = null;                                          // ファイル選択ダイアログで選択したクエリスクリプトファイル（SQLバッチ実行スクリプト）
 
+    /**
+     * JavaFXアプリのエントリポイント。<br>
+     * FXMLの読み込みとコントローラの初期化を行い、メイン画面を表示する。<br>
+     * @param primaryStage アプリケーション・シーンを設定できる、このアプリケーションのプライマリ・ステージ
+     * @throws Exception 何らかの例外が発生した場合
+     */
     @Override
     public void start(Stage primaryStage) throws Exception {
         FXMLLoader loader = ControllerManager.getControllerManager().getLoarder("main");
@@ -213,6 +219,7 @@ public class MainController extends Application implements Initializable, MainCo
         controller.focusQueryTextArea();
     }
 
+    // クエリ入力欄にフォーカスを移動する
     private void focusQueryTextArea() {
         queryTextArea.requestFocus();
     }
@@ -225,8 +232,8 @@ public class MainController extends Application implements Initializable, MainCo
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        dbStructurRootItem = new DbStructureTreeItem(DATABASE, DATABASE.getName(), null);
-        dbStructureTreeView.setRoot(dbStructurRootItem);
+        dbStructureRootItem = new DbStructureTreeItem(DATABASE, DATABASE.getName(), null);
+        dbStructureTreeView.setRoot(dbStructureRootItem);
         dbStructureTreeView.getSelectionModel().selectedItemProperty().addListener(new DbStructureTreeViewChangeListener());
 
         // service
@@ -279,6 +286,7 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    // データベース接続画面を表示する
     private void showConnect() {
         closeConnection();
         Platform.runLater(new Runnable() {
@@ -288,6 +296,8 @@ public class MainController extends Application implements Initializable, MainCo
             }
         });
     }
+
+    // データベース接続を閉じる
     private void closeConnection() {
         if (isConnectWithoutOutputMessage()) {
             try {
@@ -302,119 +312,14 @@ public class MainController extends Application implements Initializable, MainCo
         reservedWordUpdateService.restart();
     }
 
-    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
-    public void writeLog(String message, Object... args) {
-        final String logText = LOG_DATE_FORMAT.format(new Date())+" " + String.format(message, args);
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                logTextArea.appendText(logText + "\n");
-            }
-        });
-    }
-
-    public void writeLog(Throwable e) {
-        ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
-        try {
-            e.printStackTrace();
-            applicationLogSerializer.appendText(e.toString());
-        } catch (IOException e1) {
-            writeLog(e1.toString());
-            e1.printStackTrace();
-        }
-        writeLog(e.toString());
-    }
-
-    public void connectNotify() {
-        Connection con = connectPair.controller.getConnection();
-        if (con!=null) {
-            writeLog("Connected.");
-            connectParam = connectPair.controller.getConnect();
-            dbStructureUpdateService.restart();
-            reservedWordUpdateService.restart();
-        }
-    }
-
-    public Connection getConnection() {
-        return connectParam==null? null: connectParam.getConnection();
-    }
-    public Connect getConnectParam() {
-        return connectParam;
-    }
-
-
-    public BackgroundService getDbStructureUpdateService() {
-        return dbStructureUpdateService;
-    }
-
-    public BackgroundService getTableStructureTabPaneUpdateService() {
-        return tableStructureTabPaneUpdateService;
-    }
-
-    public BackgroundService getTableStructureUpdateService() {
-        return tableStructureUpdateService;
-    }
-
-    public BackgroundService getQueryExecuteService() {
-        return queryExecuteService;
-    }
-
-    public DbStructureParam getDbStructureParam() {
-        MainControllerInterface.DbStructureParam param = new MainControllerInterface.DbStructureParam();
-        param.filterTextField = filterTextField;
-        param.dbStructureTreeView = dbStructureTreeView;
-        param.dbStructureRootItem = dbStructurRootItem;
-        return param;
-    }
-
-    public MainControllerInterface.TableStructureTabParam getTableStructureTabParam() {
-        MainControllerInterface.TableStructureTabParam param = new MainControllerInterface.TableStructureTabParam();
-        param.tableStructureTabPane = tableStructureTabPane;
-
-        param.tablePropertyTab = tablePropertyTab;
-        param.tablePropertyTableView = tablePropertyTableView;
-        param.keyTableColumn = keyTableColumn;
-        param.valueTableColumn = valueTableColumn;
-
-        param.tableColumnTab = tableColumnTab;
-        param.tableColumnTableView = tableColumnTableView;
-        param.nameTableColumn = nameTableColumn;
-        param.typeTableColumn = typeTableColumn;
-        param.sizeTableColumn = sizeTableColumn;
-        param.decimalDigitsTableColumn = decimalDigitsTableColumn;
-        param.nullableTableColumn = nullableTableColumn;
-        param.primaryKeyTableColumn = primaryKeyTableColumn;
-        param.remarksTableColumn = remarksTableColumn;
-        param.columnDefaultTableColumn = columnDefaultTableColumn;
-        param.autoincrementTableColumn = autoincrementTableColumn;
-        param.generatedColumnTableColumn = generatedColumnTableColumn;
-
-        param.tableIndexTab = tableIndexTab;
-        param.tableIndexNameComboBox = tableIndexNameComboBox;
-        param.tableIndexPrimaryKeyTextField = tableIndexPrimaryKeyTextField;
-        param.tableIndexUniqueKeyTextField = tableIndexUniqueKeyTextField;
-        param.tableIndexListView = tableIndexListView;
-
-        return param;
-    }
-
-    public QueryParam getQueryParam() {
-        MainControllerInterface.QueryParam param = new MainControllerInterface.QueryParam();
-
-        param.queryTextArea = queryTextArea;
-        param.queryResultTableView = queryResultTableView;
-
-        return param;
-    }
-
-    public class DbStructureTreeViewChangeListener implements ChangeListener {
-        @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-            tableStructureTabPaneUpdateService.restart();
-        }
-    }
-
+    /**
+     * クエリ入力欄で、現在のキャレット位置の左側にある単語を返す。<br>
+     * 「test input」の文字のpとuの間にキャレットがあった場合、返す文字列は「inp」となる。<br>
+     * @param text クエリ入力欄の入力内容
+     * @param caret 現在のキャレット位置
+     * @param inputCharacter キーイベントで発生した入力文字列
+     * @return 現在のキャレット位置の左側にある単語
+     */
     protected String inputWord(String text, int caret, String inputCharacter) {
         // キーイベント前の入力内容に、キーイベントで入力した文字をキャレットの位置に入れる
         StringBuilder realText = new StringBuilder(text);
@@ -431,147 +336,32 @@ public class MainController extends Application implements Initializable, MainCo
         return inputKeyword.toString();
     }
 
-    @Override
-    public void selectReservedWord(String word) {
-        int caret = queryTextArea.getCaretPosition();
-        String text = queryTextArea.getText();
-        String inputKeyword = inputWord(text, caret, "");       // キャレットより前の単語を取得
-
-        // キャレットより前の単語を削除
-        queryTextArea.deleteText(caret-inputKeyword.length(), caret);
-
-        // キャレット位置に選択した単語を挿入
-        queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
-    }
-
-    @Override
-    public void mainControllerRequestFocus() {
-        primaryStage.requestFocus();
-    }
-
-    @Override
-    public void hideReservedWordStage() {
-        reservedWordPair.stage.hide();
-    }
-
-    @Override
-    public void showAlertDialog(String message, String detail) {
-        alertDialogPair.controller.setContents(message, detail);
-        alertDialogPair.controller.setWaitMode(false);
-        alertDialogPair.stage.showAndWait();
-    }
-    public void showWaitDialog(String message, String detail) {
-        alertDialogPair.controller.setContents(message, detail);
-        alertDialogPair.controller.setWaitMode(true);
-        alertDialogPair.stage.showAndWait();
-    }
-    public void hideWaitDialog() {
-        alertDialogPair.stage.hide();
-    }
-
-    @Override
-    public boolean isEvidenceMode() {
-        return evidenceMode.isSelected();
-    }
-
-    @Override
-    public boolean isEvidenceModeIncludeHeader() {
-        return evidenceModeIncludeHeader.isSelected();
-    }
-
-    private static final String[] EVIDENCE_DELIMITERS = new String[] {"\t", ",", " "};
-    @Override
-    public String getEvidenceDelimiter() {
-        int selectedIndex = 0;
-        for (Toggle toggle: evidenceDelimiter.getToggles()) {
-            if (toggle.isSelected()) {
-                break;
-            }
-            selectedIndex++;
-        }
-
-        return EVIDENCE_DELIMITERS[selectedIndex];
-    }
-
-    @Override
-    public String getQuery() {
-        String sql;
-
-        if (queryScript!=null) {
-            // 読み込んだスクリプトがあるなら、それを実行
-            sql = queryScript;
-            queryScript = null;
-
-        } else {
-            // スクリプトを読み込んでいないなら、クエリ入力している内容を実行
-
-            //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
-            sql = queryTextArea.getSelectedText();
-            if (sql.length() <= 0) {
-                sql = queryTextArea.getText();
-            }
-        }
-
-        return sql;
-    }
-
-    @Override
-    public String getSelectedQuery() {
-        return queryTextArea.getSelectedText();
-    }
-
-    @Override
-    public String getEditorPath() {
-        return appConfigEditor.getEditorPath();
-    }
-
-    @Override
-    public void updateSelectedQuery(String query) {
-        int caret = queryTextArea.getCaretPosition();
-        int anchor = queryTextArea.getAnchor();
-        queryTextArea.replaceText((anchor<caret? anchor: caret), (anchor>caret? anchor: caret), query);    // "begin<=end" の関係でないとNG
-    }
-
-    @Override
-    public void addQueryWord(String word, boolean shiftDown) {
-        updateSelectedQuery(word + (shiftDown? ", ": ""));
-        queryTextArea.requestFocus();
-    }
-
-    @Override
-    public boolean isConnect() {
-        boolean result = isConnectWithoutOutputMessage();
-        if (!result) {
-            writeLog("No connect.");
-        }
-        return result;
-    }
-
-    @Override
-    public boolean isConnectWithoutOutputMessage() {
-        return connectParam==null? false: connectParam.getConnection()!=null;
-    }
-
-
-    private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
-            KeyCode.TAB, KeyCode.DOWN,
-    };
-    private static final String[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_STRING = new String[] {
-            "\t"
-    };
+    // クエリ入力中に入力したキーが予約語一覧へのフォーカス移動のキーかを判定する
+    // 予約語一覧が表示されていて、かつ入力したキーが「TAB」か「DOWN」キーの場合はtrue
     private boolean isChangeFocusForReservedWordStage(KeyCode code) {
         if(!reservedWordPair.stage.isShowing()) {
             return false;
         }
         return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES).anyMatch(c -> c == code);
     }
+    private static final KeyCode[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_CODES = new KeyCode[] {
+            KeyCode.TAB, KeyCode.DOWN,
+    };
+
+    // クエリ入力中に入力したキーが予約語一覧へのフォーカス移動の文字入力かを判定する
+    // 予約語一覧が表示されていて、かつ入力した文字が「TAB」の場合はtrue
     private boolean isChangeFocusForReservedWordStage(String key) {
         if(!reservedWordPair.stage.isShowing()) {
             return false;
         }
         return Arrays.stream(CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_STRING).anyMatch(s -> s.equals(key));
     }
+    private static final String[] CHANGE_FOCUS_FOR_RESERVED_WORD_STAGE_STRING = new String[] {
+            "\t"
+    };
 
+    // クエリ入力中に入力したキーが予約語一覧を非表示にするキーかを判定する
+    // 予約語一覧が表示されていて、かつ入力したキーが「ALT」か「Ctrl」か文字以外の場合はtrue
     private boolean isHideReservedWordStage(KeyEvent event) {
         if(!reservedWordPair.stage.isShowing()) {
             return false;
@@ -579,14 +369,23 @@ public class MainController extends Application implements Initializable, MainCo
         return (event.isAltDown() || event.isControlDown() || !isTextInput(event.getCode()));
     }
 
-    private static final KeyCode[] SELECT_NEXT_EMPTY_LINE_CODES = new KeyCode[] {
-            KeyCode.UP, KeyCode.DOWN,
-    };
+    // クエリ入力中に入力したキーが次もしくは前の空行までを一括選択するキーかを判定する。
+    // クエリ入力中に「Shift」と「Ctrl」と「UP」もしくは「DOWN」を押した場合はtrue
     private boolean isSelectNextEmptyLine(KeyEvent event) {
         return event.isShiftDown() && event.isControlDown()
                 && Arrays.stream(SELECT_NEXT_EMPTY_LINE_CODES).anyMatch(c -> c == event.getCode());
     }
+    private static final KeyCode[] SELECT_NEXT_EMPTY_LINE_CODES = new KeyCode[] {
+            KeyCode.UP, KeyCode.DOWN,
+    };
 
+    /**
+     * クエリ入力欄のキャレット位置の、次もしくは前の空行までのキャレット位置を返す<br>
+     * @param text クエリ入力欄の入力内容
+     * @param caret 現在のキャレット位置
+     * @param direction キャレット移動方向。キャレット位置より前に移動する場合は-1、後ろに移動する場合は1を設定
+     * @return 移動先のキャレット位置
+     */
     protected int getNextEmptyLineCaretPosition(String text, int caret, int direction) {
         // すでにインデックスを超えていたら抜ける
         if (caret+direction<0 || caret+direction>=text.length()) {
@@ -617,13 +416,19 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
 
-    private static final Character[] SPACE_INPUT_CHARS = new Character[] {
-        ' ', '\t', '\n', '　', '.',
-    };
+    // 空白文字かを判定する。
+    // 空白文字は、半角空白・タブ文字・改行・全角空白・ピリオドがある。
     private boolean isSpaceInput(char ch) {
         return Arrays.stream(SPACE_INPUT_CHARS).anyMatch(c -> c == ch);
     }
+    private static final Character[] SPACE_INPUT_CHARS = new Character[] {
+            ' ', '\t', '\n', '　', '.',
+    };
 
+    // 文字の入力かを判定する。
+    private boolean isTextInput(KeyCode code) {
+        return Arrays.stream(TEXT_INPUT_CODES).anyMatch(c -> c == code);
+    }
     private static final KeyCode[] TEXT_INPUT_CODES = new KeyCode[] {
             KeyCode.A, KeyCode.B, KeyCode.C, KeyCode.D, KeyCode.E, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.I, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.M,
             KeyCode.N, KeyCode.O, KeyCode.P, KeyCode.Q, KeyCode.R, KeyCode.S, KeyCode.T, KeyCode.U, KeyCode.V, KeyCode.W, KeyCode.X, KeyCode.Y, KeyCode.Z,
@@ -635,9 +440,6 @@ public class MainController extends Application implements Initializable, MainCo
             KeyCode.BACK_SLASH, KeyCode.BACK_SPACE, KeyCode.OPEN_BRACKET, KeyCode.CLOSE_BRACKET,KeyCode.AT,
             KeyCode.SEMICOLON, KeyCode.COLON, KeyCode.PERIOD
     };
-    private boolean isTextInput(KeyCode code) {
-        return Arrays.stream(TEXT_INPUT_CODES).anyMatch(c -> c == code);
-    }
 
 
     /***************************************************************************
@@ -796,6 +598,16 @@ public class MainController extends Application implements Initializable, MainCo
             return ;
         }
         dbStructureUpdateService.restart();
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // DB structure event
+
+    public class DbStructureTreeViewChangeListener implements ChangeListener {
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            tableStructureTabPaneUpdateService.restart();
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////
@@ -1057,5 +869,229 @@ public class MainController extends Application implements Initializable, MainCo
      * MainControllerInterface implementation                                  *
      *                                                                         *
      **************************************************************************/
+
+    @Override
+    public void writeLog(String message, Object... args) {
+        final String logText = LOG_DATE_FORMAT.format(new Date())+" " + String.format(message, args);
+
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                logTextArea.appendText(logText + "\n");
+            }
+        });
+    }
+    private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
+
+    @Override
+    public void writeLog(Throwable e) {
+        ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
+        try {
+            e.printStackTrace();
+            applicationLogSerializer.appendText(e.toString());
+        } catch (IOException e1) {
+            writeLog(e1.toString());
+            e1.printStackTrace();
+        }
+        writeLog(e.toString());
+    }
+
+    @Override
+    public void selectReservedWord(String word) {
+        int caret = queryTextArea.getCaretPosition();
+        String text = queryTextArea.getText();
+        String inputKeyword = inputWord(text, caret, "");       // キャレットより前の単語を取得
+
+        // キャレットより前の単語を削除
+        queryTextArea.deleteText(caret-inputKeyword.length(), caret);
+
+        // キャレット位置に選択した単語を挿入
+        queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
+    }
+
+    @Override
+    public void mainControllerRequestFocus() {
+        primaryStage.requestFocus();
+    }
+
+    @Override
+    public void hideReservedWordStage() {
+        reservedWordPair.stage.hide();
+    }
+
+    @Override
+    public void showAlertDialog(String message, String detail) {
+        alertDialogPair.controller.setContents(message, detail);
+        alertDialogPair.controller.setWaitMode(false);
+        alertDialogPair.stage.showAndWait();
+    }
+    public void showWaitDialog(String message, String detail) {
+        alertDialogPair.controller.setContents(message, detail);
+        alertDialogPair.controller.setWaitMode(true);
+        alertDialogPair.stage.showAndWait();
+    }
+    public void hideWaitDialog() {
+        alertDialogPair.stage.hide();
+    }
+
+    @Override
+    public boolean isEvidenceMode() {
+        return evidenceMode.isSelected();
+    }
+
+    @Override
+    public boolean isEvidenceModeIncludeHeader() {
+        return evidenceModeIncludeHeader.isSelected();
+    }
+
+    private static final String[] EVIDENCE_DELIMITERS = new String[] {"\t", ",", " "};
+    @Override
+    public String getEvidenceDelimiter() {
+        int selectedIndex = 0;
+        for (Toggle toggle: evidenceDelimiter.getToggles()) {
+            if (toggle.isSelected()) {
+                break;
+            }
+            selectedIndex++;
+        }
+
+        return EVIDENCE_DELIMITERS[selectedIndex];
+    }
+
+    @Override
+    public String getQuery() {
+        String sql;
+
+        if (queryScript!=null) {
+            // 読み込んだスクリプトがあるなら、それを実行
+            sql = queryScript;
+            queryScript = null;
+
+        } else {
+            // スクリプトを読み込んでいないなら、クエリ入力している内容を実行
+
+            //  選択したテキストが実行するSQLだが、選択テキストがない場合はテキストエリア全体をSQLとする
+            sql = queryTextArea.getSelectedText();
+            if (sql.length() <= 0) {
+                sql = queryTextArea.getText();
+            }
+        }
+
+        return sql;
+    }
+
+    @Override
+    public String getSelectedQuery() {
+        return queryTextArea.getSelectedText();
+    }
+
+    @Override
+    public void updateSelectedQuery(String query) {
+        int caret = queryTextArea.getCaretPosition();
+        int anchor = queryTextArea.getAnchor();
+        queryTextArea.replaceText((anchor<caret? anchor: caret), (anchor>caret? anchor: caret), query);    // "begin<=end" の関係でないとNG
+    }
+
+    @Override
+    public void addQueryWord(String word, boolean shiftDown) {
+        updateSelectedQuery(word + (shiftDown? ", ": ""));
+        queryTextArea.requestFocus();
+    }
+
+    @Override
+    public String getEditorPath() {
+        return appConfigEditor.getEditorPath();
+    }
+
+    @Override
+    public void connectNotify() {
+        Connection con = connectPair.controller.getConnection();
+        if (con!=null) {
+            writeLog("Connected.");
+            connectParam = connectPair.controller.getConnect();
+            dbStructureUpdateService.restart();
+            reservedWordUpdateService.restart();
+        }
+    }
+
+    @Override
+    public Connection getConnection() {
+        return connectParam==null? null: connectParam.getConnection();
+    }
+
+    @Override
+    public Connect getConnectParam() {
+        return connectParam;
+    }
+
+    @Override
+    public boolean isConnect() {
+        boolean result = isConnectWithoutOutputMessage();
+        if (!result) {
+            writeLog("No connect.");
+        }
+        return result;
+    }
+
+    @Override
+    public boolean isConnectWithoutOutputMessage() {
+        return connectParam==null? false: connectParam.getConnection()!=null;
+    }
+
+    @Override
+    public BackgroundService getTableStructureUpdateService() {
+        return tableStructureUpdateService;
+    }
+
+    @Override
+    public DbStructureParam getDbStructureParam() {
+        MainControllerInterface.DbStructureParam param = new MainControllerInterface.DbStructureParam();
+        param.filterTextField = filterTextField;
+        param.dbStructureTreeView = dbStructureTreeView;
+        param.dbStructureRootItem = dbStructureRootItem;
+        return param;
+    }
+
+    @Override
+    public MainControllerInterface.TableStructureTabParam getTableStructureTabParam() {
+        MainControllerInterface.TableStructureTabParam param = new MainControllerInterface.TableStructureTabParam();
+        param.tableStructureTabPane = tableStructureTabPane;
+
+        param.tablePropertyTab = tablePropertyTab;
+        param.tablePropertyTableView = tablePropertyTableView;
+        param.keyTableColumn = keyTableColumn;
+        param.valueTableColumn = valueTableColumn;
+
+        param.tableColumnTab = tableColumnTab;
+        param.tableColumnTableView = tableColumnTableView;
+        param.nameTableColumn = nameTableColumn;
+        param.typeTableColumn = typeTableColumn;
+        param.sizeTableColumn = sizeTableColumn;
+        param.decimalDigitsTableColumn = decimalDigitsTableColumn;
+        param.nullableTableColumn = nullableTableColumn;
+        param.primaryKeyTableColumn = primaryKeyTableColumn;
+        param.remarksTableColumn = remarksTableColumn;
+        param.columnDefaultTableColumn = columnDefaultTableColumn;
+        param.autoincrementTableColumn = autoincrementTableColumn;
+        param.generatedColumnTableColumn = generatedColumnTableColumn;
+
+        param.tableIndexTab = tableIndexTab;
+        param.tableIndexNameComboBox = tableIndexNameComboBox;
+        param.tableIndexPrimaryKeyTextField = tableIndexPrimaryKeyTextField;
+        param.tableIndexUniqueKeyTextField = tableIndexUniqueKeyTextField;
+        param.tableIndexListView = tableIndexListView;
+
+        return param;
+    }
+
+    @Override
+    public QueryParam getQueryParam() {
+        MainControllerInterface.QueryParam param = new MainControllerInterface.QueryParam();
+
+        param.queryTextArea = queryTextArea;
+        param.queryResultTableView = queryResultTableView;
+
+        return param;
+    }
 
 }
