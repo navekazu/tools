@@ -451,24 +451,30 @@ public class MainController extends Application implements Initializable, MainCo
     ////////////////////////////////////////////////////////////////////////////
     // menu action
 
+    // メニュー「File > Close」のアクションイベントハンドラ
+    // データベース接続を解除してアプリケーションを終了する
     @FXML
     private void onClose(ActionEvent event) {
         closeConnection();
+        Platform.exit();
     }
 
+    // メニュー「Edit > Undo」のアクションイベントハンドラ
     @FXML
     private void onUndo(ActionEvent event) {
         // TODO: TextAreaのデフォルトの動作を更新したい・・・
     }
 
+    // メニュー「Edit > Redo」のアクションイベントハンドラ
     @FXML
     private void onRedo(ActionEvent event) {
         // TODO: TextAreaのデフォルトの動作を更新したい・・・
     }
 
+    // メニュー「Edit > Copy」のアクションイベントハンドラ
+    // 実行結果一覧にフォーカスがある場合、一覧の選択している内容をクリップボードにコピーする
     @FXML
     private void onCopy(ActionEvent event) {
-        // 実行結果一覧にフォーカスがあるなら、一覧の選択している内容をクリップボードにコピーする
         if (!queryResultTableView.isFocused()) {
             return ;
         }
@@ -481,6 +487,8 @@ public class MainController extends Application implements Initializable, MainCo
         event.consume();
     }
 
+    // メニュー「Edit > Setting SQL editor」のアクションイベントハンドラ
+    // SQLエディタの設定画面を表示する
     @FXML
     private void onSettingSqlEditor(ActionEvent event) {
         editorChooserPair.controller.setEditorPath(appConfigEditor.getEditorPath());
@@ -491,32 +499,43 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    // メニュー「Edit > Call SQL editor」のアクションイベントハンドラ
+    // SQLエディタを呼び出し、編集中のクエリをSQLエディタで編集させる
     @FXML
     private void onCallSqlEditor(ActionEvent event) {
         sqlEditorLaunchService.restart();
     }
 
+    // メニュー「Database > Connect」のアクションイベントハンドラ
+    // データベース接続画面を表示する
     @FXML
     private void onConnect(ActionEvent event) {
         showConnect();
     }
 
+    // メニュー「Database > Disconnect」のアクションイベントハンドラ
+    // データベース接続を解除する
     @FXML
     private void onDisconnect(ActionEvent event) {
         closeConnection();
     }
 
+    // メニュー「Database > Execute query」のアクションイベントハンドラ
+    // クエリを実行する
     @FXML
     private void onExecuteQuery(ActionEvent event) {
         queryExecuteService.restart();
     }
 
 
+    // メニュー「Database > Paste & Execute query」のアクションイベントハンドラ
     @FXML
     private void onPasteAndExecuteQuery(ActionEvent event) {
         // TODO: クリップボードの内容をクエリ入力欄に貼り付けると同時に、貼り付けた内容のSQLを実行する
     }
 
+    // メニュー「Database > Cancel query」のアクションイベントハンドラ
+    // 実行中のクエリを実行解除する
     @FXML
     private void onCancelQuery(ActionEvent event) {
         if (!isConnect()) {
@@ -525,6 +544,8 @@ public class MainController extends Application implements Initializable, MainCo
         queryExecuteService.cancel();
     }
 
+    // メニュー「Database > Query script」のアクションイベントハンドラ
+    // クエリスクリプトファイルを選択し、実行する
     @FXML
     private void onQueryScript(ActionEvent event) {
         FileChooser fileChooser = new FileChooser();
@@ -550,6 +571,8 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    // メニュー「Database > Commit」のアクションイベントハンドラ
+    // データベースにコミットを送信する
     @FXML
     private void onCommit(ActionEvent event) {
         if (!isConnect()) {
@@ -563,6 +586,8 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    // メニュー「Database > Rollback」のアクションイベントハンドラ
+    // データベースにロールバックを送信する
     @FXML
     private void onRollback(ActionEvent event) {
         if (!isConnect()) {
@@ -576,6 +601,15 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    // メニュー「Database > Isolation」のアクションイベントハンドラ
+    // 現在のトランザクション分離レベルをログエリアに出力する
+    @FXML
+    private void onCheckIsolation(ActionEvent event) throws SQLException {
+        if (!isConnect()) {
+            return ;
+        }
+        writeLog("Transaction isolation: %s", ISOLATIONS.get(connectParam.getConnection().getTransactionIsolation()));
+    }
     private static final Map<Integer, String> ISOLATIONS = new HashMap<>();
     static {
         ISOLATIONS.put(Connection.TRANSACTION_READ_UNCOMMITTED, "UNCOMMITTED");
@@ -584,14 +618,27 @@ public class MainController extends Application implements Initializable, MainCo
         ISOLATIONS.put(Connection.TRANSACTION_SERIALIZABLE, "SERIALIZABLE");
         ISOLATIONS.put(Connection.TRANSACTION_NONE, "NONE");
     }
-    @FXML
-    private void onCheckIsolation(ActionEvent event) throws SQLException {
-        if (!isConnect()) {
-            return ;
+
+    ////////////////////////////////////////////////////////////////////////////
+    // DB structure event
+
+    // メイン画面左上のデータベース構造の選択変更イベントリスナ
+    private class DbStructureTreeViewChangeListener implements ChangeListener {
+        /**
+         * 選択変更イベント。<br>
+         * メイン画面左下のテーブル構造の更新を実行する
+         * @param observable 値が変更されたObservableValue
+         * @param oldValue   古い値
+         * @param newValue   新しい値
+         */
+        @Override
+        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
+            tableStructureTabPaneUpdateService.restart();
         }
-        writeLog("Transaction isolation: %s", ISOLATIONS.get(connectParam.getConnection().getTransactionIsolation()));
     }
 
+    // メイン画面左上のSearchボタンのアクションイベントハンドラ
+    // メイン画面左上のデータベース構造の更新を行う
     @FXML
     private void onSearchButton(ActionEvent event) {
         if (!isConnect()) {
@@ -601,18 +648,10 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     ////////////////////////////////////////////////////////////////////////////
-    // DB structure event
-
-    public class DbStructureTreeViewChangeListener implements ChangeListener {
-        @Override
-        public void changed(ObservableValue observable, Object oldValue, Object newValue) {
-            tableStructureTabPaneUpdateService.restart();
-        }
-    }
-
-    ////////////////////////////////////////////////////////////////////////////
     // Table structure event
 
+    // メイン画面左下のテーブル構造の、テーブルのインデックスを表示するコンボボックスを変更した時のアクションイベント
+    // 選択したインデックスの内容でタブ内の項目を更新する
     @FXML
     private void onTableIndexNameComboBox(ActionEvent event) {
         int index = tableIndexNameComboBox.getSelectionModel().getSelectedIndex();
@@ -635,8 +674,10 @@ public class MainController extends Application implements Initializable, MainCo
     ////////////////////////////////////////////////////////////////////////////
     // queryTextArea event
 
+    // クエリ入力欄でのキー押下イベントハンドラ
+    // 予約語画面へのフォーカス移動や行選択の処理を行う
     @FXML
-    public void onQueryTextAreaKeyPressed(KeyEvent event) {
+    private void onQueryTextAreaKeyPressed(KeyEvent event) {
         // 予約語ウィンドウにフォーカス移動
         if (isChangeFocusForReservedWordStage(event.getCode())) {
             event.consume();
@@ -658,12 +699,10 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    // クエリ入力欄でのキー入力イベントハンドラ
+    // 予約語画面へのフォーカス移動や予約語画面の表示制御を行う
     @FXML
-    public void onQueryTextAreaKeyReleased(KeyEvent event) {
-    }
-
-    @FXML
-    public void onQueryTextAreaKeyTyped(KeyEvent event) {
+    private void onQueryTextAreaKeyTyped(KeyEvent event) {
         if (isChangeFocusForReservedWordStage(event.getCharacter())) {
             return;
         }
@@ -688,13 +727,25 @@ public class MainController extends Application implements Initializable, MainCo
     ////////////////////////////////////////////////////////////////////////////
     // MainWindow event
 
+    // メイン画面のウィンドウ表示イベントハンドラクラス
     private class MainWindowShownHandler implements EventHandler<WindowEvent> {
+        // メイン画面のコントローラ
         private MainController controller;
+
+        /**
+         * コンストラクタ
+         * @param controller メイン画面のコントローラ
+         */
         public MainWindowShownHandler(MainController controller) {
             this.controller = controller;
 
         }
 
+        /**
+         * メイン画面のウィンドウ表示イベントハンドラ。<br>
+         * 設定ファイルの内容でメイン画面の表示位置を変更する。<br>
+         * @param event ウィンドウの表示/非表示アクションに関連するイベント
+         */
         @Override
         public void handle(WindowEvent event) {
             try {
@@ -748,13 +799,25 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
+    // メイン画面のウィンドウクローズイベントハンドラクラス
     private class MainWindowCloseRequestHandler implements EventHandler<WindowEvent> {
+        // メイン画面のコントローラ
         private MainController controller;
+
+        /**
+         * コンストラクタ
+         * @param controller メイン画面のコントローラ
+         */
         public MainWindowCloseRequestHandler(MainController controller) {
             this.controller = controller;
 
         }
 
+        /**
+         * メイン画面のウィンドウクローズイベントハンドラ。<br>
+         * メイン画面の表示位置を設定ファイルに書き込む。<br>
+         * @param event ウィンドウの表示/非表示アクションに関連するイベント
+         */
         @Override
         public void handle(WindowEvent event) {
             // DB切断
@@ -808,9 +871,11 @@ public class MainController extends Application implements Initializable, MainCo
 
     ////////////////////////////////////////////////////////////////////////////
     // queryResultTableView event
+
+    // クエリ実行結果やデータベース構造など、セカンダリボタン（右ボタン）のダブルクリック時にダブルクリックしたテキストをクエリ入力欄へ貼り付ける
     private void addQueryWordEvent(MouseEvent event) {
         // 右ダブルクリック以外は終了
-        if ((event.getButton()!=MouseButton.SECONDARY) || (event.getClickCount()!=2)) {
+        if ((event.getClickCount()!=2) || (event.getButton()!=MouseButton.SECONDARY)) {
             return ;
         }
 
