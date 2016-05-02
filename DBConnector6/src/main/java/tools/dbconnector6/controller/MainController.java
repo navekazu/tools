@@ -193,7 +193,6 @@ public class MainController extends Application implements Initializable, MainCo
     private BackgroundService sqlEditorLaunchService;
 
     // other field
-    private Connection connection;
     private Connect connectParam;
     private String queryScript = null;
 
@@ -292,11 +291,10 @@ public class MainController extends Application implements Initializable, MainCo
     private void closeConnection() {
         if (isConnectWithoutOutputMessage()) {
             try {
-                connection.close();
+                connectParam.getConnection().close();
             } catch (SQLException e) {
                 writeLog(e);
             }
-            connection = null;
             connectParam = null;
             writeLog("Disconnected.");
         }
@@ -332,7 +330,6 @@ public class MainController extends Application implements Initializable, MainCo
         Connection con = connectPair.controller.getConnection();
         if (con!=null) {
             writeLog("Connected.");
-            connection = con;
             connectParam = connectPair.controller.getConnect();
             dbStructureUpdateService.restart();
             reservedWordUpdateService.restart();
@@ -340,7 +337,7 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     public Connection getConnection() {
-        return connection;
+        return connectParam==null? null: connectParam.getConnection();
     }
     public Connect getConnectParam() {
         return connectParam;
@@ -552,7 +549,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @Override
     public boolean isConnectWithoutOutputMessage() {
-        return connection!=null;
+        return connectParam==null? false: connectParam.getConnection()!=null;
     }
 
 
@@ -757,7 +754,7 @@ public class MainController extends Application implements Initializable, MainCo
             return ;
         }
         try {
-            connection.commit();
+            connectParam.getConnection().commit();
             writeLog("Commit success.");
         } catch(Exception e) {
             writeLog(e);
@@ -770,7 +767,7 @@ public class MainController extends Application implements Initializable, MainCo
             return ;
         }
         try {
-            connection.rollback();
+            connectParam.getConnection().rollback();
             writeLog("Rollback success.");
         } catch(Exception e) {
             writeLog(e);
@@ -790,7 +787,7 @@ public class MainController extends Application implements Initializable, MainCo
         if (!isConnect()) {
             return ;
         }
-        writeLog("Transaction isolation: %s", ISOLATIONS.get(connection.getTransactionIsolation()));
+        writeLog("Transaction isolation: %s", ISOLATIONS.get(connectParam.getConnection().getTransactionIsolation()));
     }
 
     @FXML
