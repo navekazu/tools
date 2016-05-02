@@ -17,6 +17,10 @@ import java.util.ResourceBundle;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+/**
+ * 予約語画面用コントローラ。<br>
+ * 予約語はSQL予約語・テーブル名・カラム名を対象に、SQL入力欄へ入力補完としてポップアップ表示を行う。<br>
+ */
 public class ReservedWordController extends SubController implements Initializable {
 
     // Scene overview
@@ -25,12 +29,17 @@ public class ReservedWordController extends SubController implements Initializab
     // |                                  |
     // |                                  |
     // +----------------------------------+
-    @FXML private ListView reservedWordListView;
+    @FXML private ListView reservedWordListView;        // 予約語表示用
 
-    // 予約語の一覧（SQLの予約語・全テーブル名・全カラム名が入る）
+    // 予約語一覧の参照（SQLの予約語・全テーブル名・全カラム名が入る）
+    // インスタンスの生成はMainControllerが行う。
     private Set<ReservedWord> reservedWordList;
 
-    public void setRservedWordList(Set<ReservedWord> reservedWordList) {
+    /**
+     * 予約語一覧の参照をセットする
+     * @param reservedWordList 予約語一覧の参照
+     */
+    public void setReservedWordList(Set<ReservedWord> reservedWordList) {
         this.reservedWordList = reservedWordList;
     }
 
@@ -89,12 +98,6 @@ public class ReservedWordController extends SubController implements Initializab
         return false;
     }
 
-    private static final Character[] ALPHABETS_ALL = new Character[]{
-            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
-            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
-            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
-            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
-    };
     /**
      * 入力文字が文字なのか判定
      * @param ch 入力文字
@@ -103,11 +106,14 @@ public class ReservedWordController extends SubController implements Initializab
     private boolean isCharacter(char ch) {
         return Arrays.stream(ALPHABETS_ALL).anyMatch(c -> c == ch);
     }
-
-    private static final Character[] ALPHABETS_UPPERCASE = new Character[]{
+    // isCharacterメソッドで使用する「大文字小文字アルファベット」
+    private static final Character[] ALPHABETS_ALL = new Character[]{
             'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
             'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+            'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+            'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
     };
+
     /**
      * 入力文字が大文字なのか判定
      * @param ch 入力文字
@@ -116,6 +122,11 @@ public class ReservedWordController extends SubController implements Initializab
     private boolean isUpperCharacter(char ch) {
         return Arrays.stream(ALPHABETS_UPPERCASE).anyMatch(c -> c == ch);
     }
+    // isUpperCharacterメソッドで使用する「大文字アルファベット」
+    private static final Character[] ALPHABETS_UPPERCASE = new Character[]{
+            'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+            'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+    };
 
     /**
      * コントローラのルート要素が完全に処理された後に、コントローラを初期化するためにコールされます。<br>
@@ -128,6 +139,28 @@ public class ReservedWordController extends SubController implements Initializab
 
     }
 
+    // 選択した予約語をメイン画面に通知する
+    private void selected() {
+        int index = reservedWordListView.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            return;
+        }
+
+        ObservableList<ReservedWord> items = reservedWordListView.getItems();
+        mainControllerInterface.selectReservedWord(items.get(index).getWord());
+    }
+
+    /***************************************************************************
+     *                                                                         *
+     * Event handler                                                           *
+     *                                                                         *
+     **************************************************************************/
+
+    // 予約語表示用ListViewのキープレスイベントハンドラ
+    // キーの種類によって以下のように処理する。
+    //   ENTER -> ListViewで現在選択中の予約語をメイン画面に通知して自画面を閉じる
+    //   TAB   -> メイン画面にフォーカスを戻す
+    //   ESC   -> メイン画面にフォーカスを戻し、自画面を閉じる
     @FXML
     private void onKeyPressed(KeyEvent event){
         switch (event.getCode()) {
@@ -147,14 +180,8 @@ public class ReservedWordController extends SubController implements Initializab
         }
     }
 
-    @FXML
-    private void onKeyReleased(KeyEvent event){
-    }
-
-    @FXML
-    private void onKeyTyped(KeyEvent event){
-    }
-
+    // 予約語表示用ListViewのマウスイベントハンドラ
+    // プライマリボタン（左ボタン）のダブルクリック時に選択した予約語をメイン画面に通知して自画面を閉じる
     @FXML
     private void onMouseClicked(MouseEvent event){
         if (event.getClickCount()>=2 && event.getButton()== MouseButton.PRIMARY) {
@@ -162,17 +189,5 @@ public class ReservedWordController extends SubController implements Initializab
             selected();
         }
     }
-
-    // 選択した予約語をメイン画面に通知する
-    private void selected() {
-        int index = reservedWordListView.getSelectionModel().getSelectedIndex();
-        if (index==-1) {
-            return;
-        }
-
-        ObservableList<ReservedWord> items = reservedWordListView.getItems();
-        mainControllerInterface.selectReservedWord(items.get(index).getWord());
-    }
-
 }
 

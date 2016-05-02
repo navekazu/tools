@@ -272,7 +272,7 @@ public class MainController extends Application implements Initializable, MainCo
             alertDialogPair = SubController.createStageAndControllerPair("alertDialog", this);
             editorChooserPair = SubController.createStageAndControllerPair("editorChooser", this);
 
-            reservedWordPair.controller.setRservedWordList(reservedWordList);
+            reservedWordPair.controller.setReservedWordList(reservedWordList);
 
         } catch(IOException e) {
             e.printStackTrace();
