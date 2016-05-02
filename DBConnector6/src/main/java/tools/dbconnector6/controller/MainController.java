@@ -681,7 +681,7 @@ public class MainController extends Application implements Initializable, MainCo
 
     @FXML
     private void onSettingSqlEditor(ActionEvent event) {
-        editorChooserPair.controller.setContents(appConfigEditor.getEditorPath());
+        editorChooserPair.controller.setEditorPath(appConfigEditor.getEditorPath());
         editorChooserPair.stage.showAndWait();
 
         if (editorChooserPair.controller.isOk()) {
