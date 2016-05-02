@@ -127,7 +127,7 @@ public class DbStructureTreeItem extends TreeItem<String> implements Comparable 
     }
 
     /**
-     * Comparableの実装。表示内容を辞書的に比較しか結果を返す。
+     * Comparableの実装で、表示内容を辞書的に比較した結果を返す。
      * @param o 比較対象のツリーアイテム
      * @return 表示内容が等しい場合は 0。
      *          自身の表示内容が指定された表示内容より辞書式に小さい場合は、0 より小さい値。
