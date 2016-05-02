@@ -78,4 +78,11 @@ public class EditorChooserController extends SubController implements Initializa
     public String getEditorPath() {
         return editorPathTextField.getText();
     }
+
+    /***************************************************************************
+     *                                                                         *
+     * Event handler                                                           *
+     *                                                                         *
+     **************************************************************************/
+
 }

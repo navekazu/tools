@@ -37,13 +37,6 @@ public class AlertController extends SubController implements Initializable {
 
     }
 
-    // OKボタンのイベントハンドラ。
-    // 自画面を閉じる。
-    @FXML
-    private void onOkButton(ActionEvent event) {
-        messageLabel.getScene().getWindow().hide();
-    }
-
     /**
      * 表示メッセージの初期化。<br>
      * @param message メッセージのタイトル
@@ -64,4 +57,18 @@ public class AlertController extends SubController implements Initializable {
         okButton.setVisible(!waitMode);
         // TODO: ウィンドウのクローズボタンも制御する必要あり
     }
+
+    /***************************************************************************
+     *                                                                         *
+     * Event handler                                                           *
+     *                                                                         *
+     **************************************************************************/
+
+    // OKボタンのイベントハンドラ。
+    // 自画面を閉じる。
+    @FXML
+    private void onOkButton(ActionEvent event) {
+        messageLabel.getScene().getWindow().hide();
+    }
+
 }

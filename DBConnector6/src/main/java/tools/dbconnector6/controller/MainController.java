@@ -184,7 +184,7 @@ public class MainController extends Application implements Initializable, MainCo
     private Set<ReservedWord> reservedWordList = new HashSet<>();
     private AppConfigEditor appConfigEditor = new AppConfigEditor();;
 
-    // service
+    // background service
     private BackgroundService dbStructureUpdateService;
     private BackgroundService tableStructureTabPaneUpdateService;
     private BackgroundService tableStructureUpdateService;

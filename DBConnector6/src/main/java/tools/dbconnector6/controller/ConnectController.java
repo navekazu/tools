@@ -135,21 +135,6 @@ public class ConnectController extends SubController implements Initializable {
         passwordTextField.setText(history.getPassword());
     }
 
-    @FXML
-    private void onAdd(ActionEvent event) {
-        if (!validTextField()) {
-            return ;
-        }
-
-        Connect connect = createConnect();
-
-        ObservableList<Connect> tableList = connectTableView.getItems();
-        tableList.add(connect);
-        connectTableView.getSelectionModel().select(tableList.size()-1);
-
-        saveConnectList();
-    }
-
     private Connect createConnect() {
         return  Connect.builder()
                 .libraryPath(libraryPathTextField.getText().trim())
@@ -158,40 +143,6 @@ public class ConnectController extends SubController implements Initializable {
                 .user(userTextField.getText().trim())
                 .password(passwordTextField.getText().trim())
                 .build();
-    }
-
-    @FXML
-    private void onUpdate(ActionEvent event) {
-        if (!validTextField()) {
-            return ;
-        }
-
-        int index = connectTableView.getSelectionModel().getSelectedIndex();
-        if (index==-1) {
-            return ;
-        }
-
-        Connect connect = createConnect();
-
-        ObservableList<Connect> tableList = connectTableView.getItems();
-        tableList.remove(index);
-        tableList.add(index, connect);
-        connectTableView.getSelectionModel().select(index);
-
-        saveConnectList();
-    }
-
-    @FXML
-    private void onDelete(ActionEvent event) {
-        int index = connectTableView.getSelectionModel().getSelectedIndex();
-        if (index==-1) {
-            return ;
-        }
-
-        ObservableList<Connect> tableList = connectTableView.getItems();
-        tableList.remove(index);
-
-        saveConnectList();
     }
 
     private boolean validTextField() {
@@ -229,11 +180,6 @@ public class ConnectController extends SubController implements Initializable {
         if (event.getClickCount()>=2 && event.getButton()== MouseButton.PRIMARY) {
             selectConnection();
         }
-    }
-
-    @FXML
-    private void onLoad(ActionEvent event) {
-        selectConnection();
     }
 
     private void selectConnection() {
@@ -339,4 +285,68 @@ public class ConnectController extends SubController implements Initializable {
     public Connection getConnection() {
         return this.connection;
     }
+
+    /***************************************************************************
+     *                                                                         *
+     * Event handler                                                           *
+     *                                                                         *
+     **************************************************************************/
+
+    ////////////////////////////////////////////////////////////////////////////
+    // edit connectTableView event
+
+    @FXML
+    private void onAdd(ActionEvent event) {
+        if (!validTextField()) {
+            return ;
+        }
+
+        Connect connect = createConnect();
+
+        ObservableList<Connect> tableList = connectTableView.getItems();
+        tableList.add(connect);
+        connectTableView.getSelectionModel().select(tableList.size()-1);
+
+        saveConnectList();
+    }
+
+    @FXML
+    private void onUpdate(ActionEvent event) {
+        if (!validTextField()) {
+            return ;
+        }
+
+        int index = connectTableView.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            return ;
+        }
+
+        Connect connect = createConnect();
+
+        ObservableList<Connect> tableList = connectTableView.getItems();
+        tableList.remove(index);
+        tableList.add(index, connect);
+        connectTableView.getSelectionModel().select(index);
+
+        saveConnectList();
+    }
+
+    @FXML
+    private void onDelete(ActionEvent event) {
+        int index = connectTableView.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            return ;
+        }
+
+        ObservableList<Connect> tableList = connectTableView.getItems();
+        tableList.remove(index);
+
+        saveConnectList();
+    }
+
+    @FXML
+    private void onLoad(ActionEvent event) {
+        selectConnection();
+    }
+
 }
