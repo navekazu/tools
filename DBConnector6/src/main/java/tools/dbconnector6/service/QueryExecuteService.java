@@ -6,7 +6,9 @@ import javafx.beans.value.ObservableValue;
 import javafx.collections.ObservableList;
 import javafx.concurrent.Task;
 import javafx.geometry.Pos;
-import javafx.scene.control.*;
+import javafx.scene.control.TableCell;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.paint.Color;
 import javafx.util.Callback;
 import tools.dbconnector6.MainControllerInterface;
@@ -17,10 +19,14 @@ import tools.dbconnector6.serializer.QueryHistorySerializer;
 import tools.dbconnector6.transfer.ResultDataTransfer;
 import tools.dbconnector6.transfer.ResultDataTransferClipboard;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 

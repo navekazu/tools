@@ -7,7 +7,6 @@ import javafx.scene.control.ListView;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.ReservedWord;
 
 import java.net.URL;

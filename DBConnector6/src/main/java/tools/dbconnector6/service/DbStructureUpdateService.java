@@ -7,8 +7,8 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
-import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
+import tools.dbconnector6.controller.DbStructureTreeItem;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;

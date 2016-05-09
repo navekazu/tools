@@ -3,7 +3,8 @@ package tools.dbconnector6.mapper;
 import tools.dbconnector6.serializer.DataSerializer;
 
 import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

@@ -1,13 +1,10 @@
 package tools.dbconnector6.controller;
 
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.TextField;
 import javafx.stage.FileChooser;
-import javafx.stage.WindowEvent;
-import tools.dbconnector6.MainControllerInterface;
 
 import java.io.File;
 import java.net.URL;

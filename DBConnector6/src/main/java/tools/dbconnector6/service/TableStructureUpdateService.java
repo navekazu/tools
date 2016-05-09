@@ -2,8 +2,8 @@ package tools.dbconnector6.service;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
+import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TableIndexTab;
 import tools.dbconnector6.entity.TablePropertyTab;
