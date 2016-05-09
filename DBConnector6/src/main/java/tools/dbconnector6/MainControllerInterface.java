@@ -16,7 +16,14 @@ import java.sql.Connection;
  */
 public interface MainControllerInterface {
 
-    public void writeLog(String message, Object... args);
+    /**
+     * ログの出力。<br>
+     * 出力はString#formatメソッドの書式文字列で指定する。<br>
+     * @param format 書式文字列
+     * @param args   書式文字列の書式指示子により参照される引数
+     * @see java.lang.String
+     */
+    public void writeLog(String format, Object... args);
     public void writeLog(Throwable e);
     public void selectReservedWord(String word);
     public void mainControllerRequestFocus();

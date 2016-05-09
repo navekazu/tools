@@ -933,8 +933,8 @@ public class MainController extends Application implements Initializable, MainCo
      **************************************************************************/
 
     @Override
-    public void writeLog(String message, Object... args) {
-        final String logText = LOG_DATE_FORMAT.format(new Date())+" " + String.format(message, args);
+    public void writeLog(String format, Object... args) {
+        final String logText = LOG_DATE_FORMAT.format(new Date())+" " + String.format(format, args);
 
         Platform.runLater(new Runnable() {
             @Override
