@@ -228,11 +228,12 @@ public class MainController extends Application implements Initializable, MainCo
      */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
+        // データベース構造のルート要素を関連付け
         dbStructureRootItem = new DbStructureTreeItem(DATABASE, DATABASE.getName(), null);
         dbStructureTreeView.setRoot(dbStructureRootItem);
         dbStructureTreeView.getSelectionModel().selectedItemProperty().addListener(new DbStructureTreeViewChangeListener());
 
-        // service
+        // サービスの作成
         queryExecuteService = new BackgroundService(new QueryExecuteService(this), this);
         reservedWordUpdateService = new BackgroundService(new ReservedWordUpdateService(this, reservedWordList), this);
         sqlEditorLaunchService = new BackgroundService(new SqlEditorLaunchService(this), this);
