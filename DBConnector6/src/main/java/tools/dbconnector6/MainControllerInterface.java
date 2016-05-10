@@ -17,14 +17,21 @@ import java.sql.Connection;
 public interface MainControllerInterface {
 
     /**
-     * ログの出力。<br>
-     * 出力はString#formatメソッドの書式文字列で指定する。<br>
+     * 通常ログの出力。<br>
+     * 出力はString#formatメソッドの書式文字列で指定し、ログ出力エリアに出力する。<br>
      * @param format 書式文字列
      * @param args   書式文字列の書式指示子により参照される引数
      * @see java.lang.String
      */
     public void writeLog(String format, Object... args);
+
+    /**
+     * 例外ログの出力。<br>
+     * 例外ログを、ログ出力エリアとログファイルに出力する。<br>
+     * @param e 例外発生時の例外オブジェクト
+     */
     public void writeLog(Throwable e);
+
     public void selectReservedWord(String word);
     public void mainControllerRequestFocus();
     public void hideReservedWordStage();
