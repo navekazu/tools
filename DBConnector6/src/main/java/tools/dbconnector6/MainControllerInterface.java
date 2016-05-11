@@ -32,15 +32,58 @@ public interface MainControllerInterface {
      */
     public void writeLog(Throwable e);
 
+    /**
+     * 予約語選択画面の選択結果の通知。<br>
+     * クエリー入力欄に現在入力中の単語を指定された単語に置き換える。<br>
+     * @param word 選択結果の予約語
+     */
     public void selectReservedWord(String word);
+
+    /**
+     * メイン画面にフォーカスを移動させる。<br>
+     */
     public void mainControllerRequestFocus();
+
+    /**
+     * 予約語選択画面を閉じる
+     */
     public void hideReservedWordStage();
+
+    /**
+     * 警告画面をモーダルで表示する。<br>
+     * @param message メッセージタイトル
+     * @param detail  メッセージの詳細
+     */
     public void showAlertDialog(String message, String detail);
+
+    /**
+     * 待機画面をモーダルで表示する。<br>
+     * @param message メッセージタイトル
+     * @param detail  メッセージの詳細
+     */
     public void showWaitDialog(String message, String detail);
+
+    /**
+     * 待機画面を閉じる。<br>
+     */
     public void hideWaitDialog();
 
+    /**
+     * 現在のエビデンスモードを取得する。<br>
+     * @return エビデンスモードが有効の場合は true、それ以外は false。
+     */
     public boolean isEvidenceMode();
+
+    /**
+     * エビデンスにヘッダー列（カラム列）を含めるかを取得する。<br>
+     * @return ヘッダー列（カラム列）を含める場合は true、それ以外は false。
+     */
     public boolean isEvidenceModeIncludeHeader();
+
+    /**
+     * エビデンスの列の区切り文字を取得する。<br>
+     * @return 区切り文字
+     */
     public String getEvidenceDelimiter();
 
     public String getQuery();
