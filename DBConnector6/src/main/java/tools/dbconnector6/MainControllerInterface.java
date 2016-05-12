@@ -86,6 +86,7 @@ public interface MainControllerInterface {
      */
     public String getEvidenceDelimiter();
 
+    
     public String getQuery();
     public String getSelectedQuery();
     public void updateSelectedQuery(String query);
