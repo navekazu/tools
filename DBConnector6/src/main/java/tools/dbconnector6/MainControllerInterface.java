@@ -114,13 +114,23 @@ public interface MainControllerInterface {
      */
     public boolean isConnectWithoutOutputMessage();
 
-    public BackgroundService getTableStructureUpdateService();
+    /**
+     * TableStructureUpdateServiceクラスのrestartメソッドを呼んで更新を要求する。<br>
+     */
+    public void requestTableStructureUpdate();
 
+    /**
+     * メイン画面左上のデータベース構造のUI参照をまとめた構造体
+     */
     public class DbStructureParam {
         public TextField filterTextField;
         public TreeView dbStructureTreeView;
         public DbStructureTreeItem dbStructureRootItem;
     }
+
+    /**
+     * メイン画面左下のテーブル構造のUI参照をまとめた構造体
+     */
     public class TableStructureTabParam {
         public TabPane tableStructureTabPane;
 
@@ -149,13 +159,30 @@ public interface MainControllerInterface {
         public ListView tableIndexListView;
     }
 
+    /**
+     * メイン画面右のクエリ入力・結果一覧のUI参照をまとめた構造体
+     */
     public class QueryParam {
         public TextArea queryTextArea;
         public TableView queryResultTableView;
 
     }
 
+    /**
+     * メイン画面左上のデータベース構造のUI参照をまとめた構造体を取得する。<br>
+     * @return メイン画面左上のデータベース構造のUI参照をまとめた構造体
+     */
     public DbStructureParam getDbStructureParam();
+
+    /**
+     * メイン画面左下のテーブル構造のUI参照をまとめた構造体を取得する。<br>
+     * @return メイン画面左下のテーブル構造のUI参照をまとめた構造体
+     */
     public TableStructureTabParam getTableStructureTabParam();
+
+    /**
+     * メイン画面右のクエリ入力・結果一覧のUI参照をまとめた構造体を取得する。<br>
+     * @return メイン画面右のクエリ入力・結果一覧のUI参照をまとめた構造体
+     */
     public QueryParam getQueryParam();
 }

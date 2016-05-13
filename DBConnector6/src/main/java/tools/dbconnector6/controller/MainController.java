@@ -1101,8 +1101,8 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     @Override
-    public BackgroundService getTableStructureUpdateService() {
-        return tableStructureUpdateService;
+    public void requestTableStructureUpdate() {
+        tableStructureUpdateService.restart();
     }
 
     @Override

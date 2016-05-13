@@ -95,7 +95,7 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
                 tabParam.tableColumnTab.setDisable(updateParam.tableColumnTabDisable);
                 tabParam.tableIndexTab.setDisable(updateParam.tableIndexTabDisable);
 
-                mainControllerInterface.getTableStructureUpdateService().restart();
+                mainControllerInterface.requestTableStructureUpdate();
             }
         });
     }
