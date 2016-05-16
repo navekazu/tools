@@ -10,7 +10,8 @@ import tools.dbconnector6.service.BackgroundService;
 import java.sql.Connection;
 
 /**
- * メイン画面へのアクセスを限定するためのインターフェース。<br>
+ * メイン画面へアクセスするためのインターフェース。<br>
+ * データの取得や更新や通知を行うための定義。<br>
  * 実装はMainController。<br>
  * @see tools.dbconnector6.controller.MainController
  */
@@ -86,17 +87,62 @@ public interface MainControllerInterface {
      */
     public String getEvidenceDelimiter();
 
-    
+    /**
+     * 実行対象のクエリを取得する。<br>
+     * SQLスクリプトを読み込んでの実行中であれば読み込んだスクリプトの内容を返す。<br>
+     * それ以外はクエリ入力欄の内容を返すが、
+     * クエリ入力欄で選択中のクエリがあればその内容を、
+     * 選択中のクエリが無ければクエリ入力欄全体の内容を返す。<br>
+     * @return 実行対象のクエリ
+     */
     public String getQuery();
+
+    /**
+     * クエリ入力欄の現在選択中の文字列を取得する。
+     * @return クエリ入力欄の現在選択中の文字列
+     */
     public String getSelectedQuery();
-    public void updateSelectedQuery(String query);
+
+    /**
+     * 指定された単語でクエリ入力欄の現在選択中のテキストを置き換える。<br>
+     * @param word 置き換えする単語
+     */
+    public void updateSelectedQuery(String word);
+
+    /**
+     * 指定された単語をクエリ入力欄の現在キャレット位置に挿入する、<br>
+     * クエリ結果の行タイトル（カラム名）やデータベース構造一覧の項目（テーブル名）を右ダブルクリックした際に、
+     * ダブルクリックしたテキストをクエリ入力欄に挿入する入力補完機能を実現する。<br>
+     * シフトを押しながら右ダブルクリックした場合、挿入した単語の後にカンマを追加する。<br>
+     * @param word クエリ入力欄に挿入する単語
+     * @param shiftDown シフトを押しながら挿入する場合はtrue、それ以外はfalse
+     */
     public void addQueryWord(String word, boolean shiftDown);
 
+    /**
+     * 現在設定されているテキストエディタへのパスを返す。<br>
+     * 設定されていない場合は空文字を返す。<br>
+     * @return テキストエディタへのパス
+     */
     public String getEditorPath();
 
+    /**
+     * データベース接続画面から、データベース接続時にメイン画面へ接続した旨の通知をする。<br>
+     * 通知を受け取ったメイン画面は、データベース構造表示等の画面更新を行う。<br>
+     */
     public void connectNotify();
-    public Connection getConnection();
+
+    /**
+     * 現在接続しているデータベースへの接続情報（ドライバ名URLやユーザ名）を取得する。<br>
+     * @return データベースへの接続情報
+     */
     public Connect getConnectParam();
+
+    /**
+     * 現在接続しているデータベースへのコネクションを取得する。<br>
+     * @return データベースコネクション
+     */
+    public Connection getConnection();
 
     /**
      * データベース接続確認。未接続時にログエリアへメッセージを出力する。<br>
@@ -165,7 +211,6 @@ public interface MainControllerInterface {
     public class QueryParam {
         public TextArea queryTextArea;
         public TableView queryResultTableView;
-
     }
 
     /**

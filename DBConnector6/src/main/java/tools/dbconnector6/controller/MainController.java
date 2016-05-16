@@ -1048,10 +1048,10 @@ public class MainController extends Application implements Initializable, MainCo
     }
 
     @Override
-    public void updateSelectedQuery(String query) {
+    public void updateSelectedQuery(String word) {
         int caret = queryTextArea.getCaretPosition();
         int anchor = queryTextArea.getAnchor();
-        queryTextArea.replaceText((anchor<caret? anchor: caret), (anchor>caret? anchor: caret), query);    // "begin<=end" の関係でないとNG
+        queryTextArea.replaceText((anchor<caret? anchor: caret), (anchor>caret? anchor: caret), word);    // "begin<=end" の関係でないとNG
     }
 
     @Override
