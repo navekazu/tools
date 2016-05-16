@@ -65,7 +65,7 @@
         </configuration>
         <executions>
           <execution>
-            <id>make-sample-jar</id>
+            <id>make-assembly</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
