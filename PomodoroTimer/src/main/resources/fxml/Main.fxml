@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.text.*?>
+<?import javafx.scene.control.*?>
+<?import java.lang.*?>
+<?import javafx.scene.layout.*?>
+
+<StackPane style="-fx-background-radius: 10; -fx-background-color: rgba(0,0,0,0);" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tools.pomodorotimer.App">
+   <children>
+      <Label fx:id="timerLabel" alignment="CENTER">
+         <font>
+            <Font size="24.0" />
+         </font>
+         <contextMenu>
+            <ContextMenu>
+              <items>
+                  <MenuItem fx:id="startEndMenu" mnemonicParsing="false" onAction="#onStartEnd" text="Start / End" />
+                  <MenuItem fx:id="configMenu" mnemonicParsing="false" onAction="#onConfig" text="Config" />
+                  <SeparatorMenuItem mnemonicParsing="false" />
+                <MenuItem fx:id="exitMenu" mnemonicParsing="false" onAction="#onExit" text="Exit" />
+              </items>
+            </ContextMenu>
+         </contextMenu>
+      </Label>
+      <Label fx:id="promptLabel" text="00:00">
+         <font>
+            <Font size="24.0" />
+         </font>
+         <StackPane.margin>
+            <Insets top="30.0" />
+         </StackPane.margin>
+      </Label>
+   </children>
+</StackPane>

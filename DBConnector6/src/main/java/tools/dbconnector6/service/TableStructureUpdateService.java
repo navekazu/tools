@@ -2,9 +2,8 @@ package tools.dbconnector6.service;
 
 import javafx.application.Platform;
 import javafx.concurrent.Task;
-import tools.dbconnector6.BackgroundServiceInterface;
-import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
+import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TableIndexTab;
 import tools.dbconnector6.entity.TablePropertyTab;
@@ -15,23 +14,41 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.*;
 
+/**
+ * メイン画面左下のテーブル構造表示欄を更新するサービス。
+ */
 public class TableStructureUpdateService implements BackgroundServiceInterface<Void, TableStructureUpdateService.TableStructures> {
+    // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
+
+    /**
+     * コンストラクタ。<br>
+     * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     */
     public TableStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }
 
+    /**
+     * 3つのタブそれぞれのモデルデータをまとめた構造体
+     */
     public class TableStructures {
         public List<TablePropertyTab> tablePropertyList;
         public List<TableColumnTab> tableColumnList;
         public List<TableIndexTab> tableIndexList;
     }
 
+    /**
+     * バックグラウンドで実行する処理を実装する。<br>
+     * メイン画面左上のデータベース構造の選択状態に応じて、メイン画面左下のテーブル構造表示欄の内容を更新する。<br>
+     * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
+     * @throws Exception 何らかのエラーが発生し処理を中断する場合
+     */
     @Override
     public void run(Task task) throws Exception {
         DbStructureTreeItem tableItem = (DbStructureTreeItem)mainControllerInterface.getDbStructureParam().dbStructureTreeView.getSelectionModel().getSelectedItem();
-        if (tableItem==null || !mainControllerInterface.isConnectWithoutMessage()) {
-            updateUIPreparation(null);
+        if (tableItem==null || !mainControllerInterface.isConnectWithoutOutputMessage()) {
+            prepareUpdate(null);
             return ;
         }
 
@@ -52,33 +69,19 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
                 updateTableIndexFromTable(tableItem, metaData, tableStructures.tableIndexList);
                 break;
         }
-        updateUIPreparation(null);
-        updateUI(tableStructures);
+        prepareUpdate(null);
+        update(tableStructures);
 
     }
 
+    /**
+     * 更新の前処理。<br>
+     * 各タブ内の画面項目を全クリアする。<br>
+     * @param prepareUpdateParam null
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
-    public void cancel() throws Exception {
-
-    }
-
-    @Override
-    public void cancelled() {
-
-    }
-
-    @Override
-    public void failed() {
-
-    }
-
-    @Override
-    public String getNotRunningMessage() {
-        return "";
-    }
-
-    @Override
-    public void updateUIPreparation(final Void uiParam) throws Exception {
+    public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
@@ -92,28 +95,59 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         });
     }
 
+    /**
+     * 更新処理。<br>
+     * バックグラウンドで実行した結果を画面等に反映する。<br>
+     * @param updateParam 3つのタブそれぞれのモデルデータをまとめた構造体
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
-    public void updateUI(final TableStructures uiParam) throws Exception {
-//        final List<TablePropertyTab> tablePropertyList = new ArrayList<>(uiParam.tablePropertyList);
-//        final List<TableColumnTab> tableColumnList = new ArrayList<>(uiParam.tableColumnList);
-//        final List<TableIndexTab> tableIndexList = new ArrayList<>(uiParam.tableIndexList);
+    public void update(final TableStructures updateParam) throws Exception {
         Platform.runLater(new Runnable() {
             @Override
             public void run() {
-//                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(tablePropertyList);
-//                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(tableColumnList);
-//                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(tableIndexList);
-//                if (tableIndexList.size()>=1) {
-                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(uiParam.tablePropertyList);
-                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(uiParam.tableColumnList);
-                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(uiParam.tableIndexList);
-                if (uiParam.tableIndexList.size()>=1) {
+                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(updateParam.tablePropertyList);
+                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(updateParam.tableColumnList);
+                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(updateParam.tableIndexList);
+                if (updateParam.tableIndexList.size()>=1) {
                     mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getSelectionModel().select(0);
                 }
             }
         });
     }
 
+    /**
+     * バックグラウンド実行をキャンセルするたびに呼び出される。<br>
+     */
+    @Override
+    public void cancel() {
+    }
+
+    /**
+     * Serviceの状態がCANCELLED状態に遷移するたびに呼び出される。<br>
+     */
+    @Override
+    public void cancelled() {
+    }
+
+    /**
+     * Serviceの状態がFAILED状態に遷移するたびに呼び出される。<br>
+     */
+    @Override
+    public void failed() {
+    }
+
+    /**
+     * もし実行中ではない時にキャンセル要求があった場合のメッセージ。<br>
+     * @return 空文字
+     */
+    @Override
+    public String getNotRunningMessage() {
+        return "";
+    }
+
+    // メイン画面左上のデータベース構造で、「DATABASE」を
+    // 選択した際に表示するgetDatabaseXXXメソッドで取得したデータベース情報を返す。
     private void updateTablePropertyFromDatabase(DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
 
         list.add(TablePropertyTab.builder().key("Database product version").value(metaData.getDatabaseProductVersion()).build());
@@ -158,16 +192,20 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         list.add(TablePropertyTab.builder().key("Max user name length").value(Integer.toString(metaData.getMaxUserNameLength())).build());
     }
 
+    // メイン画面左上のデータベース構造で、「TABLE」（や、「VIEW」など）を
+    // 選択した際に表示するgetTablesメソッドで取得したテーブル情報を返す。
     private void updateTablePropertyFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TablePropertyTab> list) throws SQLException {
         try (ResultSet resultSet = metaData.getTables(null, tableItem.getSchema(), tableItem.getValue(), null)) {
             showResultSet(resultSet, list);
         }
     }
 
+    // ResultSetから全カラムの値を取得して指定されたlistに入れる。
     private void showResultSet(ResultSet resultSet, List<TablePropertyTab> list) throws SQLException {
         ResultSetMetaData metaData = resultSet.getMetaData();
         int columnCount = metaData.getColumnCount();
 
+        // ループはしているが、1レコードを想定
         while (resultSet.next()) {
             for (int loop = 0; loop < columnCount; loop++) {
                 list.add(TablePropertyTab.builder().key(metaData.getColumnName(loop + 1)).value(resultSet.getString(loop + 1)).build());
@@ -175,12 +213,16 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    // DatabaseMetaDataの各値と、その文字列表現のマッピング
     private static final Map<Integer, String> NULLABLE_MAP = new HashMap<>();
     static {
         NULLABLE_MAP.put(DatabaseMetaData.columnNoNulls, "No Null");
         NULLABLE_MAP.put(DatabaseMetaData.columnNullable, "");
         NULLABLE_MAP.put(DatabaseMetaData.columnNullableUnknown, "Unknown");
     }
+
+    // メイン画面左上のデータベース構造で、「TABLE」（や、「VIEW」など）を
+    // 選択した際に表示するカラムの一覧を返す。
     private void updateTableColumnFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableColumnTab> tableColumnList) throws SQLException {
         Map<String, Integer> primaryKeys = new HashMap<>();
 
@@ -214,6 +256,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    // メイン画面左上のデータベース構造で、「TABLE」（や、「VIEW」など）を
+    // 選択した際に表示するインデックスの一覧を返す。
     private void updateTableIndexFromTable(DbStructureTreeItem tableItem, DatabaseMetaData metaData, List<TableIndexTab> tableIndexList) throws SQLException {
         String primaryKeyName = null;
 
@@ -279,6 +323,7 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    // mapの値をlistに変換して返す
     private List<String> mapToList(final Map<Short, String> map) {
         List<String> columnList = new ArrayList<>();
         Set<Short> keyList = map.keySet();
@@ -287,6 +332,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         return columnList;
     }
 
+    // ResultSetから指定された列の文字列を取り出す。
+    // もし取得に失敗した場合は空文字を返す。
     private String getStringForce(ResultSet resultSet, String columnName) {
         try {
             return resultSet.getString(columnName);
@@ -295,6 +342,8 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
         }
     }
 
+    // ResultSetから指定された列の数値を取り出す。
+    // もし取得に失敗した場合は0を返す。
     private int getIntForce(ResultSet resultSet, String columnName) {
         try {
             return resultSet.getInt(columnName);

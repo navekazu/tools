@@ -12,7 +12,6 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
-import tools.dbconnector6.MainControllerInterface;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ConnectHistory;
 import tools.dbconnector6.mapper.ConnectHistoryMapper;
@@ -27,7 +26,10 @@ import java.sql.Driver;
 import java.sql.DriverManager;
 import java.util.*;
 
-public class ConnectController implements Initializable {
+/**
+ * 接続先データベースの登録・選択画面用コントローラ。<br>
+ */
+public class ConnectController extends SubController implements Initializable {
 
     // Scene overview
     // +-----------------------------------------------------------------------------------------------+
@@ -45,28 +47,29 @@ public class ConnectController implements Initializable {
     // |       passwordTextField                                                                       |
     // |                                                        [okButton] [cancelButton] [testButton] |
     // +-----------------------------------------------------------------------------------------------+
-    @FXML private TableView connectTableView;
-    @FXML private TableColumn<Connect, String> libraryPathTableColumn;
-    @FXML private TableColumn<Connect, String> driverTableColumn;
-    @FXML private TableColumn<Connect, String> urlTableColumn;
-    @FXML private TableColumn<Connect, String> userTableColumn;
-    @FXML private TableColumn<Connect, String> passwordTableColumn;
+    @FXML private TableView connectTableView;                           // 接続先一覧
+    @FXML private TableColumn<Connect, String> libraryPathTableColumn;  //   列：ライブラリパス
+    @FXML private TableColumn<Connect, String> driverTableColumn;       //   列：ドライバ名
+    @FXML private TableColumn<Connect, String> urlTableColumn;          //   列：URL
+    @FXML private TableColumn<Connect, String> userTableColumn;         //   列：ユーザー名
+    @FXML private TableColumn<Connect, String> passwordTableColumn;     //   列：パスワード
 
-    @FXML private ComboBox historyComboBox;
-    @FXML private TextField libraryPathTextField;
-    @FXML private TextField driverTextField;
-    @FXML private TextField urlTextField;
-    @FXML private TextField userTextField;
-    @FXML private PasswordField passwordTextField;
+    @FXML private ComboBox historyComboBox;                             // 接続履歴
+    @FXML private TextField libraryPathTextField;                       // ライブラリパス入力欄
+    @FXML private TextField driverTextField;                            // ドライバ名入力欄
+    @FXML private TextField urlTextField;                               // URL入力欄
+    @FXML private TextField userTextField;                              // ユーザー名入力欄
+    @FXML private PasswordField passwordTextField;                      // パスワード入力欄
 
-    private MainControllerInterface mainControllerInterface;
-    private Connection connection;
+    // データベース接続した際のエンティティと接続子
     private Connect connect;
 
-    public void setMainControllerInterface(MainControllerInterface mainControllerInterface) {
-        this.mainControllerInterface = mainControllerInterface;
-    }
-
+    /**
+     * コントローラのルート要素が完全に処理された後に、コントローラを初期化するためにコールされます。<br>
+     * @param location ルート・オブジェクトの相対パスの解決に使用される場所、または場所が不明の場合は、null
+     * @param resources ート・オブジェクトのローカライズに使用されるリソース、
+     *                  またはルート・オブジェクトがローカライズされていない場合は、null。
+     */
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         // TableColumnとエンティティの関連付け
@@ -76,7 +79,6 @@ public class ConnectController implements Initializable {
         userTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("user"));
         passwordTableColumn.setCellValueFactory(new PropertyValueFactory<Connect, String>("maskedPassword"));
 
-        connection = null;
         connect = null;
 
         // 接続リストの読み込み
@@ -113,40 +115,28 @@ public class ConnectController implements Initializable {
         }
     }
 
+    /**
+     * データベース接続エンティティを返す。<br>
+     * データベースに未接続の場合は null を、接続済みの場合は接続時のエンティティと接続子（Connection）を返す。
+     * @return データベースに未接続の場合は null を、接続済みの場合は接続時のエンティティと接続子（Connection）。
+     */
     public Connect getConnect() {
         return connect;
     }
 
-    private void historyComboBoxChangeHandler(ObservableValue observable, Object oldValue, Object newValue) {
-        int index = historyComboBox.getSelectionModel().getSelectedIndex();
-        if (index==-1) {
-            return;
-        }
-
-        List<ConnectHistory> list = historyComboBox.getItems();
-        ConnectHistory history = list.get(index);
-        libraryPathTextField.setText(history.getLibraryPath());
-        driverTextField.setText(history.getDriver());
-        urlTextField.setText(history.getUrl());
-        userTextField.setText(history.getUser());
-        passwordTextField.setText(history.getPassword());
+    /**
+     * データベース接続子（Connection）を返す。<br>
+     * 接続していない場合は null を返す。
+     * @return データベース接続子。接続していない場合は null。
+     */
+    public Connection getConnection() {
+        return connect==null? null: connect.getConnection();
     }
 
-    @FXML
-    private void onAdd(ActionEvent event) {
-        if (!validTextField()) {
-            return ;
-        }
-
-        Connect connect = createConnect();
-
-        ObservableList<Connect> tableList = connectTableView.getItems();
-        tableList.add(connect);
-        connectTableView.getSelectionModel().select(tableList.size()-1);
-
-        saveConnectList();
-    }
-
+    /**
+     * DB接続用に入力した入力欄の各パラメータを基にデータベース接続エンティティを作成する。<br>
+     * @return データベース接続エンティティ
+     */
     private Connect createConnect() {
         return  Connect.builder()
                 .libraryPath(libraryPathTextField.getText().trim())
@@ -154,43 +144,15 @@ public class ConnectController implements Initializable {
                 .url(urlTextField.getText().trim())
                 .user(userTextField.getText().trim())
                 .password(passwordTextField.getText().trim())
+                .connection(null)
                 .build();
     }
 
-    @FXML
-    private void onUpdate(ActionEvent event) {
-        if (!validTextField()) {
-            return ;
-        }
-
-        int index = connectTableView.getSelectionModel().getSelectedIndex();
-        if (index==-1) {
-            return ;
-        }
-
-        Connect connect = createConnect();
-
-        ObservableList<Connect> tableList = connectTableView.getItems();
-        tableList.remove(index);
-        tableList.add(index, connect);
-        connectTableView.getSelectionModel().select(index);
-
-        saveConnectList();
-    }
-
-    @FXML
-    private void onDelete(ActionEvent event) {
-        int index = connectTableView.getSelectionModel().getSelectedIndex();
-        if (index==-1) {
-            return ;
-        }
-
-        ObservableList<Connect> tableList = connectTableView.getItems();
-        tableList.remove(index);
-
-        saveConnectList();
-    }
-
+    /**
+     * DB接続用に入力した入力欄の検証を行う。<br>
+     * ライブラリパス、ドライバ名、URL、ユーザ名、パスワードの全てが空欄の場合は検証NGで false を返す。
+     * @return 検証OKの場合は true、それ以外はfalseを返す
+     */
     private boolean validTextField() {
         if ("".equals(libraryPathTextField.getText().trim())
                 && "".equals(driverTextField.getText().trim())
@@ -201,6 +163,8 @@ public class ConnectController implements Initializable {
         }
         return true;
     }
+
+    // 現在の接続先一覧の内容を永続化する
     private void saveConnectList() {
         ConnectMapper mapper = new ConnectMapper();
         ObservableList<Connect> tableList = connectTableView.getItems();
@@ -213,26 +177,7 @@ public class ConnectController implements Initializable {
         }
     }
 
-    @FXML
-    private void onKeyPressConnectTableView(KeyEvent event) {
-        if (event.getCode()==KeyCode.ENTER) {
-            event.consume();
-            selectConnection();
-        }
-    }
-
-    @FXML
-    private void onMouseClickConnectTableView(MouseEvent event) {
-        if (event.getClickCount()>=2 && event.getButton()== MouseButton.PRIMARY) {
-            selectConnection();
-        }
-    }
-
-    @FXML
-    private void onLoad(ActionEvent event) {
-        selectConnection();
-    }
-
+    // 接続先一覧の選択行の内容を、各入力欄に反映する
     private void selectConnection() {
         int index = connectTableView.getSelectionModel().getSelectedIndex();
         if (index==-1) {
@@ -249,35 +194,8 @@ public class ConnectController implements Initializable {
         passwordTextField.setText(connect.getPassword());
     }
 
-    @FXML
-    private void onOk(ActionEvent event) throws Exception {
-        Connection conn = connectDatabase();
-
-        if (conn!=null) {
-            this.connection = conn;
-            this.connect = createConnect();
-
-            connectTableView.getScene().getWindow().hide();
-            mainControllerInterface.connectNotify();
-        }
-    }
-
-    @FXML
-    private void onCancel(ActionEvent event) {
-        this.connection = null;
-        this.connect = null;
-        connectTableView.getScene().getWindow().hide();
-    }
-
-    @FXML
-    private void onTest(ActionEvent event) throws Exception {
-        Connection conn = connectDatabase();
-        if (conn!=null) {
-            mainControllerInterface.showAlertDialog("Connect success.", "");
-            conn.close();
-        }
-    }
-
+    // DB接続用に入力した各パラメータの値を使ってデータベース接続をする。
+    // 接続に成功したら、その内容を接続履歴に永続化する。
     private Connection connectDatabase() throws Exception {
         if (!validTextField()) {
             return null;
@@ -329,11 +247,157 @@ public class ConnectController implements Initializable {
         return conn;
     }
 
+    // 指定されたStringが空文字か判定する。
+    // nullの場合も空文字と判定する。
     private boolean isEmptyString(String value) {
         return (value==null || "".equals(value));
     }
 
-    public Connection getConnection() {
-        return this.connection;
+    /***************************************************************************
+     *                                                                         *
+     * Event handler                                                           *
+     *                                                                         *
+     **************************************************************************/
+
+    ////////////////////////////////////////////////////////////////////////////
+    // connectTableView event
+
+    // 接続先一覧でのキーイベントハンドラ
+    // エンター押下時に選択行の内容を入力欄に反映する
+    @FXML
+    private void onKeyPressConnectTableView(KeyEvent event) {
+        if (event.getCode()==KeyCode.ENTER) {
+            event.consume();
+            selectConnection();
+        }
     }
+
+    // 接続先一覧でのマウスイベントハンドラ
+    // プライマリボタン（左ボタン）のダブルクリック時に選択行の内容を入力欄に反映する
+    @FXML
+    private void onMouseClickConnectTableView(MouseEvent event) {
+        if (event.getClickCount()>=2 && event.getButton()== MouseButton.PRIMARY) {
+            selectConnection();
+        }
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // edit connectTableView event
+
+    // Addボタンのアクションイベントハンドラ
+    // DB接続用に入力した各パラメータを、接続先一覧の末尾に追加する
+    @FXML
+    private void onAdd(ActionEvent event) {
+        if (!validTextField()) {
+            return ;
+        }
+
+        Connect connect = createConnect();
+
+        ObservableList<Connect> tableList = connectTableView.getItems();
+        tableList.add(connect);
+        connectTableView.getSelectionModel().select(tableList.size()-1);
+
+        saveConnectList();
+    }
+
+    // Updateボタンのアクションイベントハンドラ
+    // DB接続用に入力した各パラメータを、接続先一覧の現在選択行に更新する
+    @FXML
+    private void onUpdate(ActionEvent event) {
+        if (!validTextField()) {
+            return ;
+        }
+
+        int index = connectTableView.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            return ;
+        }
+
+        Connect connect = createConnect();
+
+        ObservableList<Connect> tableList = connectTableView.getItems();
+        tableList.remove(index);
+        tableList.add(index, connect);
+        connectTableView.getSelectionModel().select(index);
+
+        saveConnectList();
+    }
+
+    // Deleteボタンのアクションイベントハンドラ
+    // 接続先一覧の現在選択行を削除する
+    @FXML
+    private void onDelete(ActionEvent event) {
+        int index = connectTableView.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            return ;
+        }
+
+        ObservableList<Connect> tableList = connectTableView.getItems();
+        tableList.remove(index);
+
+        saveConnectList();
+    }
+
+    // Loadボタンのアクションイベントハンドラ
+    // 接続先一覧の現在選択行の内容を入力欄に反映する
+    @FXML
+    private void onLoad(ActionEvent event) {
+        selectConnection();
+    }
+
+    // 接続履歴の選択変更イベントハンドラ
+    // 変更した履歴の内容を入力欄に反映する
+    private void historyComboBoxChangeHandler(ObservableValue observable, Object oldValue, Object newValue) {
+        int index = historyComboBox.getSelectionModel().getSelectedIndex();
+        if (index==-1) {
+            return;
+        }
+
+        List<ConnectHistory> list = historyComboBox.getItems();
+        ConnectHistory history = list.get(index);
+        libraryPathTextField.setText(history.getLibraryPath());
+        driverTextField.setText(history.getDriver());
+        urlTextField.setText(history.getUrl());
+        userTextField.setText(history.getUser());
+        passwordTextField.setText(history.getPassword());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////
+    // bottom button event
+
+    // OKボタンのアクションイベントハンドラ
+    // 入力内容を基にDB接続を行う
+    @FXML
+    private void onOk(ActionEvent event) throws Exception {
+        Connection conn = connectDatabase();
+
+        if (conn!=null) {
+            this.connect = createConnect();
+            this.connect.setConnection(conn);
+
+            connectTableView.getScene().getWindow().hide();
+            mainControllerInterface.connectNotify();
+        }
+    }
+
+    // Cancelボタンのアクションイベントハンドラ
+    // 自画面を閉じる
+    @FXML
+    private void onCancel(ActionEvent event) {
+        this.connect = null;
+        connectTableView.getScene().getWindow().hide();
+    }
+
+    // Testボタンのアクションイベントハンドラ
+    // 入力内容を基にDB接続を行いすぐに接続を解除することで、接続確認を行う。
+    @FXML
+    private void onTest(ActionEvent event) throws Exception {
+        Connection conn = connectDatabase();
+        if (conn!=null) {
+            mainControllerInterface.showAlertDialog("Connect success.", "");
+            conn.close();
+        }
+    }
+
 }

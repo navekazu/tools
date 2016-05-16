@@ -5,6 +5,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Builder;
 
+import java.sql.Connection;
+
 /**
  * データベース接続用のエンティティクラス。
  * 内容はフラットファイルとして永続化され、「~/.DBConnector6/config/connection」として保存する。<br>
@@ -19,6 +21,7 @@ public class Connect {
     private String url;             // データベース接続のURL
     private String user;            // 接続時のユーザー名
     private String password;        // 接続時のパスワード
+    private Connection connection;  // DB接続子（永続化対象外）
 
     /**
      * 接続リストに表示するマスクしたパスワード文字列を返す。<br>
