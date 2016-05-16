@@ -7,9 +7,8 @@ import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TreeItem;
-import tools.dbconnector6.BackgroundServiceInterface;
-import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.MainControllerInterface;
+import tools.dbconnector6.controller.DbStructureTreeItem;
 
 import java.sql.DatabaseMetaData;
 import java.sql.ResultSet;
@@ -19,18 +18,34 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * 画面左上のデータベース構造を解析し表示するサービス。<br>
+ */
 public class DbStructureUpdateService implements BackgroundServiceInterface<Void, DbStructureTreeItem> {
+    // メイン画面へのアクセス用インターフェース
     private MainControllerInterface mainControllerInterface;
+
+    /**
+     * コンストラクタ。<br>
+     * @param mainControllerInterface メイン画面へのアクセス用インターフェース
+     */
     public DbStructureUpdateService(MainControllerInterface mainControllerInterface) {
         this.mainControllerInterface = mainControllerInterface;
     }
 
+    /**
+     * 接続先データベースのスキーマから、テーブル一覧（シノニム、テーブル、ビュー、など）、
+     * ファンクション一覧、プロシージャ一覧を取得し、データベース構造を画面左上にツリー形式で表示する。<br>
+     * 解析はスキーマごとにスレッドを立てて行う。<br>
+     * @param task 生成したバックグラウンド実行を行うTaskのインスタンス
+     * @throws Exception 何らかのエラーが発生し処理を中断する場合
+     */
     @Override
     public void run(Task task) throws Exception {
         // クリーンナップ
-        updateUIPreparation(null);
+        prepareUpdate(null);
 
-        if (!mainControllerInterface.isConnectWithoutMessage()) {
+        if (!mainControllerInterface.isConnectWithoutOutputMessage()) {
             return ;
         }
 
@@ -52,37 +67,113 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         });
     }
 
+    /**
+     * データベース構造のツリーをクリアする。<br>
+     * @param prepareUpdateParam 不使用
+     * @throws Exception 何らかのエラーが発生した場合
+     */
     @Override
-    public void cancel() throws Exception {
-
+    public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
+                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
+                subList.clear();
+                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
+            }
+        });
     }
 
+    /**
+     * データベース構造のツリーを更新する。<br>
+     * 呼び出しはスキーマ単位で行われる。<br>
+     * @param updateParam ツリーのルートにぶら下がる子要素
+     * @throws Exception 何らかのエラーが発生した場合
+     */
+    @Override
+    public void update(final DbStructureTreeItem updateParam) throws Exception {
+        Platform.runLater(new Runnable() {
+            @Override
+            public void run() {
+                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
+                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
+                subList.add(updateParam);
+                FXCollections.sort(subList, new Comparator<TreeItem<String>>() {
+                    @Override
+                    public int compare(TreeItem<String> o1, TreeItem<String> o2) {
+                        return o1.getValue().compareTo(o2.getValue());
+                    }
+                });
+                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
+            }
+        });
+    }
+
+    /**
+     * バックグラウンド実行をキャンセルするたびに呼び出される。<br>
+     */
+    @Override
+    public void cancel() {
+        // ToDo:実行したスレッドを終了しないといけないはず・・・
+    }
+
+    /**
+     * Serviceの状態がCANCELLED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void cancelled() {
-
     }
 
+    /**
+     * Serviceの状態がFAILED状態に遷移するたびに呼び出される。<br>
+     */
     @Override
     public void failed() {
-
     }
 
+    /**
+     * もし実行中ではない時にキャンセル要求があった場合のメッセージ。<br>
+     * 何も返さない。<br>
+     * @return メッセージ
+     */
     @Override
     public String getNotRunningMessage() {
         return "";
     }
 
-    private class  SchemaSearchTask extends Task {
-        DatabaseMetaData meta;
-        DbStructureTreeItem item;
+    /**
+     * スキーマから、テーブル一覧（シノニム、テーブル、ビュー、など）、ファンクション一覧、プロシージャ一覧を取得し画面更新を行う。
+     * スキーマ単位にインスタンスを作成すること。
+     */
+    private class  SchemaSearchTask extends Task<Void> {
+        // 現在接続中のデータベースメタデータ
+        private DatabaseMetaData meta;
+
+        // 更新先のツリーアイテム
+        private DbStructureTreeItem item;
+
+        /**
+         * コンストラクタ
+         * @param meta 現在接続中のデータベースメタデータ。
+         * @param item 更新先のツリーアイテム。ここから取得対象のスキーマ名を取得する。
+         */
         public SchemaSearchTask(DatabaseMetaData meta, DbStructureTreeItem item) {
             this.meta = meta;
             this.item = item;
 
         }
 
+        /**
+         * 更新先のツリーアイテムから対象のスキーマ名を取得し、
+         * そのスキーマのテーブル一覧（シノニム、テーブル、ビュー、など）、
+         * ファンクション一覧、プロシージャ一覧を取得しツリーアイテムに追加する。<br>
+         * @return nullを返す
+         * @throws Exception バックグラウンド操作中に発生した未処理の例外。
+         *                  データベース操作で発生した例外は握りつぶす。（後続の一覧取得は続行したい為）
+         */
         @Override
-        protected Object call() throws Exception {
+        protected Void call() throws Exception {
             List<DbStructureTreeItem> subList = new ArrayList<>();
             DbStructureTreeItem.ItemType itemType;
 
@@ -121,17 +212,22 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
 
             mainControllerInterface.writeLog("Schema parsed. (%s)", item.getSchema());
 
-            updateUI(item);
+            update(item);
             return null;
         }
     }
 
+    /**
+     * 現在接続中のデータベースのスキーマ一覧を取得する。<br>
+     * @param meta 現在接続中のデータベースメタデータ
+     * @return スキーマ一覧
+     * @throws SQLException スキーマ取得に失敗した場合
+     */
     private List<DbStructureTreeItem> getSchemaList(DatabaseMetaData meta) throws SQLException {
         List<DbStructureTreeItem> schemaList = new ArrayList<>();
-
         ResultSet resultSet = meta.getSchemas();
 
-        while(resultSet.next()) {
+        while (resultSet.next()) {
             schemaList.add(new DbStructureTreeItem(DbStructureTreeItem.ItemType.SCHEMA
                     , resultSet.getString("TABLE_SCHEM"), resultSet.getString("TABLE_SCHEM")));
         }
@@ -144,59 +240,40 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
         return schemaList;
     }
 
-    @Override
-    public void updateUIPreparation(final Void uiParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
-                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
-                subList.clear();
-                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
-            }
-        });
-    }
-
-    @Override
-    public void updateUI(final DbStructureTreeItem uiParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
-                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
-                subList.add(uiParam);
-                FXCollections.sort(subList, new Comparator<TreeItem<String>>() {
-                    @Override
-                    public int compare(TreeItem<String> o1, TreeItem<String> o2) {
-                        return o1.getValue().compareTo(o2.getValue());
-                    }
-                });
-                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
-            }
-        });
-    }
-
+    /**
+     * 指定されたルート要素名を親とするツリーアイテムを作成する。子の要素をResultSetから作成する。<br>
+     * @param resultSet 取得元のResultSet
+     * @param colName ResultSetから取得する列
+     * @param schemaName ツリーアイテムに指定するスキーマ名
+     * @param name 作成するツリーアイテムのルート要素名
+     * @param itemType 作成するツリーアイテムのルート要素タイプ
+     * @return 作成したツリーアイテム
+     * @throws SQLException ResultSetからのデータ取得に失敗した場合
+     */
     private DbStructureTreeItem createGroupItem(ResultSet resultSet, String colName, String schemaName, String name, DbStructureTreeItem.ItemType itemType) throws SQLException {
-        DbStructureTreeItem tableItem = new DbStructureTreeItem(DbStructureTreeItem.ItemType.GROUP, name, null);
 
-        List<DbStructureTreeItem> l = new ArrayList<>();
+        List<DbStructureTreeItem> subList = new ArrayList<>();
         while (resultSet.next()) {
-            l.add(new DbStructureTreeItem(itemType, resultSet.getString(colName), resultSet.getString(schemaName)));
+            subList.add(new DbStructureTreeItem(itemType, resultSet.getString(colName), resultSet.getString(schemaName)));
         }
-        Collections.sort(l);
+        Collections.sort(subList);
 
+        DbStructureTreeItem tableItem = new DbStructureTreeItem(DbStructureTreeItem.ItemType.GROUP, name, null);
         ObservableList<TreeItem<String>> tableList = tableItem.getChildren();
-        tableList.addAll(l);
+        tableList.addAll(subList);
 
         resultSet.close();
         return tableItem;
     }
 
+    /**
+     * メイン画面のフィルタ入力欄の値を取得する。<br>
+     * 値は前後に "%" を入れる。値が空の場合はnullを返す。
+     * @return 前後に "%" を入れたフィルタ入力欄の値を返す。値が空の場合はnullを返す。
+     */
     private String getFilterTextFieldParamValue() {
-        return getTextFieldParamValue(mainControllerInterface.getDbStructureParam().filterTextField);
-    }
-
-    private String getTextFieldParamValue(TextField textField) {
-        return "".equals(textField.getText()) ? null : String.format("%%%s%%", textField.getText());
+        TextField textField = mainControllerInterface.getDbStructureParam().filterTextField;
+        String text = textField.getText();
+        return "".equals(text) ? null: String.format("%%%s%%", text);
     }
 }
