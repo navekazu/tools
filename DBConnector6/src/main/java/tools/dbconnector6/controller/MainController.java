@@ -932,6 +932,13 @@ public class MainController extends Application implements Initializable, MainCo
      *                                                                         *
      **************************************************************************/
 
+    /**
+     * 通常ログの出力。<br>
+     * 出力はString#formatメソッドの書式文字列で指定し、ログ出力エリアに出力する。<br>
+     * @param format 書式文字列
+     * @param args   書式文字列の書式指示子により参照される引数
+     * @see java.lang.String
+     */
     @Override
     public void writeLog(String format, Object... args) {
         final String logText = LOG_DATE_FORMAT.format(new Date())+" " + String.format(format, args);
@@ -945,6 +952,11 @@ public class MainController extends Application implements Initializable, MainCo
     }
     private static final SimpleDateFormat LOG_DATE_FORMAT = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss.SSS");
 
+    /**
+     * 例外ログの出力。<br>
+     * 例外ログを、ログ出力エリアとログファイルに出力する。<br>
+     * @param e 例外発生時の例外オブジェクト
+     */
     @Override
     public void writeLog(Throwable e) {
         ApplicationLogSerializer applicationLogSerializer = new ApplicationLogSerializer();
@@ -958,6 +970,11 @@ public class MainController extends Application implements Initializable, MainCo
         writeLog(e.toString());
     }
 
+    /**
+     * 予約語選択画面の選択結果の通知。<br>
+     * クエリー入力欄に現在入力中の単語を指定された単語に置き換える。<br>
+     * @param word 選択結果の予約語
+     */
     @Override
     public void selectReservedWord(String word) {
         int caret = queryTextArea.getCaretPosition();
@@ -971,42 +988,74 @@ public class MainController extends Application implements Initializable, MainCo
         queryTextArea.insertText(queryTextArea.getCaretPosition(), word);
     }
 
+    /**
+     * メイン画面にフォーカスを移動させる。<br>
+     */
     @Override
     public void mainControllerRequestFocus() {
         primaryStage.requestFocus();
     }
 
+    /**
+     * 予約語選択画面を閉じる
+     */
     @Override
     public void hideReservedWordStage() {
         reservedWordPair.stage.hide();
     }
 
+    /**
+     * 警告画面をモーダルで表示する。<br>
+     * @param message メッセージタイトル
+     * @param detail  メッセージの詳細
+     */
     @Override
     public void showAlertDialog(String message, String detail) {
         alertDialogPair.controller.setContents(message, detail);
         alertDialogPair.controller.setWaitMode(false);
         alertDialogPair.stage.showAndWait();
     }
+
+    /**
+     * 待機画面をモーダルで表示する。<br>
+     * @param message メッセージタイトル
+     * @param detail  メッセージの詳細
+     */
     public void showWaitDialog(String message, String detail) {
         alertDialogPair.controller.setContents(message, detail);
         alertDialogPair.controller.setWaitMode(true);
         alertDialogPair.stage.showAndWait();
     }
+
+    /**
+     * 待機画面を閉じる。<br>
+     */
     public void hideWaitDialog() {
         alertDialogPair.stage.hide();
     }
 
+    /**
+     * 現在のエビデンスモードを取得する。<br>
+     * @return エビデンスモードが有効の場合は true、それ以外は false。
+     */
     @Override
     public boolean isEvidenceMode() {
         return evidenceMode.isSelected();
     }
 
+    /**
+     * エビデンスにヘッダー列（カラム列）を含めるかを取得する。<br>
+     * @return ヘッダー列（カラム列）を含める場合は true、それ以外は false。
+     */
     @Override
     public boolean isEvidenceModeIncludeHeader() {
         return evidenceModeIncludeHeader.isSelected();
     }
 
-    private static final String[] EVIDENCE_DELIMITERS = new String[] {"\t", ",", " "};
+    /**
+     * エビデンスの列の区切り文字を取得する。<br>
+     * @return 区切り文字
+     */
     @Override
     public String getEvidenceDelimiter() {
         int selectedIndex = 0;
@@ -1019,7 +1068,16 @@ public class MainController extends Application implements Initializable, MainCo
 
         return EVIDENCE_DELIMITERS[selectedIndex];
     }
+    private static final String[] EVIDENCE_DELIMITERS = new String[] {"\t", ",", " "};
 
+    /**
+     * 実行対象のクエリを取得する。<br>
+     * SQLスクリプトを読み込んでの実行中であれば読み込んだスクリプトの内容を返す。<br>
+     * それ以外はクエリ入力欄の内容を返すが、
+     * クエリ入力欄で選択中のクエリがあればその内容を、
+     * 選択中のクエリが無ければクエリ入力欄全体の内容を返す。<br>
+     * @return 実行対象のクエリ
+     */
     @Override
     public String getQuery() {
         String sql;
@@ -1042,29 +1100,54 @@ public class MainController extends Application implements Initializable, MainCo
         return sql;
     }
 
+    /**
+     * クエリ入力欄の現在選択中の文字列を取得する。
+     * @return クエリ入力欄の現在選択中の文字列
+     */
     @Override
     public String getSelectedQuery() {
         return queryTextArea.getSelectedText();
     }
 
+    /**
+     * 指定された単語でクエリ入力欄の現在選択中のテキストを置き換える。<br>
+     * @param word 置き換えする単語
+     */
     @Override
     public void updateSelectedQuery(String word) {
         int caret = queryTextArea.getCaretPosition();
         int anchor = queryTextArea.getAnchor();
-        queryTextArea.replaceText((anchor<caret? anchor: caret), (anchor>caret? anchor: caret), word);    // "begin<=end" の関係でないとNG
+        queryTextArea.replaceText((anchor < caret ? anchor : caret), (anchor > caret ? anchor : caret), word);    // "begin<=end" の関係でないとNG
     }
 
+    /**
+     * 指定された単語をクエリ入力欄の現在キャレット位置に挿入する、<br>
+     * クエリ結果の行タイトル（カラム名）やデータベース構造一覧の項目（テーブル名）を右ダブルクリックした際に、
+     * ダブルクリックしたテキストをクエリ入力欄に挿入する入力補完機能を実現する。<br>
+     * シフトを押しながら右ダブルクリックした場合、挿入した単語の後にカンマを追加する。<br>
+     * @param word クエリ入力欄に挿入する単語
+     * @param shiftDown シフトを押しながら挿入する場合はtrue、それ以外はfalse
+     */
     @Override
     public void addQueryWord(String word, boolean shiftDown) {
         updateSelectedQuery(word + (shiftDown? ", ": ""));
         queryTextArea.requestFocus();
     }
 
+    /**
+     * 現在設定されているテキストエディタへのパスを返す。<br>
+     * 設定されていない場合は空文字を返す。<br>
+     * @return テキストエディタへのパス
+     */
     @Override
     public String getEditorPath() {
         return appConfigEditor.getEditorPath();
     }
 
+    /**
+     * データベース接続画面から、データベース接続時にメイン画面へ接続した旨の通知をする。<br>
+     * 通知を受け取ったメイン画面は、データベース構造表示等の画面更新を行う。<br>
+     */
     @Override
     public void connectNotify() {
         Connection con = connectPair.controller.getConnection();
@@ -1076,16 +1159,30 @@ public class MainController extends Application implements Initializable, MainCo
         }
     }
 
-    @Override
-    public Connection getConnection() {
-        return connectParam==null? null: connectParam.getConnection();
-    }
-
+    /**
+     * 現在接続しているデータベースへの接続情報（ドライバ名URLやユーザ名）を取得する。<br>
+     * @return データベースへの接続情報
+     */
     @Override
     public Connect getConnectParam() {
         return connectParam;
     }
 
+    /**
+     * 現在接続しているデータベースへのコネクションを取得する。<br>
+     * @return データベースコネクション
+     */
+    @Override
+    public Connection getConnection() {
+        return connectParam==null? null: connectParam.getConnection();
+    }
+
+    /**
+     * データベース接続確認。未接続時にログエリアへメッセージを出力する。<br>
+     * ログエリアへメッセージを出力しない場合はisConnectWithoutMessage()メソッドを利用する。<br>
+     * @return データベース接続時は true 、それ以外は false を返す。
+     * @see tools.dbconnector6.MainControllerInterface#isConnectWithoutOutputMessage
+     */
     @Override
     public boolean isConnect() {
         boolean result = isConnectWithoutOutputMessage();
@@ -1095,16 +1192,29 @@ public class MainController extends Application implements Initializable, MainCo
         return result;
     }
 
+    /**
+     * データベース接続確認。未接続時にログエリアへメッセージを出力しない。
+     * ログエリアへメッセージを出力する場合はisConnect()メソッドを利用する。<br>
+     * @return データベース接続時は true 、それ以外は false を返す。
+     * @see tools.dbconnector6.MainControllerInterface#isConnect
+     */
     @Override
     public boolean isConnectWithoutOutputMessage() {
         return connectParam==null? false: connectParam.getConnection()!=null;
     }
 
+    /**
+     * TableStructureUpdateServiceクラスのrestartメソッドを呼んで更新を要求する。<br>
+     */
     @Override
     public void requestTableStructureUpdate() {
         tableStructureUpdateService.restart();
     }
 
+    /**
+     * メイン画面左上のデータベース構造のUI参照をまとめた構造体を取得する。<br>
+     * @return メイン画面左上のデータベース構造のUI参照をまとめた構造体
+     */
     @Override
     public DbStructureParam getDbStructureParam() {
         MainControllerInterface.DbStructureParam param = new MainControllerInterface.DbStructureParam();
@@ -1114,6 +1224,10 @@ public class MainController extends Application implements Initializable, MainCo
         return param;
     }
 
+    /**
+     * メイン画面左下のテーブル構造のUI参照をまとめた構造体を取得する。<br>
+     * @return メイン画面左下のテーブル構造のUI参照をまとめた構造体
+     */
     @Override
     public MainControllerInterface.TableStructureTabParam getTableStructureTabParam() {
         MainControllerInterface.TableStructureTabParam param = new MainControllerInterface.TableStructureTabParam();
@@ -1146,6 +1260,10 @@ public class MainController extends Application implements Initializable, MainCo
         return param;
     }
 
+    /**
+     * メイン画面右のクエリ入力・結果一覧のUI参照をまとめた構造体を取得する。<br>
+     * @return メイン画面右のクエリ入力・結果一覧のUI参照をまとめた構造体
+     */
     @Override
     public QueryParam getQueryParam() {
         MainControllerInterface.QueryParam param = new MainControllerInterface.QueryParam();
@@ -1155,5 +1273,4 @@ public class MainController extends Application implements Initializable, MainCo
 
         return param;
     }
-
 }
