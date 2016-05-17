@@ -17,17 +17,17 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * コントローラ管理
+ * コントローラ管理。<br>
  */
 public class ControllerManager {
 
     /**
-     * コントローラ管理のシングルトンオブジェクト
+     * コントローラ管理のシングルトンオブジェクト。<br>
      */
     private static final ControllerManager singleton = new ControllerManager();
 
     /**
-     * ステージ定義のマップ
+     * ステージ定義のマップ。<br>
      */
     private static final Map<String, StageDefine> stageDefinedMap = new HashMap<>();
     static {
@@ -39,7 +39,7 @@ public class ControllerManager {
     }
 
     /**
-     * コントローラ管理のシングルトンオブジェクトを取得する
+     * コントローラ管理のシングルトンオブジェクトを取得する。<br>
      * @return コントローラ管理のシングルトンオブジェクト
      */
     public static ControllerManager getControllerManager() {
@@ -52,7 +52,7 @@ public class ControllerManager {
     private Stage primaryStage;
 
     /**
-     * メイン画面のステージを取得する
+     * メイン画面のステージを取得する。<br>
      * @param loader FXMLを指定したFXMLLoader
      * @param primaryStage アプリケーション起動時のステージ
      * @return メイン画面のFXMLを読み込んだアプリケーション起動時のステージ
@@ -72,7 +72,7 @@ public class ControllerManager {
 
 
     /**
-     * アプリケーション起動時のステージを親に持つ子のステージを取得する
+     * アプリケーション起動時のステージを親に持つ子のステージを取得する。<br>
      * @param loader FXMLを指定したFXMLLoader
      * @param name ステージ定義のマップ名
      * @return 子のステージ
@@ -94,7 +94,7 @@ public class ControllerManager {
     }
 
     /**
-     * アプリケーション起動時のステージを親に持つ透明な子のステージを取得する
+     * アプリケーション起動時のステージを親に持つ透明な子のステージを取得する。<br>
      * @param loader FXMLを指定したFXMLLoader
      * @param name ステージ定義のマップ名
      * @return 子のステージ
@@ -116,7 +116,7 @@ public class ControllerManager {
     }
 
     /**
-     * ステージ定義名からFXMLLoaderを取得する
+     * ステージ定義名からFXMLLoaderを取得する。<br>
      * @param name ステージ定義名
      * @return FXMLLoader
      */
@@ -125,26 +125,22 @@ public class ControllerManager {
     }
 
     /**
-     * ステージ定義
+     * ステージ定義。<br>
      */
     @AllArgsConstructor
     @Data
     @NoArgsConstructor
     @Builder
     private static class StageDefine {
-        /**
-         * FXMLファイル名
-         */
+        // FXMLファイル名
         private String fxml;
 
-        /**
-         * ステージのタイトル
-         */
+        // ステージのタイトル
         private String title;
     }
 
     /**
-     * ステージ定義を取得する
+     * ステージ定義を取得する。<br>
      * @param name ステージ定義名
      * @return ステージ定義
      */
