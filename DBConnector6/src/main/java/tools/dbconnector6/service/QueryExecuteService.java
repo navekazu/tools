@@ -119,15 +119,12 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
      */
     @Override
     public void prepareUpdate(final List<TableColumn<QueryResult, String>> prepareUpdateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getQueryParam().queryResultTableView.getItems().clear();
-                mainControllerInterface.getQueryParam().queryResultTableView.getColumns().clear();
+        Platform.runLater(() -> {
+            mainControllerInterface.getQueryParam().queryResultTableView.getItems().clear();
+            mainControllerInterface.getQueryParam().queryResultTableView.getColumns().clear();
 
-                ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
-                columnList.addAll(prepareUpdateParam);
-            }
+            ObservableList<TableColumn<QueryResult, String>> columnList = mainControllerInterface.getQueryParam().queryResultTableView.getColumns();
+            columnList.addAll(prepareUpdateParam);
         });
     }
 
@@ -138,18 +135,15 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
      */
     @Override
     public void update(final List<List<QueryResultCellValue>> updateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                List<QueryResult> list = new ArrayList<>();
-                for (List<QueryResultCellValue> m: updateParam) {
-                    QueryResult r = new QueryResult();
-                    r.setRecordData(m);
-                    list.add(r);
-                }
-                List<QueryResult> items = mainControllerInterface.getQueryParam().queryResultTableView.getItems();
-                items.addAll(list);
+        Platform.runLater(() -> {
+            List<QueryResult> list = new ArrayList<>();
+            for (List<QueryResultCellValue> m: updateParam) {
+                QueryResult r = new QueryResult();
+                r.setRecordData(m);
+                list.add(r);
             }
+            List<QueryResult> items = mainControllerInterface.getQueryParam().queryResultTableView.getItems();
+            items.addAll(list);
         });
     }
 
@@ -314,22 +308,12 @@ public class QueryExecuteService implements BackgroundServiceInterface<List<Tabl
     protected String[] splitQuery(String sql) {
         String[] split = sql.trim().split("(;\n|/\n)");
         return Arrays.stream(split)
-                .map(s -> {
-                    return s.trim();
-                })
-                .map(s -> {
-                    return s.endsWith(";")? s.substring(0, s.length()-1): s;
-                })
-                .map(s -> {
-                    return s.endsWith("/")? s.substring(0, s.length()-1): s;
-                })
-                .map(s -> {
-                    return s.trim();
-                })
-                .map(s -> {
-                    return isOneWord(s)? String.format("select * from %s", s): s;
-                })
-                .filter(s -> s.length()>=1)
+                .map(s -> s.trim())
+                .map(s -> s.endsWith(";")? s.substring(0, s.length()-1): s)
+                .map(s -> s.endsWith("/")? s.substring(0, s.length()-1): s)
+                .map(s -> s.trim())
+                .map(s -> isOneWord(s)? String.format("select * from %s", s): s)
+                .filter(s -> s.length() >= 1)
                 .toArray(String[]::new);
     }
 
