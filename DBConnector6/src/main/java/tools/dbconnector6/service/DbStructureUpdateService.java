@@ -74,14 +74,11 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
      */
     @Override
     public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
-                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
-                subList.clear();
-                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
-            }
+        Platform.runLater(() -> {
+            mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
+            ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
+            subList.clear();
+            mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
         });
     }
 
@@ -93,20 +90,17 @@ public class DbStructureUpdateService implements BackgroundServiceInterface<Void
      */
     @Override
     public void update(final DbStructureTreeItem updateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
-                ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
-                subList.add(updateParam);
-                FXCollections.sort(subList, new Comparator<TreeItem<String>>() {
-                    @Override
-                    public int compare(TreeItem<String> o1, TreeItem<String> o2) {
-                        return o1.getValue().compareTo(o2.getValue());
-                    }
-                });
-                mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
-            }
+        Platform.runLater(() -> {
+            mainControllerInterface.getDbStructureParam().dbStructureRootItem.setValue(mainControllerInterface.getDbStructureParam().dbStructureRootItem.getItemType().getName());
+            ObservableList<TreeItem<String>> subList = mainControllerInterface.getDbStructureParam().dbStructureRootItem.getChildren();
+            subList.add(updateParam);
+            FXCollections.sort(subList, new Comparator<TreeItem<String>>() {
+                @Override
+                public int compare(TreeItem<String> o1, TreeItem<String> o2) {
+                    return o1.getValue().compareTo(o2.getValue());
+                }
+            });
+            mainControllerInterface.getDbStructureParam().dbStructureRootItem.setExpanded(true);
         });
     }
 

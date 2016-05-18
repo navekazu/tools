@@ -59,14 +59,9 @@ public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, 
      */
     @Override
     public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.showWaitDialog(
-                        "Waiting until the end of SQL edit.",
-                        "Please save and exit the SQL editor.");
-            }
-        });
+        Platform.runLater(() -> mainControllerInterface.showWaitDialog(
+                "Waiting until the end of SQL edit.",
+                "Please save and exit the SQL editor."));
     }
 
     /**
@@ -77,12 +72,9 @@ public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, 
      */
     @Override
     public void update(final String updateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.updateSelectedQuery(updateParam);
-                mainControllerInterface.hideWaitDialog();
-            }
+        Platform.runLater(() -> {
+            mainControllerInterface.updateSelectedQuery(updateParam);
+            mainControllerInterface.hideWaitDialog();
         });
     }
 
@@ -124,11 +116,6 @@ public class SqlEditorLaunchService implements BackgroundServiceInterface<Void, 
 
     // 待機メッセージを非表示にする。
     private void callHideWaitDialog() {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.hideWaitDialog();
-            }
-        });
+        Platform.runLater(() -> mainControllerInterface.hideWaitDialog());
     }
 }
