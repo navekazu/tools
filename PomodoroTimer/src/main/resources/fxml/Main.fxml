@@ -31,5 +31,13 @@
             <Insets top="30.0" />
          </StackPane.margin>
       </Label>
+      <Label fx:id="clockLabel" text="00:00:00">
+         <StackPane.margin>
+            <Insets top="80.0" />
+         </StackPane.margin>
+         <font>
+            <Font size="10.0" />
+         </font>
+      </Label>
    </children>
 </StackPane>

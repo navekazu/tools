@@ -22,6 +22,7 @@ import java.util.*;
 public class App extends Application implements Initializable {
     @FXML private Label timerLabel;
     @FXML private Label promptLabel;
+    @FXML private Label clockLabel;
     private ImageView doingImage;
     private ImageView breakImage;
     private App controller;
@@ -91,26 +92,15 @@ public class App extends Application implements Initializable {
         Platform.exit();
     }
 
-    private void setPromptLabel(final String text) {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.promptLabel.setText(text);
-                controller.timerLabel.setGraphic(controller.breakImage);
-            }
-        });
-    }
+    private void updatePomodoro(int hour, int minute, int second) {
+        final int halfMinute = minute % 30;
+        final String promptText = String.format("%02d:%02d", halfMinute, second);
+        final String clockText = String.format("%02d:%02d:%02d", hour, minute, second);
 
-    private void updatePomodoro(int minute, int second) {
-        final int finalMinute = minute % 30;
-        String text = String.format("%02d:%02d", finalMinute, second);
-
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                controller.promptLabel.setText(text);
-                controller.timerLabel.setGraphic(isDoingTime(finalMinute)? controller.doingImage: controller.breakImage);
-            }
+        Platform.runLater(() -> {
+            controller.promptLabel.setText(promptText);
+            controller.clockLabel.setText(clockText);
+            controller.timerLabel.setGraphic(isDoingTime(halfMinute)? controller.doingImage: controller.breakImage);
         });
     }
     protected boolean isDoingTime(int minute) {
@@ -129,9 +119,10 @@ public class App extends Application implements Initializable {
                         }
 
                         LocalTime localTime = LocalTime.now();
+                        int hour = localTime.getHour();
                         int minute = localTime.getMinute();
                         int second = localTime.getSecond();
-                        updatePomodoro(minute, second);
+                        updatePomodoro(hour, minute, second);
 
 
                         try {
