@@ -390,7 +390,7 @@ public class MainController extends Application implements Initializable, MainCo
         }
 
         int nextCaret = caret+direction;
-        char lastCh = text.charAt(caret);
+        char lastCh = (text.length()>=caret? ' ': text.charAt(caret));  // 末尾にキャレットがある場合に配列範囲外で例外が発生するので回避（仮の値でスペースを使用）
 
         // 現在位置が改行なら1文字進める
         if (lastCh=='\n') {
