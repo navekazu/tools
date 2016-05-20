@@ -128,9 +128,7 @@ public class App extends Application implements Initializable {
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException interrupted) {
-                            if (isCancelled()) {
-                                break;
-                            }
+                            break;
                         }
                     }
                     return null;
