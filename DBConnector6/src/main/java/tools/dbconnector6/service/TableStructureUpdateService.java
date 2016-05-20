@@ -82,16 +82,13 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
      */
     @Override
     public void prepareUpdate(final Void prepareUpdateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().clear();
-                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().clear();
-                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().clear();
-                mainControllerInterface.getTableStructureTabParam().tableIndexPrimaryKeyTextField.setText("");
-                mainControllerInterface.getTableStructureTabParam().tableIndexUniqueKeyTextField.setText("");
-                mainControllerInterface.getTableStructureTabParam().tableIndexListView.getItems().clear();
-            }
+        Platform.runLater(() -> {
+            mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().clear();
+            mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().clear();
+            mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().clear();
+            mainControllerInterface.getTableStructureTabParam().tableIndexPrimaryKeyTextField.setText("");
+            mainControllerInterface.getTableStructureTabParam().tableIndexUniqueKeyTextField.setText("");
+            mainControllerInterface.getTableStructureTabParam().tableIndexListView.getItems().clear();
         });
     }
 
@@ -103,15 +100,12 @@ public class TableStructureUpdateService implements BackgroundServiceInterface<V
      */
     @Override
     public void update(final TableStructures updateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(updateParam.tablePropertyList);
-                mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(updateParam.tableColumnList);
-                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(updateParam.tableIndexList);
-                if (updateParam.tableIndexList.size()>=1) {
-                    mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getSelectionModel().select(0);
-                }
+        Platform.runLater(() -> {
+            mainControllerInterface.getTableStructureTabParam().tablePropertyTableView.getItems().addAll(updateParam.tablePropertyList);
+            mainControllerInterface.getTableStructureTabParam().tableColumnTableView.getItems().addAll(updateParam.tableColumnList);
+            mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getItems().addAll(updateParam.tableIndexList);
+            if (updateParam.tableIndexList.size()>=1) {
+                mainControllerInterface.getTableStructureTabParam().tableIndexNameComboBox.getSelectionModel().select(0);
             }
         });
     }

@@ -63,7 +63,7 @@ public class ReservedWordUpdateService implements BackgroundServiceInterface<Voi
         DatabaseMetaData dmd = mainControllerInterface.getConnection().getMetaData();
 
         // テーブルタイプの取得
-        List<String> types = new ArrayList<>();
+        List<String> types;
         try (ResultSet resultSet = dmd.getTableTypes()) {
             types = getResultList(resultSet, "TABLE_TYPE");
         } catch(SQLException e){

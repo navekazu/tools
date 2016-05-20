@@ -87,16 +87,13 @@ public class TableStructureTabPaneUpdateService implements BackgroundServiceInte
      */
     @Override
     public void update(final TabDisableProperty updateParam) throws Exception {
-        Platform.runLater(new Runnable() {
-            @Override
-            public void run() {
-                MainControllerInterface.TableStructureTabParam tabParam = mainControllerInterface.getTableStructureTabParam();
-                tabParam.tablePropertyTab.setDisable(updateParam.tablePropertyTabDisable);
-                tabParam.tableColumnTab.setDisable(updateParam.tableColumnTabDisable);
-                tabParam.tableIndexTab.setDisable(updateParam.tableIndexTabDisable);
+        Platform.runLater(() -> {
+            MainControllerInterface.TableStructureTabParam tabParam = mainControllerInterface.getTableStructureTabParam();
+            tabParam.tablePropertyTab.setDisable(updateParam.tablePropertyTabDisable);
+            tabParam.tableColumnTab.setDisable(updateParam.tableColumnTabDisable);
+            tabParam.tableIndexTab.setDisable(updateParam.tableIndexTabDisable);
 
-                mainControllerInterface.requestTableStructureUpdate();
-            }
+            mainControllerInterface.requestTableStructureUpdate();
         });
     }
 
