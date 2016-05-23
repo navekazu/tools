@@ -12,7 +12,7 @@ import java.sql.Connection;
 /**
  * メイン画面へアクセスするためのインターフェース。<br>
  * データの取得や更新や通知を行うための定義。<br>
- * 実装はMainController。<br>
+ * 実装はMainControllerクラス。<br>
  * @see tools.dbconnector6.controller.MainController
  */
 public interface MainControllerInterface {
