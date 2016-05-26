@@ -5,7 +5,6 @@ import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
-import tools.dbconnector6.service.BackgroundService;
 
 import java.sql.Connection;
 
