@@ -5,14 +5,13 @@ import tools.dbconnector6.controller.DbStructureTreeItem;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.TableColumnTab;
 import tools.dbconnector6.entity.TablePropertyTab;
-import tools.dbconnector6.service.BackgroundService;
 
 import java.sql.Connection;
 
 /**
  * メイン画面へアクセスするためのインターフェース。<br>
  * データの取得や更新や通知を行うための定義。<br>
- * 実装はMainController。<br>
+ * 実装はMainControllerクラス。<br>
  * @see tools.dbconnector6.controller.MainController
  */
 public interface MainControllerInterface {

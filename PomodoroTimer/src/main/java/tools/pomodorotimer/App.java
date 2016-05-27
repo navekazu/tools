@@ -39,14 +39,12 @@ public class App extends Application implements Initializable {
         primaryStage.setScene(scene);
         controller = loader.getController();
 
-
         // 透明にする
         primaryStage.initStyle(StageStyle.TRANSPARENT);
         scene.setFill(null);
 
         // 常に前画面
         primaryStage.setAlwaysOnTop(true);
-
 
         // シーンのドラッグ
         scene.setOnMousePressed(e -> {
@@ -58,6 +56,7 @@ public class App extends Application implements Initializable {
             primaryStage.setY(e.getScreenY() - dragStartY);
         });
 
+        // 画面更新のサービスを起動
         TimerService timerService = new TimerService();
         timerService.restart();
 
@@ -72,7 +71,6 @@ public class App extends Application implements Initializable {
         loadAndSetImage(breakImage, "image/tomato-break.png");
 
         timerLabel.setGraphic(breakImage);
-//        breakImage.addEventHandler();
     }
     private void loadAndSetImage(ImageView imageView, String resource) {
         Image image = new Image(resource);
@@ -110,32 +108,31 @@ public class App extends Application implements Initializable {
     private class TimerService extends Service<Void> {
         @Override
         protected Task<Void> createTask() {
-            return new Task<Void>() {
-                @Override
-                protected Void call() throws Exception {
-                    while (true) {
-                        if (isCancelled()) {
-                            break;
-                        }
+            return new TimerTask();
+        }
+    }
 
-                        LocalTime localTime = LocalTime.now();
-                        int hour = localTime.getHour();
-                        int minute = localTime.getMinute();
-                        int second = localTime.getSecond();
-                        updatePomodoro(hour, minute, second);
-
-
-                        try {
-                            Thread.sleep(10);
-                        } catch (InterruptedException interrupted) {
-                            if (isCancelled()) {
-                                break;
-                            }
-                        }
-                    }
-                    return null;
+    private class TimerTask extends Task<Void> {
+        @Override
+        protected Void call() throws Exception {
+            while (true) {
+                if (isCancelled()) {
+                    break;
                 }
-            };
+
+                LocalTime localTime = LocalTime.now();
+                int hour = localTime.getHour();
+                int minute = localTime.getMinute();
+                int second = localTime.getSecond();
+                updatePomodoro(hour, minute, second);
+
+                try {
+                    Thread.sleep(10);
+                } catch (InterruptedException interrupted) {
+                    break;
+                }
+            }
+            return null;
         }
     }
 
