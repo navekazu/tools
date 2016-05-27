@@ -39,14 +39,12 @@ public class App extends Application implements Initializable {
         primaryStage.setScene(scene);
         controller = loader.getController();
 
-
         // 透明にする
         primaryStage.initStyle(StageStyle.TRANSPARENT);
         scene.setFill(null);
 
         // 常に前画面
         primaryStage.setAlwaysOnTop(true);
-
 
         // シーンのドラッグ
         scene.setOnMousePressed(e -> {
@@ -58,6 +56,7 @@ public class App extends Application implements Initializable {
             primaryStage.setY(e.getScreenY() - dragStartY);
         });
 
+        // 画面更新のサービスを起動
         TimerService timerService = new TimerService();
         timerService.restart();
 
