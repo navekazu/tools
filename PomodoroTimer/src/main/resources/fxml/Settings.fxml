@@ -1,19 +1,40 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.*?>
 <?import javafx.geometry.*?>
 <?import java.lang.*?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 
 <BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
           <Tab text="General">
-            <content>
-              <AnchorPane minHeight="0.0" minWidth="0.0" prefHeight="180.0" prefWidth="200.0" />
-            </content>
+               <content>
+                  <FlowPane>
+                     <children>
+                        <FlowPane style="-fx-border-color: black; -fx-border-insets: 10px;">
+                           <children>
+                              <Label text="Label" />
+                              <RadioButton mnemonicParsing="false" text="RadioButton" />
+                              <RadioButton mnemonicParsing="false" text="RadioButton" />
+                              <Pane prefHeight="200.0" prefWidth="200.0" />
+                           </children>
+                        </FlowPane>
+                        <StackPane>
+                           <children>
+                              <FlowPane prefHeight="200.0" prefWidth="200.0">
+                                 <children>
+                                    <Label text="Label" />
+                                 </children>
+                              </FlowPane>
+                              <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: black; -fx-border-insets: 10px;" />
+                           </children>
+                        </StackPane>
+                     </children>
+                  </FlowPane>
+               </content>
           </Tab>
         </tabs>
       </TabPane>
