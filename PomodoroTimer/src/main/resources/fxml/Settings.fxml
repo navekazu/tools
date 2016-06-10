@@ -12,26 +12,29 @@
         <tabs>
           <Tab text="General">
                <content>
-                  <FlowPane>
+                  <FlowPane orientation="VERTICAL">
                      <children>
-                        <FlowPane style="-fx-border-color: black; -fx-border-insets: 10px;">
+                        <FlowPane>
                            <children>
-                              <Label text="Label" />
-                              <RadioButton mnemonicParsing="false" text="RadioButton" />
-                              <RadioButton mnemonicParsing="false" text="RadioButton" />
-                              <Pane prefHeight="200.0" prefWidth="200.0" />
+                              <Label text="Label">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="15.0" top="5.0" />
+                                 </padding>
+                              </Label>
+                              <RadioButton mnemonicParsing="false" text="RadioButton">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding></RadioButton>
+                              <RadioButton mnemonicParsing="false" text="RadioButton">
+                                 <padding>
+                                    <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                                 </padding></RadioButton>
                            </children>
+                           <padding>
+                              <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
+                           </padding>
                         </FlowPane>
-                        <StackPane>
-                           <children>
-                              <FlowPane prefHeight="200.0" prefWidth="200.0">
-                                 <children>
-                                    <Label text="Label" />
-                                 </children>
-                              </FlowPane>
-                              <Pane prefHeight="200.0" prefWidth="200.0" style="-fx-border-color: black; -fx-border-insets: 10px;" />
-                           </children>
-                        </StackPane>
+                        <Separator />
                      </children>
                   </FlowPane>
                </content>
