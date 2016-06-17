@@ -521,6 +521,15 @@ public class MainController extends Application implements Initializable, MainCo
     // クエリを実行する
     @FXML
     private void onExecuteQuery(ActionEvent event) {
+        // クエリ入力欄の内容を書き込む
+        QueryParam param = getQueryParam();
+        WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
+        try {
+            workingQuerySerializer.updateText(param.queryTextArea.getText());
+        } catch (IOException e) {
+            writeLog(e);
+        }
+
         queryExecuteService.restart();
     }
 
@@ -820,10 +829,11 @@ public class MainController extends Application implements Initializable, MainCo
             controller.closeConnection();
 
             try {
-                // アプリケーション設定を書き込む
+                // クエリ入力欄の内容を書き込む
                 WorkingQuerySerializer workingQuerySerializer = new WorkingQuerySerializer();
                 workingQuerySerializer.updateText(controller.queryTextArea.getText());
 
+                // アプリケーション設定を書き込む
                 AppConfigMapper mapper = new AppConfigMapper();
                 List<AppConfig> list = new ArrayList<>();
 
