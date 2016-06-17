@@ -6,7 +6,7 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="500.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="500.0" prefWidth="400.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1">
    <center>
       <TabPane tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER">
         <tabs>
@@ -16,16 +16,16 @@
                      <children>
                         <FlowPane>
                            <children>
-                              <Label text="Label">
+                              <Label text="Mode">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="15.0" top="5.0" />
                                  </padding>
                               </Label>
-                              <RadioButton mnemonicParsing="false" text="RadioButton">
+                              <RadioButton mnemonicParsing="false" text="Clock mode">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding></RadioButton>
-                              <RadioButton mnemonicParsing="false" text="RadioButton">
+                              <RadioButton mnemonicParsing="false" text="Timer mode">
                                  <padding>
                                     <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                                  </padding></RadioButton>
