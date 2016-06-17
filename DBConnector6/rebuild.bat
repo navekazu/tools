@@ -1,4 +1,2 @@
-call mvn clean
-call mvn package
-call mvn javadoc:javadoc
+call mvn clean package javadoc:javadoc
 pause
