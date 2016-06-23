@@ -49,7 +49,6 @@ public class MainController extends Application implements Initializable {
 
     @FXML
     private void onSplit(ActionEvent event) {
-
         // splitCharacterFieldでsplitすると、splitCharacterFieldが消失するのでsplitCharacterFieldがあったら改行コードを入れた文字列を作成する
         StringBuilder builder = new StringBuilder();
         Stream.of(sourceArea.getText().split(""))
