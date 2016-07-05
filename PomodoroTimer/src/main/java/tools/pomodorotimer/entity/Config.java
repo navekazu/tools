@@ -1,7 +1,16 @@
 package tools.pomodorotimer.entity;
 
-/**
- * Created by k_watanabe on 2016/07/05.
- */
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.Builder;
+
+@NoArgsConstructor
+@AllArgsConstructor
+@Data
+@Builder
 public class Config {
+    private double screenX;
+    private double screenY;
+
 }
