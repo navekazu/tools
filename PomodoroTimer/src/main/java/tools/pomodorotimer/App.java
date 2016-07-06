@@ -20,6 +20,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
 import tools.pomodorotimer.entity.Config;
+import tools.pomodorotimer.entity.Mode;
 
 import java.awt.event.WindowEvent;
 import java.io.FileInputStream;
@@ -44,6 +45,7 @@ public class App extends Application implements Initializable {
     private double dragStartY;
 
     private Stage primaryStage;
+    private Mode mode;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
@@ -92,6 +94,11 @@ public class App extends Application implements Initializable {
 
             primaryStage.setX(config.getScreenX());
             primaryStage.setY(config.getScreenY());
+            mode = config.getMode();
+
+            if (mode==null) {
+                mode = Mode.CLOCK_MODE;
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -104,6 +111,7 @@ public class App extends Application implements Initializable {
         Config config = Config.builder()
                 .screenX(primaryStage.getX())
                 .screenY(primaryStage.getY())
+                .mode(mode)
                 .build();
 
         ObjectMapper mapper = new ObjectMapper();

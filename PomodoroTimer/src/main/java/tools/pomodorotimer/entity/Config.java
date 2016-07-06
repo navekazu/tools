@@ -12,5 +12,6 @@ import lombok.experimental.Builder;
 public class Config {
     private double screenX;
     private double screenY;
+    private Mode mode;
 
 }
