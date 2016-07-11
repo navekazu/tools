@@ -14,4 +14,6 @@ public class Config {
     private double screenY;
     private Mode mode;
 
+    private int workTime;
+    private int breakTime;
 }
