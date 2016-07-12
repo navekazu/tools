@@ -112,6 +112,8 @@ public class App extends Application implements Initializable {
                 .screenX(primaryStage.getX())
                 .screenY(primaryStage.getY())
                 .mode(mode)
+                .workTime(25)
+                .breakTime(5)
                 .build();
 
         ObjectMapper mapper = new ObjectMapper();
