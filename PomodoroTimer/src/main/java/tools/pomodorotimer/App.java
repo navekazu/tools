@@ -85,7 +85,6 @@ public class App extends Application implements Initializable {
     }
 
     private void loadConfig(Stage primaryStage) {
-        System.out.println("loadConfig");
         ObjectMapper mapper = new ObjectMapper();
         try {
             Path path = Paths.get(System.getProperty("user.home"), ".PomodoroTimerConfig");
@@ -106,8 +105,6 @@ public class App extends Application implements Initializable {
     }
 
     private void writeConfig(Stage primaryStage) {
-        System.out.println("writeConfig");
-
         Config config = Config.builder()
                 .screenX(primaryStage.getX())
                 .screenY(primaryStage.getY())
