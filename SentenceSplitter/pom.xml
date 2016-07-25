@@ -1,11 +1,11 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>tools.pomodorotimer</groupId>
-  <artifactId>PomodoroTimer</artifactId>
+  <groupId>tools.sentencesplitter</groupId>
+  <artifactId>SentenceSplitter</artifactId>
   <packaging>jar</packaging>
-  <version>0.1</version>
-  <name>PomodoroTimer</name>
+  <version>1.0-SNAPSHOT</version>
+  <name>SentenceSplitter</name>
   <url>http://maven.apache.org</url>
 
   <properties>
@@ -44,11 +44,6 @@
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-simple</artifactId>
       <version>1.7.13</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>2.8.0</version>
     </dependency>
   </dependencies>
 </project>

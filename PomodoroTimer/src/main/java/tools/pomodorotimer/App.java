@@ -1,13 +1,17 @@
 package tools.pomodorotimer;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.concurrent.Service;
 import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.control.Toggle;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
@@ -15,7 +19,17 @@ import javafx.stage.StageStyle;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Label;
+import tools.pomodorotimer.entity.Config;
+import tools.pomodorotimer.entity.Mode;
+
+import java.awt.event.WindowEvent;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.util.*;
 
@@ -30,6 +44,9 @@ public class App extends Application implements Initializable {
     private double dragStartX;
     private double dragStartY;
 
+    private Stage primaryStage;
+    private Mode mode;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
 	    FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/Main.fxml"));
@@ -38,6 +55,7 @@ public class App extends Application implements Initializable {
         primaryStage.setTitle("Pomodoro timer");
         primaryStage.setScene(scene);
         controller = loader.getController();
+        controller.primaryStage = primaryStage;
 
         // 透明にする
         primaryStage.initStyle(StageStyle.TRANSPARENT);
@@ -60,7 +78,50 @@ public class App extends Application implements Initializable {
         TimerService timerService = new TimerService();
         timerService.restart();
 
+        primaryStage.setOnShown(event -> loadConfig(primaryStage));
+        primaryStage.setOnCloseRequest(event -> writeConfig(primaryStage));
+
         primaryStage.show();
+    }
+
+    private void loadConfig(Stage primaryStage) {
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Path path = Paths.get(System.getProperty("user.home"), ".PomodoroTimerConfig");
+            FileInputStream in = new FileInputStream(path.toFile());
+            Config config = mapper.readValue(in, Config.class);
+
+            primaryStage.setX(config.getScreenX());
+            primaryStage.setY(config.getScreenY());
+            mode = config.getMode();
+
+            if (mode==null) {
+                mode = Mode.CLOCK_MODE;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void writeConfig(Stage primaryStage) {
+        Config config = Config.builder()
+                .screenX(primaryStage.getX())
+                .screenY(primaryStage.getY())
+                .mode(mode)
+                .workTime(25)
+                .breakTime(5)
+                .build();
+
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            Path path = Paths.get(System.getProperty("user.home"), ".PomodoroTimerConfig");
+            FileOutputStream out = new FileOutputStream(path.toFile());
+            mapper.writeValue(out, config);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -87,6 +148,7 @@ public class App extends Application implements Initializable {
 
     @FXML
     private void onExit(ActionEvent event) {
+        writeConfig(primaryStage);
         Platform.exit();
     }
 
