@@ -10,10 +10,10 @@ import lombok.experimental.Builder;
 @Data
 @Builder
 public class Config {
-    private double screenX;
-    private double screenY;
-    private Mode mode;
+    private double screenX;     // 初期表示位置(X座標)
+    private double screenY;     // 初期表示位置(Y座標)
+    private Mode mode;          // 動作モード
 
-    private int workTime;
-    private int breakTime;
+    private int workTime;       // 作業時間
+    private int breakTime;      // 休憩時間
 }
