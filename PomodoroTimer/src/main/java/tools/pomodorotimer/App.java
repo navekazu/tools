@@ -110,7 +110,8 @@ public class App extends Application implements Initializable {
                 .screenY(primaryStage.getY())
                 .mode(mode)
                 .workTime(25)
-                .breakTime(5)
+                .shortBreakTime(5)
+                .longBreakTime(30)
                 .build();
 
         ObjectMapper mapper = new ObjectMapper();

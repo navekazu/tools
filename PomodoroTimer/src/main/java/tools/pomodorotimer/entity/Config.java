@@ -15,5 +15,6 @@ public class Config {
     private Mode mode;          // 動作モード
 
     private int workTime;       // 作業時間
-    private int breakTime;      // 休憩時間
+    private int shortBreakTime; // 短い休憩時間
+    private int longBreakTime;  // 長い休憩時間
 }
