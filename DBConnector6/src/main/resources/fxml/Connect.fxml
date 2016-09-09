@@ -126,21 +126,33 @@
                                     <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
                                  </GridPane.margin>
                               </ComboBox>
-                              <TextField fx:id="libraryPathTextField" GridPane.rowIndex="1">
+                              <BorderPane GridPane.rowIndex="1">
+                                 <center>
+                                    <TextField fx:id="libraryPathTextField" BorderPane.alignment="CENTER" />
+                                 </center>
                                  <GridPane.margin>
                                     <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
                                  </GridPane.margin>
-                              </TextField>
+                                 <right>
+                                    <Button fx:id="referenceButton" mnemonicParsing="false" onAction="#onReference" text="..." BorderPane.alignment="CENTER" />
+                                 </right>
+                              </BorderPane>
                               <TextField fx:id="driverTextField" GridPane.rowIndex="2">
                                  <GridPane.margin>
                                     <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
                                  </GridPane.margin>
                               </TextField>
-                              <TextField fx:id="urlTextField" GridPane.rowIndex="3">
+                              <BorderPane GridPane.rowIndex="3">
+                                 <center>
+                                    <TextField fx:id="urlTextField" BorderPane.alignment="CENTER" />
+                                 </center>
                                  <GridPane.margin>
                                     <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />
                                  </GridPane.margin>
-                              </TextField>
+                                 <right>
+                                    <Button fx:id="backslashToSlashButton" mnemonicParsing="false" onAction="#onBackslashToSlash" text="\\ to /" BorderPane.alignment="CENTER" />
+                                 </right>
+                              </BorderPane>
                               <TextField fx:id="userTextField" GridPane.rowIndex="4">
                                  <GridPane.margin>
                                     <Insets bottom="1.0" left="1.0" right="1.0" top="1.0" />

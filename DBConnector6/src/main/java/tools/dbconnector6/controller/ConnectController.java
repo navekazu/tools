@@ -12,6 +12,7 @@ import javafx.scene.input.KeyCode;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
+import javafx.stage.FileChooser;
 import tools.dbconnector6.entity.Connect;
 import tools.dbconnector6.entity.ConnectHistory;
 import tools.dbconnector6.mapper.ConnectHistoryMapper;
@@ -63,6 +64,9 @@ public class ConnectController extends SubController implements Initializable {
 
     // データベース接続した際のエンティティと接続子
     private Connect connect;
+
+    // ファイル選択ダイアログのフォルダ名退避
+    private static File fileChooserInitialDirectory = new File(System.getProperty("user.dir"));
 
     /**
      * コントローラのルート要素が完全に処理された後に、コントローラを初期化するためにコールされます。<br>
@@ -283,6 +287,33 @@ public class ConnectController extends SubController implements Initializable {
 
     ////////////////////////////////////////////////////////////////////////////
     // edit connectTableView event
+
+    // ...ボタンのアクションイベントハンドラ
+    // ファイル参照ダイアログを出してライブラリパスを更新する
+    @FXML
+    private void onReference(ActionEvent event) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Resource File");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JAR Files", "*.jar"));
+        fileChooser.setInitialDirectory(fileChooserInitialDirectory);
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if (selectedFile!=null) {
+            libraryPathTextField.setText(selectedFile.getPath());
+            fileChooserInitialDirectory = selectedFile.getParentFile();
+        }
+    }
+
+    // \to/ボタンのアクションイベントハンドラ
+    // URL欄に入れられたバックスラッシュをスラッシュに置き換える
+    @FXML
+    private void onBackslashToSlash(ActionEvent event) {
+        String url = urlTextField.getText();
+        urlTextField.setText(ConnectController.backslashToSlash(url));
+    }
+
+    static private String backslashToSlash(String value) {
+        return value.replaceAll("\\\\", "/");
+    }
 
     // Addボタンのアクションイベントハンドラ
     // DB接続用に入力した各パラメータを、接続先一覧の末尾に追加する
