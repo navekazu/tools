@@ -4,10 +4,19 @@
 */*.iws
 
 # Maven
-*/log/
-*/logs/
 */target/
-*/testdb/
+
+# Gradle
+.gradle
+!gradle-wrapper.jar
+
+# Maven
+target
 
 # jar
 */*.jar
+
+# project
+*/log/
+*/logs/
+*/testdb/
