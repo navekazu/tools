@@ -2,6 +2,8 @@ package tools.templategenerator;
 
 import org.junit.*;
 
+import static org.junit.Assert.assertTrue;
+
 public class AppTest {
     @BeforeClass
     public static void beforeClass() throws Exception {
@@ -21,5 +23,6 @@ public class AppTest {
 
     @Test
     public void test() {
+        assertTrue(true);
     }
 }
