@@ -7,11 +7,9 @@
 */target/
 
 # Gradle
-.gradle
-!gradle-wrapper.jar
+*/.gradle/
+!*/gradle-wrapper.jar
 
-# Maven
-target
 
 # jar
 */*.jar
