@@ -143,6 +143,16 @@ public class MainController extends Application implements Initializable {
             pomodoroListController = loader.getController();
             pomodoroListStage.initStyle(StageStyle.TRANSPARENT);
             scene.setFill(null);
+            // シーンのドラッグ
+            scene.setOnMousePressed(e -> {
+                dragStartX = e.getSceneX();
+                dragStartY = e.getSceneY();
+            });
+            scene.setOnMouseDragged(e -> {
+                pomodoroListStage.setX(e.getScreenX() - dragStartX);
+                pomodoroListStage.setY(e.getScreenY() - dragStartY);
+            });
+
             pomodoroListStage.show();
         } catch (IOException e) {
             e.printStackTrace();
