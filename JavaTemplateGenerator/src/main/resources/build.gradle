@@ -8,6 +8,6 @@ repositories {
 }
 
 dependencies {
-    compile "org.projectlombok:lombok:"
+    compile "org.projectlombok:lombok:1.14.0"
     testCompile "junit:junit:4.11"
 }
