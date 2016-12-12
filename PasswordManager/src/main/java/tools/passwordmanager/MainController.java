@@ -24,7 +24,6 @@ import javafx.scene.input.MouseButton;
 import javafx.scene.input.MouseEvent;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
-import sun.plugin2.jvm.RemoteJVMLauncher;
 import tools.passwordmanager.model.Pair;
 import tools.passwordmanager.model.TreeData;
 
