@@ -8,6 +8,8 @@
 
 # Gradle
 */.gradle/
+*/build/
+*/gradle/
 !*/gradle-wrapper.jar
 
 
