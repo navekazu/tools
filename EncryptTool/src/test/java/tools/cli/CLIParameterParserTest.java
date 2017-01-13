@@ -26,7 +26,7 @@ public class CLIParameterParserTest {
     }
 
     @Test
-    public void getInputFilesTest() {
+    public void parseUnixStyleTest() {
 
         String[] args = new String[] {
                 "-a", "a-value",
@@ -37,9 +37,39 @@ public class CLIParameterParserTest {
         };
         CLIParameters cliParameters = CLIParameterParser.parseUnixStyle(
                 CLIParameterRule.builder()
-                    .needValueParameters(new String[] {"a", "b"})
-                    .optionOnlyParameters(new String[] {"c", "d", "e", "f"})
-                    .build()
+                        .needValueParameters(new String[] {"a", "b"})
+                        .optionOnlyParameters(new String[] {"c", "d", "e", "f"})
+                        .build()
+                , args
+        );
+        assertEquals(5, cliParameters.options.size());
+        assertEquals("a-value", cliParameters.options.get("a"));
+        assertEquals("b-value", cliParameters.options.get("b"));
+        assertEquals(null, cliParameters.options.get("c"));
+        assertEquals(null, cliParameters.options.get("d"));
+        assertEquals(null, cliParameters.options.get("e"));
+        assertFalse(cliParameters.options.containsKey("f"));
+        assertEquals(3, cliParameters.operands.size());
+        assertEquals("aaa", cliParameters.operands.get(0));
+        assertEquals("bbb", cliParameters.operands.get(1));
+        assertEquals("ccc", cliParameters.operands.get(2));
+    }
+
+    @Test
+    public void parseWindowsStyleTest() {
+
+        String[] args = new String[] {
+                "/a", "a-value",
+                "/b", "b-value",
+                "/c",
+                "/de",
+                "aaa", "bbb", "ccc"
+        };
+        CLIParameters cliParameters = CLIParameterParser.parseWindowsStyle(
+                CLIParameterRule.builder()
+                        .needValueParameters(new String[] {"a", "b"})
+                        .optionOnlyParameters(new String[] {"c", "d", "e", "f"})
+                        .build()
                 , args
         );
         assertEquals(5, cliParameters.options.size());
