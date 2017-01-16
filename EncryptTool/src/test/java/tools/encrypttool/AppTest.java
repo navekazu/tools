@@ -10,6 +10,7 @@ import java.nio.file.Paths;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AppTest {
 
@@ -108,6 +109,25 @@ public class AppTest {
         assertEquals(true, encryptTool.update(Cipher.ENCRYPT_MODE, "sample_plain.txt", "password", "sample_encrypt.txt"));
         assertEquals(true, encryptTool.update(Cipher.DECRYPT_MODE, "sample_encrypt.txt", "password", "sample_result.txt"));
         assertEquals(true, Arrays.equals(Files.readAllBytes(Paths.get("sample_plain.txt")), Files.readAllBytes(Paths.get("sample_result.txt"))));
+    }
+
+    @Test
+    public void createKeyFileTest() {
+        App encryptTool = new App();
+        encryptTool.createKeyFile("test", App.KEY_FILE_PATH+"_test");
+    }
+
+    @Test
+    public void readKeyFileTest() {
+        App encryptTool = new App();
+        byte[] result = encryptTool.readKeyFile(App.KEY_FILE_PATH+"_test");
+        byte[] answer = new byte[]{
+                (byte)0x9f, (byte)0x86, (byte)0xd0, (byte)0x81, (byte)0x88, (byte)0x4c, (byte)0x7d, (byte)0x65,
+                (byte)0x9a, (byte)0x2f, (byte)0xea, (byte)0xa0, (byte)0xc5, (byte)0x5a, (byte)0xd0, (byte)0x15,
+                (byte)0xa3, (byte)0xbf, (byte)0x4f, (byte)0x1b, (byte)0x2b, (byte)0x0b, (byte)0x82, (byte)0x2c,
+                (byte)0xd1, (byte)0x5d, (byte)0x6c, (byte)0x15, (byte)0xb0, (byte)0xf0, (byte)0x0a, (byte)0x08,
+        };
+        assertTrue(Arrays.equals(answer, result));
     }
 
 }
