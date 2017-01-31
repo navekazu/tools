@@ -1,0 +1,23 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+version = '1.0'
+[compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+configurations {
+    provided
+}
+
+sourceSets {
+    main { compileClasspath += configurations.provided }
+}
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    provided 'org.projectlombok:lombok:1.14.0'
+    compile 'org.slf4j:slf4j-api:1.7.21'
+    testCompile 'junit:junit:4.12'
+}
