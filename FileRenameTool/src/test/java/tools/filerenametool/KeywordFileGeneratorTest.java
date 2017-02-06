@@ -40,6 +40,6 @@ public class KeywordFileGeneratorTest {
             out.newLine();
         }
         KeywordFileGenerator keywordFileGenerator = new KeywordFileGenerator();
-        keywordFileGenerator.generate("generateTest.txt", "keywordTest.txt");
+        keywordFileGenerator.generate(Paths.get("fileRenameTool", "generateTest.txt"), Paths.get("keywordTest.txt"));
     }
 }
