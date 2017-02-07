@@ -32,14 +32,16 @@ public class KeywordFileGeneratorTest {
             out.newLine();
             out.write("some=one");
             out.newLine();
-            out.write("key=キーワード1");
+            out.write("src=キーワード1");
             out.newLine();
             out.write("some=なにか");
             out.newLine();
-            out.write("key=キーワード2");
+            out.write("src=キーワード2");
             out.newLine();
+            out.flush();
         }
         KeywordFileGenerator keywordFileGenerator = new KeywordFileGenerator();
-        keywordFileGenerator.generate(Paths.get("fileRenameTool", "generateTest.txt"), Paths.get("keywordTest.txt"));
+        keywordFileGenerator.generate("generateTest.txt", "keywordTest.txt");
+        Files.delete(Paths.get("generateTest.txt"));
     }
 }
