@@ -1,16 +1,45 @@
 package tools.filerenametool;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FileRenamer {
-    public static void main(String[] args) {
+    List<String> keywordList = new ArrayList<>();
+
+    public static void main(String[] args) throws IOException {
+        if (args.length==0) {
+            System.out.println("usage: java tools.filerenametool.FileRenamer [keywordFile (in app directory)] [target file]...");
+            return ;
+        }
+
+        FileRenamer fileRenamer = new FileRenamer();
+        fileRenamer.readKeywordList(args[0]);
+
+        Arrays.asList(args, 1);
+        for (int i=1; i<args.length; i++) {
+            fileRenamer.execute(args[i]);
+        }
     }
 
+    void execute(String name) throws IOException {
+        Path srcPath = Paths.get(name);
+        if (!isTargetFile(srcPath.getFileName().toString())) {
+            return;
+        }
+
+        Path destPath = Paths.get(srcPath.getParent().toString(), moveBehind(srcPath.getFileName().toString()));
+        Files.move(srcPath, destPath);
+    }
+
+    void readKeywordList(String file) throws IOException {
+        keywordList = Files.readAllLines(Paths.get(FileRenameToolUtil.getToolDirectory().toString(), file), Charset.forName("MS932"));
+    }
 
     private static final Map<String, String> TO_HALF_CHARACTER_TARGET_MAP = new HashMap<>();
     static {
@@ -39,21 +68,70 @@ public class FileRenamer {
         MOVE_BEHIND_CHARACTER_LIST.add("「");
         MOVE_BEHIND_CHARACTER_LIST.add("【");
         MOVE_BEHIND_CHARACTER_LIST.add("～");
-        MOVE_BEHIND_CHARACTER_LIST.add(" ");
     }
     String moveBehind(String name) {
-        FileName fileName = splitName(name);
-
-        for (String key: MOVE_BEHIND_CHARACTER_LIST) {
-        }
-
+        name = toHalfCharacter(name);
+        FileName fileName = splitTitle(splitName(name));
         return String.format("%s %s%s%s%s", fileName.title, fileName.datetime,
                 (fileName.subtitle.isEmpty()? "": " "+fileName.subtitle),
                 (fileName.additionalSubtitle.isEmpty()? "": " "+fileName.additionalSubtitle), fileName.suffix);
     }
-    FileName splitName(String name) {
+
+    FileName splitTitle(FileName fileName) {
+        int index = -1;
+        int keywordIndex = getKeywordIndex(fileName.title);
+        int moveBehindIndex = getMoveBehindIndex(fileName.title);
+        int spaceIndex = fileName.title.indexOf(" ");
+
+        if (keywordIndex!=-1) {
+            index = keywordIndex;
+        } else if (moveBehindIndex!=-1) {
+            index = moveBehindIndex;
+        } else if (spaceIndex!=-1) {
+            index = spaceIndex;
+        }
+
+        if (index==-1) {
+            return fileName;
+        }
+
+        fileName.additionalSubtitle = fileName.title.substring(index).trim();
+        fileName.title = fileName.title.substring(0, index).trim();
+
+        return fileName;
+    }
+
+    int getKeywordIndex(String title) {
+        for (String keyword: keywordList) {
+            if (title.startsWith(keyword)) {
+                return keyword.length();
+            }
+        }
+
+        return -1;
+    }
+
+    int getMoveBehindIndex(String title) {
+        for (String keyword: MOVE_BEHIND_CHARACTER_LIST) {
+            if (title.indexOf(keyword)!=-1) {
+                return title.indexOf(keyword);
+            }
+        }
+
+        return -1;
+    }
+
+    Matcher getRenamerMatcher(String name) {
         Pattern pattern = Pattern.compile("(.*)(\\(\\d{8}-\\d{4}\\))(.*)(\\..*)");
-        Matcher matcher = pattern.matcher(name);
+        return pattern.matcher(name);
+    }
+
+    boolean isTargetFile(String name) {
+        return getRenamerMatcher(name).matches();
+    }
+
+    FileName splitName(String name) {
+        Matcher matcher = getRenamerMatcher(name);
         boolean b = matcher.matches();
         FileName fileName = new FileName();
         fileName.title = matcher.group(1).trim();
