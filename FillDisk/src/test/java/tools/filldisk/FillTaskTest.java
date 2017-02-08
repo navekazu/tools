@@ -25,7 +25,7 @@ public class FillTaskTest {
     public void fillDiskTest() throws IOException {
         FillTask task = FillTaskFactory.createFillTask(FillPattern.BLANK);
         task.eraseDisk("D:\\work");
-        task.fillDisk("D:\\work", 1);
+//        task.fillDisk("D:\\work", 1);
 
     }
 

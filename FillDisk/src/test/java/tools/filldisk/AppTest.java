@@ -24,6 +24,6 @@ public class AppTest {
     @Test
     public void infinityExecuteTest() throws IOException {
         App app = new App();
-        app.infinityExecute("D:\\work");
+//        app.infinityExecute("D:\\work");
     }
 }
