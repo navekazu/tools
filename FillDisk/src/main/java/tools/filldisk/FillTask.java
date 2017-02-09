@@ -47,7 +47,7 @@ public abstract class FillTask {
                         out.write(data);
                     }
                 }
-                dumpHead(filePath.toString());
+//                dumpHead(filePath.toString());
                 loop++;
             }
         } catch (IOException e) {
