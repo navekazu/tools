@@ -1,5 +1,6 @@
 package tools.filldisk;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -39,13 +40,14 @@ public abstract class FillTask {
             while (true) {
                 Path filePath = Paths.get(path, String.format("FillDisk_%06d.fillDiskData", loop));
                 Date date = new Date();
-                System.out.println(String.format("%tF %tT, repeat:%3d, pattern:%s, file:%s", date, date, repeat, filePath.getFileName().toString(), getCurrentPattern().name()));
+                App.log("%tF %tT, repeat:%3d, pattern:%s, file:%s", date, date, repeat, filePath.getFileName().toString(), getCurrentPattern().name());
                 try (BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(filePath))) {
                     for (int i=0; i<WRITE_LOOP; i++) {
                         byte[] data = getWriteData();
                         out.write(data);
                     }
                 }
+                dumpHead(filePath.toString());
                 loop++;
             }
         } catch (IOException e) {
@@ -54,6 +56,20 @@ public abstract class FillTask {
 
     }
     public void dumpHead(String path) {
+        try {
+            try (BufferedInputStream in = new BufferedInputStream(Files.newInputStream(Paths.get(path)))) {
+                byte[] data = new byte[10];
+                in.read(data);
 
+                StringBuilder sb = new StringBuilder();
+                for (byte d: data) {
+                    sb.append(String.format("0x%02X ", d));
+                }
+
+                App.log("Bymary dump %s on %s", sb.toString(), path);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

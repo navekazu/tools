@@ -16,7 +16,7 @@ public class FillTaskRandom extends FillTask {
     public byte[] getWriteData() {
 
         IntStream.range(0, WRITE_SIZE)
-                .forEach(i -> writeData[i] = (byte)(random.nextInt(0x00+1)));
+                .forEach(i -> writeData[i] = (byte)(random.nextInt(0xFF+1)));
 
         return writeData;
     }

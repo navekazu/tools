@@ -22,11 +22,28 @@ public class FillTaskTest {
     }
 
     @Test
-    public void fillDiskTest() throws IOException {
-        FillTask task = FillTaskFactory.createFillTask(FillPattern.BLANK);
+    public void fillDiskBlankTest() throws IOException {
+        FillTask task;
+        task = FillTaskFactory.createFillTask(FillPattern.BLANK);
         task.eraseDisk("D:\\work");
 //        task.fillDisk("D:\\work", 1);
-
     }
+
+    @Test
+    public void fillDiskFillTest() throws IOException {
+        FillTask task;
+        task = FillTaskFactory.createFillTask(FillPattern.FILL);
+        task.eraseDisk("D:\\work");
+//        task.fillDisk("D:\\work", 1);
+    }
+
+    @Test
+    public void fillDiskRandomTest() throws IOException {
+        FillTask task;
+        task = FillTaskFactory.createFillTask(FillPattern.RANDOM);
+        task.eraseDisk("D:\\work");
+//        task.fillDisk("D:\\work", 1);
+    }
+
 
 }
