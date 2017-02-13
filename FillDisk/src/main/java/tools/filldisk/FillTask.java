@@ -40,7 +40,7 @@ public abstract class FillTask {
             while (true) {
                 Path filePath = Paths.get(path, String.format("FillDisk_%06d.fillDiskData", loop));
                 Date date = new Date();
-                App.log("%tF %tT, repeat:%3d, pattern:%s, file:%s", date, date, repeat, filePath.getFileName().toString(), getCurrentPattern().name());
+                App.log("%tF %tT, repeat:%3d, pattern:%s, file:%s in:%s", date, date, repeat, filePath.getFileName().toString(), getCurrentPattern().name(), path.toString());
                 try (BufferedOutputStream out = new BufferedOutputStream(Files.newOutputStream(filePath))) {
                     for (int i=0; i<WRITE_LOOP; i++) {
                         byte[] data = getWriteData();
