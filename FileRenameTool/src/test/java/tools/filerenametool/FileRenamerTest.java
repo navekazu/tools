@@ -2,7 +2,9 @@ package tools.filerenametool;
 
 import org.junit.*;
 
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -108,4 +110,53 @@ public class FileRenamerTest {
             Files.delete(path);
         }
     }
+
+    @Test
+    public void readKeywordListTest() throws IOException {
+        Path path = Paths.get(FileRenameToolUtil.getToolDirectory().toString(), "Keyword.txt");
+        try (BufferedWriter out = Files.newBufferedWriter(path, Charset.forName("MS932"))) {
+            out.write("AAA");
+            out.newLine();
+            out.write("BBB");
+            out.newLine();
+            out.write("   ");                       // 空行は無視される？
+            out.newLine();
+            out.newLine();
+            out.write("#CCC");                      // コメント行は無視される？
+        }
+
+        FileRenamer fileRenamer = new FileRenamer();
+        fileRenamer.readKeywordList("Keyword.txt");
+
+        assertEquals(2, fileRenamer.keywordList.size());
+        assertEquals("AAA", fileRenamer.keywordList.get(0));
+        assertEquals("BBB", fileRenamer.keywordList.get(1));
+    }
+
+    @Test
+    public void readChangeTitleMapTest() throws IOException {
+        Path path = Paths.get(FileRenameToolUtil.getToolDirectory().toString(), "ChangeTitle.txt");
+        try (BufferedWriter out = Files.newBufferedWriter(path, Charset.forName("MS932"))) {
+            out.write("AAA\tAAA AAA");
+            out.newLine();
+            out.write("BBB\t\t\tBBB BBB BBB");
+            out.newLine();
+            out.write("   ");                       // 空行は無視される？
+            out.newLine();                          // 空行は無視される？
+            out.newLine();
+            out.write("CCC");                       // タブで区切っていないのは無視される？
+            out.newLine();
+            out.write("DDD\t\t\tD D\tDD DD");       // タブが多すぎる行は無視される？
+            out.newLine();
+            out.write("#EEE\tEEE EEE");             // コメント行は無視される？
+        }
+
+        FileRenamer fileRenamer = new FileRenamer();
+        fileRenamer.readChangeTitleMap("ChangeTitle.txt");
+
+        assertEquals(2, fileRenamer.changeTitleMap.size());
+        assertEquals("AAA AAA", fileRenamer.changeTitleMap.get("AAA"));
+        assertEquals("BBB BBB BBB", fileRenamer.changeTitleMap.get("BBB"));
+    }
+
 }

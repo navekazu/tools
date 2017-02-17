@@ -8,9 +8,11 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class FileRenamer {
     List<String> keywordList = new ArrayList<>();
+    Map<String, String> changeTitleMap = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         if (args.length==0) {
@@ -20,9 +22,10 @@ public class FileRenamer {
 
         FileRenamer fileRenamer = new FileRenamer();
         fileRenamer.readKeywordList(args[0]);
+        fileRenamer.readChangeTitleMap(args[1]);
 
-        Arrays.asList(args, 1);
-        for (int i=1; i<args.length; i++) {
+//        Arrays.asList(args, 1);
+        for (int i=2; i<args.length; i++) {
             fileRenamer.execute(args[i]);
         }
     }
@@ -38,8 +41,24 @@ public class FileRenamer {
     }
 
     void readKeywordList(String file) throws IOException {
-        keywordList = Files.readAllLines(Paths.get(FileRenameToolUtil.getToolDirectory().toString(), file), Charset.forName("MS932"));
+        keywordList = Files.readAllLines(Paths.get(FileRenameToolUtil.getToolDirectory().toString(), file), Charset.forName("MS932")).stream()
+                .filter(str -> !str.trim().startsWith("#"))     // #から始まる行はコメント行
+                .filter(str -> !str.trim().isEmpty())           // 空行は無視
+                .collect(Collectors.toList());
     }
+
+    void readChangeTitleMap(String file) throws IOException {
+        Files.readAllLines(Paths.get(FileRenameToolUtil.getToolDirectory().toString(), file), Charset.forName("MS932")).stream()
+                .filter(str -> !str.trim().startsWith("#"))     // #から始まる行はコメント行
+                .filter(str -> !str.trim().isEmpty())           // 空行は無視
+                .forEach(str -> {
+                    String[] sp = str.split("\t+");             // タブが一文字以上
+                    if (sp.length==2) {
+                        changeTitleMap.put(sp[0], sp[1]);
+                    }
+                });
+    }
+
 
     private static final Map<String, String> TO_HALF_CHARACTER_TARGET_MAP = new HashMap<>();
     static {
@@ -72,9 +91,17 @@ public class FileRenamer {
     String moveBehind(String name) {
         name = toHalfCharacter(name);
         FileName fileName = splitTitle(splitName(name));
+        fileName.title = changeTitle(fileName.title);
         return String.format("%s %s%s%s%s", fileName.title, fileName.datetime,
                 (fileName.subtitle.isEmpty()? "": " "+fileName.subtitle),
                 (fileName.additionalSubtitle.isEmpty()? "": " "+fileName.additionalSubtitle), fileName.suffix);
+    }
+
+    String changeTitle(String title) {
+        if (!changeTitleMap.containsKey(title)) {
+            return title;
+        }
+        return changeTitleMap.get(title);
     }
 
     FileName splitTitle(FileName fileName) {
