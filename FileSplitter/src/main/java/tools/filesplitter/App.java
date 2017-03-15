@@ -60,6 +60,9 @@ public class App {
                 i++;
                 continue;
             }
+            if ("-bat".equals(args[i]) || "-sh".equals(args[i])) {
+                continue;
+            }
             list.add(args[i]);
         }
 
@@ -113,7 +116,7 @@ public class App {
                         while ((data = in.read()) != -1) {
                             readSize++;
                             out.write(data);
-                            if (readSize % orderSize-1 == 0) {
+                            if (readSize % orderSize == 0) {
                                 break;
                             }
                         }
@@ -130,9 +133,9 @@ public class App {
                     out.println("@rem ");
                     out.println("copy /b ^");
                     for (Path splittedFile : splittedFileList) {
-                        out.println("    " + splittedFile.getFileName() + (splittedFile.equals(splittedFileList.get(splittedFileList.size() - 1)) ? "" : " +") + " ^");
+                        out.println("    \"" + splittedFile.getFileName() + "\"" + (splittedFile.equals(splittedFileList.get(splittedFileList.size() - 1)) ? "" : " +") + " ^");
                     }
-                    out.println("    " + inputFilePath.getFileName());
+                    out.println("    \"" + inputFilePath.getFileName() + "\"");
                 }
             }
             if (createShellFile) {
@@ -140,9 +143,9 @@ public class App {
                     out.println("# ");
                     out.println("cat \\");
                     for (Path splittedFile : splittedFileList) {
-                        out.println("    " + splittedFile.getFileName() + " \\");
+                        out.println("    \"" + splittedFile.getFileName() + "\" \\");
                     }
-                    out.println("    > " + inputFilePath.getFileName());
+                    out.println("    > \"" + inputFilePath.getFileName()+"\"");
                 }
             }
 
