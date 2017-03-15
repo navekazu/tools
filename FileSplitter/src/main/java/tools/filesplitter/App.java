@@ -4,10 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,12 +69,24 @@ public class App {
     public static void main(String[] args) {
         App app = new App();
         long orderSize = app.getOrderSize(args);
+        boolean createBatchFile = app.getCreateBatchFileFlag(args);
+        boolean createShellFile = app.getCreateShellFileFlag(args);
         List<String> list = app.getTargetFileList(args);
+
         list.parallelStream()
-                .forEach(f -> app.splitFile(f, orderSize));
+                .forEach(f -> app.splitFile(f, orderSize, createBatchFile, createShellFile));
     }
 
-    void splitFile(String inputFile, long orderSize) {
+    boolean getCreateBatchFileFlag(String[] args) {
+        return Arrays.asList(args).stream()
+                .anyMatch(p -> "-bat".equals(p.toLowerCase()));
+    }
+    boolean getCreateShellFileFlag(String[] args) {
+        return Arrays.asList(args).stream()
+                .anyMatch(p -> "-sh".equals(p.toLowerCase()));
+    }
+
+    void splitFile(String inputFile, long orderSize, boolean createBatchFile, boolean createShellFile) {
         List<Path> splittedFileList = new ArrayList<>();
 
         try {
@@ -116,21 +125,25 @@ public class App {
             }
 
             // ファイル結合バッチ・シェルの作成
-            try (PrintWriter out = new PrintWriter(Files.newOutputStream(Paths.get(inputFilePath.toString()+".bat")))) {
-                out.println("@rem ");
-                out.println("copy /b ^");
-                for (Path splittedFile: splittedFileList) {
-                    out.println("    " + splittedFile.getFileName() + (splittedFile.equals(splittedFileList.get(splittedFileList.size()-1))? "": " +") + " ^");
+            if (createBatchFile) {
+                try (PrintWriter out = new PrintWriter(Files.newOutputStream(Paths.get(inputFilePath.toString() + ".bat")))) {
+                    out.println("@rem ");
+                    out.println("copy /b ^");
+                    for (Path splittedFile : splittedFileList) {
+                        out.println("    " + splittedFile.getFileName() + (splittedFile.equals(splittedFileList.get(splittedFileList.size() - 1)) ? "" : " +") + " ^");
+                    }
+                    out.println("    " + inputFilePath.getFileName());
                 }
-                out.println("    " + inputFilePath.getFileName());
             }
-            try (PrintWriter out = new PrintWriter(Files.newOutputStream(Paths.get(inputFilePath.toString()+".sh")))) {
-                out.println("# ");
-                out.println("cat \\");
-                for (Path splittedFile: splittedFileList) {
-                    out.println("    " + splittedFile.getFileName() + " \\");
+            if (createShellFile) {
+                try (PrintWriter out = new PrintWriter(Files.newOutputStream(Paths.get(inputFilePath.toString() + ".sh")))) {
+                    out.println("# ");
+                    out.println("cat \\");
+                    for (Path splittedFile : splittedFileList) {
+                        out.println("    " + splittedFile.getFileName() + " \\");
+                    }
+                    out.println("    > " + inputFilePath.getFileName());
                 }
-                out.println("    > " + inputFilePath.getFileName());
             }
 
         } catch (IOException e) {
