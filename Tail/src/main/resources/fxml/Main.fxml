@@ -5,8 +5,18 @@
 <?import javafx.scene.layout.*?>
 
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tools.tail.MainController">
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="tools.tail.controller.MainController">
+   <top>
+      <TextField fx:id="pathField" editable="false" BorderPane.alignment="CENTER" />
+   </top>
+   <bottom>
+      <HBox>
+         <children>
+            <Label fx:id="informationLabel" BorderPane.alignment="CENTER" />
+         </children>
+      </HBox>
+   </bottom>
    <center>
-      <TabPane prefHeight="200.0" prefWidth="200.0" tabClosingPolicy="UNAVAILABLE" BorderPane.alignment="CENTER" />
+      <TextArea fx:id="contentArea" BorderPane.alignment="CENTER" />
    </center>
 </BorderPane>
