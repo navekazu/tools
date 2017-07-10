@@ -96,6 +96,9 @@ public class FileSimpleRenamer {
 
     }
 
+    String convert() {
+        return null;
+    }
     public void main(String[] args) {
 
     }
