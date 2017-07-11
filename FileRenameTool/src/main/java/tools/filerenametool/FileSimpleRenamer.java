@@ -97,7 +97,13 @@ public class FileSimpleRenamer {
     }
 
     String convert(String name) {
-        return null;
+        StringBuilder sb = new StringBuilder();
+
+        for (int i=0; i<name.length(); i++ ) {
+            String ch = name.substring(i, i);
+        }
+
+        return sb.toString();
     }
     public void main(String[] args) {
 
