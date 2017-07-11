@@ -96,7 +96,7 @@ public class FileSimpleRenamer {
 
     }
 
-    String convert() {
+    String convert(String name) {
         return null;
     }
     public void main(String[] args) {
