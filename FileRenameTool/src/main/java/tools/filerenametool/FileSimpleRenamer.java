@@ -1,11 +1,13 @@
 package tools.filerenametool;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class FileSimpleRenamer {
     private static Map<String, String> renameMap = new HashMap<>();
-    private static Map<String, String> repeatMap = new HashMap<>();
+    private static List<String> repeatList = new ArrayList<>();
     static {
         renameMap.put("　", " ");
         renameMap.put("Ａ", "A");
