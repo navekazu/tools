@@ -5,6 +5,7 @@ import java.util.Map;
 
 public class FileSimpleRenamer {
     private static Map<String, String> renameMap = new HashMap<>();
+    private static Map<String, String> repeatMap = new HashMap<>();
     static {
         renameMap.put("　", " ");
         renameMap.put("Ａ", "A");
