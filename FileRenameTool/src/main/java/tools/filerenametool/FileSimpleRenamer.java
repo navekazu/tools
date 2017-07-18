@@ -93,6 +93,8 @@ public class FileSimpleRenamer {
         renameMap.put("］", "]");
         renameMap.put("．", ".");
         renameMap.put("，", ",");
+
+        repeatList.add(" ");
     }
 
     public void exec() {
