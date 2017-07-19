@@ -1,9 +1,6 @@
 package tools.filerenametool;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class FileSimpleRenamer {
     private static Map<String, String> renameMap = new HashMap<>();
@@ -97,8 +94,9 @@ public class FileSimpleRenamer {
         repeatList.add(" ");
     }
 
-    public void exec() {
-
+    public void exec(String[] files) {
+        Arrays.stream(files)
+                .forEach(f -> convert(f));
     }
 
     String convert(String name) {
