@@ -113,6 +113,7 @@ public class FileSimpleRenamer {
 
         return sb.toString();
     }
+    
     public void main(String[] args) {
         new FileSimpleRenamer().exec(args);
     }
