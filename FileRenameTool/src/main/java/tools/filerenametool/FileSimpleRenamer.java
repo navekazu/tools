@@ -113,7 +113,11 @@ public class FileSimpleRenamer {
 
         return sb.toString();
     }
-    
+
+    String cutRepeat(String name) {
+        return name;
+    }
+
     public void main(String[] args) {
         new FileSimpleRenamer().exec(args);
     }
