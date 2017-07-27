@@ -115,6 +115,7 @@ public class FileSimpleRenamer {
     }
 
     String cutRepeat(String name) {
+        
         return name;
     }
 
