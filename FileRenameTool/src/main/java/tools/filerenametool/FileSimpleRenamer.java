@@ -117,6 +117,10 @@ public class FileSimpleRenamer {
     String cutRepeat(String name) {
         StringBuilder sb = new StringBuilder();
 
+        for (int i=0; i<name.length(); i++ ) {
+
+        }
+
         return sb.toString();
     }
 
