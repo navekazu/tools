@@ -119,7 +119,9 @@ public class FileSimpleRenamer {
         String prev = null;
 
         for (int i=0; i<name.length(); i++ ) {
+            String ch = name.substring(i, i);
 
+            sb.append(ch);
         }
 
         return sb.toString();
