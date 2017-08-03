@@ -120,7 +120,11 @@ public class FileSimpleRenamer {
 
         for (int i=0; i<name.length(); i++ ) {
             String ch = name.substring(i, i);
+            if (ch.equals(prev)) {
+                continue;
+            }
 
+            prev = ch;
             sb.append(ch);
         }
 
