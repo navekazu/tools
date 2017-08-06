@@ -97,6 +97,7 @@ public class FileSimpleRenamer {
     public void exec(String[] files) {
         Arrays.stream(files)
                 .map(f -> convert(f))
+                .map(f -> cutRepeat(f))
                 .forEach(f -> convert(f));
     }
 
