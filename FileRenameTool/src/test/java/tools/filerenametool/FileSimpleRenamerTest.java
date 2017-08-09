@@ -7,4 +7,9 @@ public class FileSimpleRenamerTest {
     public void convertTest() throws Exception {
 
     }
+
+    @Test
+    public void cutRepeatTest() throws Exception {
+
+    }
 }
