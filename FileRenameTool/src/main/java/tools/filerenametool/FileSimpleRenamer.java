@@ -91,6 +91,16 @@ public class FileSimpleRenamer {
         renameMap.put("．", ".");
         renameMap.put("，", ",");
 
+        renameMap.put("一", "1");
+        renameMap.put("二", "2");
+        renameMap.put("三", "3");
+        renameMap.put("四", "4");
+        renameMap.put("五", "5");
+        renameMap.put("六", "6");
+        renameMap.put("七", "7");
+        renameMap.put("八", "8");
+        renameMap.put("九", "9");
+
         repeatList.add(" ");
     }
 
