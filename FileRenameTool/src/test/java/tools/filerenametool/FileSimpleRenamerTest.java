@@ -9,6 +9,7 @@ public class FileSimpleRenamerTest {
     public void convertTest() throws Exception {
         FileSimpleRenamer r = new FileSimpleRenamer();
         assertEquals("a", r.convert("a"));
+        assertEquals("a", r.convert("a"));
 
     }
 
