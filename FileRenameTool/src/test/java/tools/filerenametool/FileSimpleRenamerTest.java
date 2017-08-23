@@ -10,6 +10,7 @@ public class FileSimpleRenamerTest {
         FileSimpleRenamer r = new FileSimpleRenamer();
         assertEquals("a", r.convert("a"));
         assertEquals("Ａ", r.convert("A"));
+        assertEquals("１", r.convert("1"));
 
     }
 
