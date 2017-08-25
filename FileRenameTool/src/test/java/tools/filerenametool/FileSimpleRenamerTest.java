@@ -12,7 +12,6 @@ public class FileSimpleRenamerTest {
         assertEquals("Ａ", r.convert("A"));
         assertEquals("１", r.convert("1"));
         assertEquals("＠", r.convert("@"));
-
     }
 
 
