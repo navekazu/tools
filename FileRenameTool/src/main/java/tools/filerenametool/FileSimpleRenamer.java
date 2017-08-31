@@ -115,11 +115,11 @@ public class FileSimpleRenamer {
         StringBuilder sb = new StringBuilder();
 
         for (int i=0; i<name.length(); i++ ) {
-            String ch = name.substring(i, i);
+            String ch = name.substring(i, i+1);
             if (renameMap.containsKey(ch)) {
                 ch = renameMap.get(ch);
             }
-            sb.append(renameMap.get(ch));
+            sb.append(ch);
         }
 
         return sb.toString();
