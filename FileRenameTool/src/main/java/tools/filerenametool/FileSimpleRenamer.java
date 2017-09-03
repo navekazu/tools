@@ -142,6 +142,10 @@ public class FileSimpleRenamer {
         return sb.toString();
     }
 
+    void rename(String file) {
+
+    }
+
     public void main(String[] args) {
         new FileSimpleRenamer().exec(args);
     }
