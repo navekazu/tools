@@ -21,4 +21,9 @@ public class FileSimpleRenamerTest {
         FileSimpleRenamer r = new FileSimpleRenamer();
         assertEquals(" ", r.cutRepeat("  "));
     }
+
+    @Test
+    public void renameTest() throws Exception {
+
+    }
 }
