@@ -26,6 +26,5 @@ public class FileSimpleRenamerTest {
     public void renameTest() throws Exception {
         FileSimpleRenamer r = new FileSimpleRenamer();
         r.rename("aaaa.txt");
-        r.rename("ａaaa.txt");
     }
 }
