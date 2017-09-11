@@ -27,6 +27,5 @@ public class FileSimpleRenamerTest {
         FileSimpleRenamer r = new FileSimpleRenamer();
         r.rename("aaaa.txt");
         r.rename("ａaaa.txt");
-
     }
 }
