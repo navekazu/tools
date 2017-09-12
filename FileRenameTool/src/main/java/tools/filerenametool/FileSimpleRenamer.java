@@ -1,5 +1,6 @@
 package tools.filerenametool;
 
+import java.io.File;
 import java.util.*;
 
 public class FileSimpleRenamer {
@@ -142,8 +143,8 @@ public class FileSimpleRenamer {
         return sb.toString();
     }
 
-    void rename(String file) {
-
+    void rename(String fileName) {
+        File file = new File(fileName);
     }
 
     public void main(String[] args) {
