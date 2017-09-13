@@ -145,6 +145,10 @@ public class FileSimpleRenamer {
 
     void rename(String fileName) {
         File file = new File(fileName);
+
+        if (!file.exists()) {
+            return;
+        }
     }
 
     public void main(String[] args) {
