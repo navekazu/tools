@@ -149,7 +149,7 @@ public class FileSimpleRenamer {
         if (!file.exists()) {
             return;
         }
-        
+
     }
 
     public void main(String[] args) {
