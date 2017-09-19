@@ -8,15 +8,15 @@ public class FileRenameSuite {
     };
 
     public FileRenameSuite() {
-        execute();
     }
 
-    private void execute() {
+    public void execute() {
         Arrays.asList(fileRenamerInterfaces)
                 .forEach(f -> f.toString());
     }
 
     public static void main(String[] args) {
-
+        FileRenameSuite suite = new FileRenameSuite();
+        suite.execute();
     }
 }
