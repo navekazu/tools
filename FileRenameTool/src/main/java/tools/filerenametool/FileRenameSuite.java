@@ -10,13 +10,13 @@ public class FileRenameSuite {
     public FileRenameSuite() {
     }
 
-    public void execute() {
+    public void execute(String[] args) {
         Arrays.asList(fileRenamerInterfaces)
                 .forEach(f -> f.toString());
     }
 
     public static void main(String[] args) {
         FileRenameSuite suite = new FileRenameSuite();
-        suite.execute();
+        suite.execute(args);
     }
 }
