@@ -11,7 +11,8 @@ public class FileRenameSuite {
     }
 
     public void execute(String[] args) {
-        Arrays.asList(fileRenamerInterfaces)
+        Arrays.asList(fileRenamerInterfaces).stream()
+                .filter(f -> Arrays.asList(args).stream().anyMatch(arg -> arg.equals(f.getName())))
                 .forEach(f -> f.toString());
     }
 
