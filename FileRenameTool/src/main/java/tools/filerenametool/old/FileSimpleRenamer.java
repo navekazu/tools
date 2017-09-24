@@ -1,4 +1,4 @@
-package tools.filerenametool;
+package tools.filerenametool.old;
 
 import java.io.File;
 import java.util.*;

@@ -1,4 +1,4 @@
-package tools.filerenametool;
+package tools.filerenametool.old;
 
 import org.junit.*;
 

@@ -1,6 +1,7 @@
-package tools.filerenametool;
+package tools.filerenametool.old;
 
 import org.junit.Test;
+import tools.filerenametool.old.FileSimpleRenamer;
 
 import static org.junit.Assert.assertEquals;
 
