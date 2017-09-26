@@ -19,6 +19,5 @@ public class FileRenameSuite {
     public static void main(String[] args) {
         FileRenameSuite suite = new FileRenameSuite();
         suite.execute(args);
-
     }
 }
