@@ -5,4 +5,9 @@ public class SmallCharacterRenamer implements FileRenamerInterface {
     public String getName() {
         return "SmallCharacterRenamer";
     }
+
+    @Override
+    public void execute() {
+        
+    }
 }
