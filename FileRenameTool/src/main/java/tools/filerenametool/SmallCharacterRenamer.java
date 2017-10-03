@@ -1,5 +1,7 @@
 package tools.filerenametool;
 
+import java.io.File;
+
 public class SmallCharacterRenamer implements FileRenamerInterface {
     @Override
     public String getName() {
@@ -7,7 +9,7 @@ public class SmallCharacterRenamer implements FileRenamerInterface {
     }
 
     @Override
-    public void execute() {
-        
+    public File execute(File file) {
+        return null;
     }
 }
