@@ -18,7 +18,8 @@ public class FileRenameSuite {
                     Arrays.asList(fileRenamerInterfaces).stream()
                             // いまは全部実行
 //                .filter(f -> Arrays.asList(args).stream().anyMatch(arg -> arg.equals(f.getName())))
-                            .forEach(f -> f.execute(arg));
+                            .map(f -> f.execute(arg))
+                            .forEach(f -> System.out.println(f.toString()));
                 });
     }
 
