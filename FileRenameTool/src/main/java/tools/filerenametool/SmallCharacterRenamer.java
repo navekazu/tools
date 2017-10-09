@@ -90,7 +90,7 @@ public class SmallCharacterRenamer implements FileRenamerInterface {
         renameMap.put("＠", "@");
         renameMap.put("［", "[");
         renameMap.put("］", "]");
-        renameMap.put("．", ".");
+//        renameMap.put("．", ".");
         renameMap.put("，", ",");
 
         renameMap.put("一", "1");
