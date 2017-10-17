@@ -6,6 +6,7 @@ public class SubtitleFormatter implements FileRenamerInterface {
     private String[] formatTarget = new String[] {
             " ",
             "【",
+            "[",
     };
 
     @Override
