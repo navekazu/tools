@@ -18,6 +18,9 @@ public class SubtitleFormatter implements FileRenamerInterface {
     @Override
     public File execute(File file) {
         String name = file.getName();
+        int middleBegin;
+        int middleEnd;
+
         return null;
     }
 }
