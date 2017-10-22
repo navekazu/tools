@@ -21,6 +21,13 @@ public class SubtitleFormatter implements FileRenamerInterface {
         int middleBegin;
         int middleEnd;
 
+        for (String s: formatTarget) {
+            middleBegin = name.indexOf(s);
+            if (middleBegin != -1) {
+                break;
+            }
+        }
+
         return null;
     }
 }
