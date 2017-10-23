@@ -30,4 +30,17 @@ public class SubtitleFormatter implements FileRenamerInterface {
 
         return null;
     }
+
+    int getIndex(String name, String[] arr) {
+        int i = -1;
+
+        for (String s: arr) {
+            i = name.indexOf(s);
+            if (i != -1) {
+                break;
+            }
+        }
+
+        return i;
+    }
 }
