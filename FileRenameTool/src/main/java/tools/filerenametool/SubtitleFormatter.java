@@ -7,6 +7,7 @@ public class SubtitleFormatter implements FileRenamerInterface {
             " ",
             "【",
             "[",
+            "「",
     };
 
     @Override
