@@ -1,6 +1,7 @@
 package tools.filerenametool;
 
 import java.io.File;
+import java.util.List;
 
 public class SubtitleFormatter implements FileRenamerInterface {
     private String[] formatTarget = new String[] {
@@ -42,5 +43,9 @@ public class SubtitleFormatter implements FileRenamerInterface {
         }
 
         return i;
+    }
+
+    List<String> getExistList() {
+       return null;
     }
 }
