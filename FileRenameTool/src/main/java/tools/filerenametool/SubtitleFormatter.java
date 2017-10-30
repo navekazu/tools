@@ -16,6 +16,7 @@ public class SubtitleFormatter implements FileRenamerInterface {
         return null;
     }
 
+
     @Override
     public File execute(File file) {
         String name = file.getName();
@@ -45,7 +46,7 @@ public class SubtitleFormatter implements FileRenamerInterface {
         return i;
     }
 
-    
+
     List<String> getExistList() {
        return null;
     }
