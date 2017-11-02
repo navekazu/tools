@@ -12,7 +12,6 @@ public class SubtitleFormatter implements FileRenamerInterface {
             "[",
     };
 
-    
     @Override
     public String getName() {
         return "SubtitleFormatter";
