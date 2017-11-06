@@ -12,6 +12,10 @@ public class SubtitleFormatter implements FileRenamerInterface {
             "[",
     };
 
+    private String[] endTarget = new String[] {
+            "(",
+    };
+
     @Override
     public String getName() {
         return "SubtitleFormatter";
@@ -20,24 +24,26 @@ public class SubtitleFormatter implements FileRenamerInterface {
     @Override
     public File execute(File file) {
         String name = file.getName();
-        int middleBegin;
-        int middleEnd;
+        int middleBegin = getIndex(name, formatTarget, true);
+        int middleEnd = getIndex(name, endTarget, false);
 
+/*
         for (String s: formatTarget) {
             middleBegin = name.indexOf(s);
             if (middleBegin != -1) {
                 break;
             }
         }
-
+*/
         return null;
     }
 
-    int getIndex(String name, String[] arr) {
+    int getIndex(String name, String[] arr, boolean findFromBegin) {
         int i = -1;
 
         for (String s: arr) {
-            i = name.indexOf(s);
+            i = findFromBegin? name.indexOf(s): name.lastIndexOf(s);
+
             if (i != -1) {
                 break;
             }
