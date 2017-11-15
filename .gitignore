@@ -12,6 +12,9 @@
 */gradle/
 !*/gradle-wrapper.jar
 
+# Pure java
+*/classes/
+
 
 # jar
 */*.jar
