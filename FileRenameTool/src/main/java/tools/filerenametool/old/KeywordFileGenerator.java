@@ -1,4 +1,4 @@
-package tools.filerenametool;
+package tools.filerenametool.old;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,12 +8,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class KeywordFileGenerator {
     public static void main(String[] args) throws IOException {
         if (args.length!=2) {
-            System.out.println("usage: java tools.filerenametool.KeywordFileGenerator [inFile] [outFile (in app directory)]");
+            System.out.println("usage: java tools.filerenametool.old.KeywordFileGenerator [inFile] [outFile (in app directory)]");
             return ;
         }
         KeywordFileGenerator app = new KeywordFileGenerator();

@@ -1,6 +1,8 @@
-package tools.filerenametool;
+package tools.filerenametool.old;
 
 import org.junit.*;
+import tools.filerenametool.old.FileRenameToolUtil;
+import tools.filerenametool.old.FileRenamer;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

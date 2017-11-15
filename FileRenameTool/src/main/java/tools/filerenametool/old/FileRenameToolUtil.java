@@ -1,4 +1,4 @@
-package tools.filerenametool;
+package tools.filerenametool.old;
 
 import java.io.IOException;
 import java.nio.file.Files;

@@ -1,4 +1,4 @@
-package tools.filerenametool;
+package tools.filerenametool.old;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -16,7 +16,7 @@ public class FileRenamer {
 
     public static void main(String[] args) throws IOException {
         if (args.length==0) {
-            System.out.println("usage: java tools.filerenametool.FileRenamer [keywordFile (in app directory)] [target file]...");
+            System.out.println("usage: java tools.filerenametool.old.FileRenamer [keywordFile (in app directory)] [target file]...");
             return ;
         }
 
