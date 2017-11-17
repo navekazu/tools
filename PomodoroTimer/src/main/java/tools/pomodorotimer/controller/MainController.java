@@ -153,7 +153,7 @@ public class MainController extends Application implements Initializable {
                 pomodoroListStage.setY(e.getScreenY() - dragStartY);
             });
 
-            pomodoroListStage.show();
+//            pomodoroListStage.show();
         } catch (IOException e) {
             e.printStackTrace();
         }
