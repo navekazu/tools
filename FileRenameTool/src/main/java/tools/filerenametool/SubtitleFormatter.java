@@ -9,7 +9,6 @@ public class SubtitleFormatter implements FileRenamerInterface {
             "【",
             "[",
             "「",
-            "[",
     };
 
     private String[] endTarget = new String[] {
