@@ -1,3 +1,4 @@
+type nul>"test_file\file_name@ (20170101-0101).ts"
 type nul>"test_file\file_name (20170101-0101).ts"
 type nul>"test_file\file_name sub title (20170101-0101).ts"
 type nul>"test_file\file_nameysub titlez(20170101-0101).ts"
