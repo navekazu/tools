@@ -5,7 +5,7 @@ import java.util.Arrays;
 
 public class FileRenameSuite {
     private FileRenamerInterface[] fileRenamerInterfaces = new FileRenamerInterface[]{
-
+        new SmallCharacterRenamer(),
     };
 
     public FileRenameSuite() {
