@@ -14,12 +14,16 @@ public class FileRenameSuite {
     public void execute(String[] args) {
         Arrays.asList(args).stream()
                 .map(arg -> new File(arg))
-                .forEach(arg -> {
-                    Arrays.asList(fileRenamerInterfaces).stream()
-                            // いまは全部実行
-//                .filter(f -> Arrays.asList(args).stream().anyMatch(arg -> arg.equals(f.getName())))
-                            .map(f -> f.execute(arg))
-                            .forEach(f -> System.out.println(f.toString()));
+                .forEach(file -> {
+
+
+
+
+//                    Arrays.asList(fileRenamerInterfaces).stream()
+//                            // いまは全部実行
+////                .filter(f -> Arrays.asList(args).stream().anyMatch(arg -> arg.equals(f.getName())))
+//                            .map(f -> f.execute(arg))
+//                            .forEach(f -> System.out.println(f.toString()));
                 });
     }
 
