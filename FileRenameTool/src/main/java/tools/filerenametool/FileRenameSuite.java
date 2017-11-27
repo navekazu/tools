@@ -11,6 +11,10 @@ public class FileRenameSuite {
     public FileRenameSuite() {
     }
 
+    private void logging() {
+
+    }
+
     public void execute(String[] args) {
         Arrays.asList(args).stream()
                 .map(arg -> new File(arg))
