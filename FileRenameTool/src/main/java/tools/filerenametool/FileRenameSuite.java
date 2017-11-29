@@ -11,7 +11,7 @@ public class FileRenameSuite {
     public FileRenameSuite() {
     }
 
-    private void logging() {
+    private void logging(String message, String ... args) {
 
     }
 
