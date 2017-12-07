@@ -1,0 +1,1 @@
+select foo.aaa from foo inner join bar on foo.aaa=bar.aaa where foo.aaa = 100 group by foo.bbb = 10 having count(foo.aaa)>=2 order by foo.aaa asc
