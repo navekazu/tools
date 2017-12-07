@@ -66,7 +66,7 @@ public class App {
 
         for (String keyword: keywords) {
             for (int i = 0; i < sb.length()-keyword.length(); i++) {
-                if (sb.substring(i).startsWith(keyword)) {
+                if (sb.substring(i).toLowerCase().startsWith(keyword)) {
                     int indentCount = 0;
 
                     for (int j = 0; j < indentSize; j++) {
