@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">Mark sheet accumulator</string>
+
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+
+    <string name="action_settings">Settings</string>
+
+    <string name="marksheet_config_ok">OK</string>
+    <string name="marksheet_config_cancel">Cancel</string>
+
+    <string-array name="marksheet_config_question_options">
+        <item>A, B, C ...</item>
+        <item>1, 2, 3 ...</item>
+        <item>ア, イ, ウ ...</item>
+    </string-array>
+</resources>
