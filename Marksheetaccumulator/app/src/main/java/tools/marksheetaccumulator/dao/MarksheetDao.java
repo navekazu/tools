@@ -25,13 +25,13 @@ public class MarksheetDao extends BaseDao {
         long memberId = 1;
         long marksheetId;
 
-        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_MEMBER_ID, memberId );                 // メンバーID
-        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_TITLE, marksheetEntity.title);                         // タイトル
+        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_MEMBER_ID, memberId );                        // メンバーID
+        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_TITLE, marksheetEntity.title);                // タイトル
         values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_QUESTION_NUMBER, marksheetEntity.questionNumber);     // 問題数
         values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_QUESTION_OPTIONS, marksheetEntity.questionOptions.getValue());   // 選択肢
-        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_OPTION_NUMBER, marksheetEntity.optionNumber);         // 選択肢数
-//        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_CREATE_DATE = "create_date";                // 作成日時
-//        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_UPDATE_DATE = "update_date";                // 更新日時
+        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_OPTION_NUMBER, marksheetEntity.optionNumber); // 選択肢数
+        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_CREATE_DATE, System.currentTimeMillis());     // 作成日時
+        values.put(MarksheetReaderContract.MarksheetEntry.COLUMN_NAME_UPDATE_DATE, System.currentTimeMillis());     // 更新日時
 
         marksheetId = db.insert(MarksheetReaderContract.MarksheetEntry.TABLE_NAME, null, values);
 
@@ -77,7 +77,7 @@ public class MarksheetDao extends BaseDao {
         entity.questionOptions = QuestionOptions.getQuestionOptions(cursor.getInt(4));
         entity.optionNumber = cursor.getInt(5);
         entity.createDate = new Date(cursor.getLong(6));
-        entity.updateDate = new Date(cursor.getInt(7));
+        entity.updateDate = new Date(cursor.getLong(7));
 
 
         cursor = db.query(QuestionReaderContract.QuestionEntry.TABLE_NAME
@@ -113,7 +113,7 @@ public class MarksheetDao extends BaseDao {
                 , null                              // 条件値
                 , null                              // group by
                 , null                              // having
-                , null);                            // order by
+                , "update_date desc");              // order by
 
         while (cursor.moveToNext()) {
             MarksheetEntity entity = new MarksheetEntity();
@@ -125,7 +125,7 @@ public class MarksheetDao extends BaseDao {
             entity.questionOptions = QuestionOptions.getQuestionOptions(cursor.getInt(4));
             entity.optionNumber = cursor.getInt(5);
             entity.createDate = new Date(cursor.getLong(6));
-            entity.updateDate = new Date(cursor.getInt(7));
+            entity.updateDate = new Date(cursor.getLong(7));
 
             list.add(entity);
         }

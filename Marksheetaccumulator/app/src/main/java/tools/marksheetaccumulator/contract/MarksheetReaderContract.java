@@ -16,8 +16,8 @@ public final class MarksheetReaderContract extends BaseContract {
                 .column(MarksheetEntry.COLUMN_NAME_QUESTION_NUMBER, BaseContract.NUMBER_TYPE, true, null)
                 .column(MarksheetEntry.COLUMN_NAME_QUESTION_OPTIONS, BaseContract.NUMBER_TYPE, true, null)
                 .column(MarksheetEntry.COLUMN_NAME_OPTION_NUMBER, BaseContract.NUMBER_TYPE, true, null)
-                .column(MarksheetEntry.COLUMN_NAME_CREATE_DATE, BaseContract.DATETIME_TYPE, true, "CURRENT_TIMESTAMP")
-                .column(MarksheetEntry.COLUMN_NAME_UPDATE_DATE, BaseContract.DATETIME_TYPE, true, "CURRENT_TIMESTAMP")
+                .column(MarksheetEntry.COLUMN_NAME_CREATE_DATE, BaseContract.NUMBER_TYPE, true, null)
+                .column(MarksheetEntry.COLUMN_NAME_UPDATE_DATE, BaseContract.NUMBER_TYPE, true, null)
                 .build();
     }
 
