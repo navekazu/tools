@@ -39,7 +39,7 @@ public class MarksheetConfigDialog extends DialogFragment {
         // Pass null as the parent view because its going in the dialog layout
         builder .setView(dialogView)
         // Add action buttons
-                .setPositiveButton(R.string.marksheet_config_ok, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         MarksheetEntity entity = new MarksheetEntity();
                         EditText editText;
@@ -76,7 +76,7 @@ public class MarksheetConfigDialog extends DialogFragment {
                         }
                     }
                 })
-                .setNegativeButton(R.string.marksheet_config_cancel, new DialogInterface.OnClickListener() {
+                .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         // User cancelled the dialog
                         getActivity().finish();

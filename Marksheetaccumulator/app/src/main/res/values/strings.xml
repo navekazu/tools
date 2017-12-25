@@ -1,13 +1,14 @@
 <resources>
     <string name="app_name">Mark sheet accumulator</string>
+    <string name="marksheet_avtivity_name">Mark sheet</string>
+
+    <string name="ok">OK</string>
+    <string name="cancel">Cancel</string>
 
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
 
     <string name="action_settings">Settings</string>
-
-    <string name="marksheet_config_ok">OK</string>
-    <string name="marksheet_config_cancel">Cancel</string>
 
     <string-array name="marksheet_config_question_options">
         <item>A, B, C ...</item>

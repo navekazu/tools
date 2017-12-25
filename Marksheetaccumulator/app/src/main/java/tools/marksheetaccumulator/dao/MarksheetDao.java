@@ -132,4 +132,11 @@ public class MarksheetDao extends BaseDao {
 
         return list;
     }
+
+    public void deleteMarksheet(long id) {
+        db.delete(MarksheetReaderContract.MarksheetEntry.TABLE_NAME
+                , "_id = ?"                         // 条件
+                , new String[]{Long.toString(id)}   // 条件値
+        );
+    }
 }

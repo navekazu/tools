@@ -1,10 +1,12 @@
 package tools.marksheetaccumulator;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -14,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListAdapter;
 import android.widget.ListView;
@@ -44,11 +47,7 @@ public class MainActivity extends AppCompatActivity
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-                Intent intent = new Intent(MainActivity.this, MarksheetActivity.class);
-                intent.putExtra("ID", 1000);
-                startActivity(intent);
+                openNewMarksheetActivity();
             }
         });
 
@@ -64,14 +63,35 @@ public class MainActivity extends AppCompatActivity
         MarksheetDatabaseOpenHelper dbHelper = MarksheetDatabaseOpenHelper.createInstance(getApplicationContext());
         SQLiteDatabase db = dbHelper.getWritableDatabase();
 
+        // setup for ListView
         ListView listView = (ListView)findViewById(R.id.marksheetList);
         MarksheetAdapter adapter = new MarksheetAdapter(getApplicationContext(), marksheetList);
         listView.setAdapter(adapter);
-    }
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                onListViewItemClick(parent, view, position, id);
+            }
+        });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                return onListViewItemLongClick(parent, view, position, id);
+            }
+        });
+
+        setTitle(getString(R.string.app_name));
+      }
 
     @Override
     protected void onStart() {
         super.onStart();
+//        loadMarksheet();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         loadMarksheet();
     }
 
@@ -132,6 +152,11 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private MarksheetAdapter getMarksheetAdapter() {
+        ListView listView = (ListView)findViewById(R.id.marksheetList);
+        return (MarksheetAdapter)listView.getAdapter();
+    }
+
     private void loadMarksheet() {
         MarksheetDatabaseOpenHelper dbHelper = MarksheetDatabaseOpenHelper.getInstance();
         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -143,6 +168,7 @@ public class MainActivity extends AppCompatActivity
 
             marksheetList.clear();
             marksheetList.addAll(list);
+            getMarksheetAdapter().notifyDataSetChanged();
 
         } catch(Exception e) {
             e.printStackTrace();
@@ -150,5 +176,54 @@ public class MainActivity extends AppCompatActivity
         } finally {
             db.endTransaction();
         }
+    }
+
+    private void openNewMarksheetActivity() {
+        openMarksheetActivity(MarksheetActivity.NEW_MARKSHEET_ID);
+    }
+
+    private void openMarksheetActivity(Long id) {
+        Intent intent = new Intent(MainActivity.this, MarksheetActivity.class);
+        intent.putExtra("marksheet_id", id);
+        startActivity(intent);
+    }
+
+    private void onListViewItemClick(AdapterView<?> parent, View view, int position, long id) {
+        MarksheetEntity entity = marksheetList.get(position);
+        openMarksheetActivity(entity.id);
+    }
+
+    private boolean onListViewItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+        MarksheetEntity entity = marksheetList.get(position);
+        final long marksheetId = entity.id;
+        final int listPosition = position;
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+        builder.setMessage("削除しますか？\n"+entity.title)
+                .setTitle("削除確認");
+
+        builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int id) {
+                MarksheetDatabaseOpenHelper dbHelper = MarksheetDatabaseOpenHelper.getInstance();
+                SQLiteDatabase db = dbHelper.getWritableDatabase();
+                try {
+                    db.beginTransaction();
+                    MarksheetDao dao = new MarksheetDao(db);
+                    dao.deleteMarksheet(marksheetId);
+                    db.setTransactionSuccessful();
+
+                    marksheetList.remove(listPosition);
+                    getMarksheetAdapter().notifyDataSetChanged();
+                } finally {
+                    db.endTransaction();
+                }
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+
+        return true;
     }
 }

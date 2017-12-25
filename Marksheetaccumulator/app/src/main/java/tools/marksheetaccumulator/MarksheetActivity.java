@@ -22,23 +22,27 @@ import tools.marksheetaccumulator.entity.MarksheetEntity;
 public class MarksheetActivity extends AppCompatActivity {
 
     private MarksheetEntity marksheetEntity;
+    public static final long NEW_MARKSHEET_ID = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_marksheet);
+        setTitle(getString(R.string.marksheet_avtivity_name));
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-//        Intent intent = getIntent();
-//        this.marksheetId = intent.getIntExtra("ID", 0);
+        Intent intent = getIntent();
+        Long marksheetId = intent.getLongExtra("marksheet_id", -1L);
 
-        if (marksheetEntity==null) {
+        if (marksheetId==NEW_MARKSHEET_ID) {
             DialogFragment marksheetConfigDialog = new MarksheetConfigDialog();
             marksheetConfigDialog.show(getFragmentManager(), "MarksheetConfigDialog");
+        } else {
+            initialMarksheet(marksheetId);
         }
     }
 
@@ -56,6 +60,7 @@ public class MarksheetActivity extends AppCompatActivity {
             db.beginTransaction();
             MarksheetDao dao = new MarksheetDao(db);
             marksheetEntity = dao.getMarksheet(id);
+            setTitle(marksheetEntity.title);
 
             TableLayout marksheetTable = (TableLayout) findViewById(R.id.questionTable);
             for (int i=0; i<marksheetEntity.questionNumber; i++) {
