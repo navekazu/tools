@@ -6,9 +6,12 @@ import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Layout;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
 import android.widget.TextView;
@@ -80,6 +83,7 @@ public class MarksheetActivity extends AppCompatActivity {
         private QuestionEntity questionEntity;
         private TextView resultArea;
         private TextView[] choices;
+        private
 
         public MarksheetRow(int rowIndex, QuestionEntity questionEntity) {
             this.rowIndex = rowIndex;
@@ -88,24 +92,54 @@ public class MarksheetActivity extends AppCompatActivity {
 
         public View createView(Context context) {
             TableRow row = new TableRow(context);
+            TableLayout.LayoutParams layout = new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT);
+            layout.weight = 1.0f;
             row.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT));
 
-            TextView textView = new TextView(context);
-            textView.setText(Integer.toString(rowIndex+1));
-            row.addView(textView);
+            row.addView(createTextView(context, Integer.toString(rowIndex+1), false, 0.0f));
 
-            resultArea = new TextView(context);
-            resultArea.setText("  ");
+            resultArea = createTextView(context, "　", false, 0.0f);
             row.addView(resultArea);
 
             choices = new TextView[marksheetEntity.optionNumber];
             for (int i=0; i<choices.length; i++) {
-                choices[i] = new TextView(context);
-                choices[i].setText(marksheetEntity.questionOptions.getOptionValues()[i]);
+                final int choiceIndex = i;
+                choices[i] = createTextView(context, marksheetEntity.questionOptions.getOptionValues()[i], true, 1.0f);
+                choices[i].setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        markClickEvent(choiceIndex);
+                    }
+                });
                 row.addView(choices[i]);
             }
 
             return row;
+        }
+        private TextView createTextView(Context context, String text, boolean clickable, float weight) {
+            TextView textView = new TextView(context);
+            textView.setText(text);
+            textView.setClickable(clickable);
+
+            TableRow.LayoutParams layout = new TableRow.LayoutParams(
+                    TableRow.LayoutParams.WRAP_CONTENT,
+                    TableRow.LayoutParams.WRAP_CONTENT
+            );
+            layout.weight = weight;
+
+            layout.leftMargin = 3;
+            layout.rightMargin = 3;
+            layout.topMargin = 10;
+            layout.bottomMargin = 10;
+
+            layout.gravity = Gravity.CENTER;
+
+            textView.setLayoutParams(layout);
+
+            return textView;
+        }
+        private void markClickEvent(int index) {
+
         }
     }
 }
