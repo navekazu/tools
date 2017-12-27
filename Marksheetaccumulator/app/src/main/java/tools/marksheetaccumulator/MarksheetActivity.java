@@ -1,23 +1,21 @@
 package tools.marksheetaccumulator;
 
-import android.app.AlertDialog;
 import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
-import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.TableLayout;
-
-import org.w3c.dom.Text;
+import android.widget.TableRow;
+import android.widget.TextView;
 
 import tools.marksheetaccumulator.dao.MarksheetDao;
 import tools.marksheetaccumulator.entity.MarksheetEntity;
+import tools.marksheetaccumulator.entity.QuestionEntity;
 
 public class MarksheetActivity extends AppCompatActivity {
 
@@ -64,9 +62,8 @@ public class MarksheetActivity extends AppCompatActivity {
 
             TableLayout marksheetTable = (TableLayout) findViewById(R.id.questionTable);
             for (int i=0; i<marksheetEntity.questionNumber; i++) {
-                LayoutInflater inflater = (LayoutInflater)getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-                View rowView = inflater.inflate(R.layout.marksheet_row, null);
-                marksheetTable.addView(rowView, new TableLayout.LayoutParams(
+                MarksheetRow marksheetRow = new MarksheetRow(i, marksheetEntity.questionEntityMap.get(i));
+                marksheetTable.addView(marksheetRow.createView(this), new TableLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             }
 
@@ -76,6 +73,39 @@ public class MarksheetActivity extends AppCompatActivity {
         } finally {
             db.endTransaction();
         }
+    }
 
+    private class MarksheetRow {
+        private int rowIndex;
+        private QuestionEntity questionEntity;
+        private TextView resultArea;
+        private TextView[] choices;
+
+        public MarksheetRow(int rowIndex, QuestionEntity questionEntity) {
+            this.rowIndex = rowIndex;
+            this.questionEntity = questionEntity;
+        }
+
+        public View createView(Context context) {
+            TableRow row = new TableRow(context);
+            row.setLayoutParams(new TableLayout.LayoutParams(TableLayout.LayoutParams.MATCH_PARENT, TableLayout.LayoutParams.WRAP_CONTENT));
+
+            TextView textView = new TextView(context);
+            textView.setText(Integer.toString(rowIndex+1));
+            row.addView(textView);
+
+            resultArea = new TextView(context);
+            resultArea.setText("  ");
+            row.addView(resultArea);
+
+            choices = new TextView[marksheetEntity.optionNumber];
+            for (int i=0; i<choices.length; i++) {
+                choices[i] = new TextView(context);
+                choices[i].setText(marksheetEntity.questionOptions.getOptionValues()[i]);
+                row.addView(choices[i]);
+            }
+
+            return row;
+        }
     }
 }

@@ -17,7 +17,6 @@ import tools.marksheetaccumulator.entity.MarksheetEntity;
 public class MarksheetAdapter extends ArrayAdapter<MarksheetEntity> {
 //    private Context context;
 //    private MarksheetEntity[] values;
-    private static final String DATE_PATTERN = "yyyy/MM/dd HH:mm:ss";
 
     public MarksheetAdapter(Context context, List<MarksheetEntity> values) {
         super(context, R.layout.main_row, values);
@@ -29,7 +28,7 @@ public class MarksheetAdapter extends ArrayAdapter<MarksheetEntity> {
     public View getView(int position, View convertView, ViewGroup parent) {
         Context context = getContext();
         MarksheetEntity value = getItem(position);
-        SimpleDateFormat sdf = new SimpleDateFormat(DATE_PATTERN);
+        SimpleDateFormat sdf = new SimpleDateFormat(Constant.DATE_PATTERN);
 
         LayoutInflater inflater = (LayoutInflater) context
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

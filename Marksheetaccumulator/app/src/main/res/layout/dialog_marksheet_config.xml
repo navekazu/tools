@@ -49,14 +49,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <EditText
+            <Spinner
                 android:id="@+id/questionNumber"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:ems="10"
-                android:inputType="number" />
-
+                android:entries="@array/marksheet_config_question_numbers" />
         </TableRow>
 
         <TableRow
@@ -98,13 +96,12 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent">
 
-            <EditText
+            <Spinner
                 android:id="@+id/optionNumber"
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="20dp"
-                android:ems="10"
-                android:inputType="number" />
+                android:entries="@array/marksheet_config_option_numbers" />
         </TableRow>
 
     </TableLayout>

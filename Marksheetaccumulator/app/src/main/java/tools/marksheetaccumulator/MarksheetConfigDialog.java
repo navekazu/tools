@@ -6,13 +6,14 @@ import android.content.DialogInterface;
 import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
 import android.app.DialogFragment;
-import android.text.SpannableStringBuilder;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Spinner;
 
-import org.w3c.dom.Text;
+import java.text.SimpleDateFormat;
+import java.util.Arrays;
+import java.util.Date;
 
 import tools.marksheetaccumulator.dao.MarksheetDao;
 import tools.marksheetaccumulator.entity.MarksheetEntity;
@@ -46,16 +47,16 @@ public class MarksheetConfigDialog extends DialogFragment {
                         Spinner spinner;
 
                         editText = (EditText)dialogView.findViewById(R.id.marksheetTitle);
-                        entity.title = editText.getText().toString();
+                        entity.title = optionValue(editText.getText().toString());
 
-                        editText = (EditText)dialogView.findViewById(R.id.questionNumber);
-                        entity.questionNumber = optionValue(editText.getText().toString(), 30);
+                        spinner = (Spinner)dialogView.findViewById(R.id.questionNumber);
+                        entity.questionNumber = Integer.parseInt((String)spinner.getSelectedItem());
 
                         spinner = (Spinner)dialogView.findViewById(R.id.questionOptions);
                         entity.questionOptions = QuestionOptions.getQuestionOptions(spinner.getSelectedItemId());
 
-                        editText = (EditText)dialogView.findViewById(R.id.optionNumber);
-                        entity.optionNumber = optionValue(editText.getText().toString(), 5);
+                        spinner = (Spinner)dialogView.findViewById(R.id.optionNumber);
+                        entity.optionNumber = Integer.parseInt((String)spinner.getSelectedItem());
 
                         MarksheetDatabaseOpenHelper dbHelper = MarksheetDatabaseOpenHelper.getInstance();
                         SQLiteDatabase db = dbHelper.getWritableDatabase();
@@ -83,9 +84,18 @@ public class MarksheetConfigDialog extends DialogFragment {
                     }
                 });
 
+        // 真ん中（あたり）を選択
+        // 3つの選択肢なら2つ目（インデックス1）
+        // 4つの選択肢なら2つ目（インデックス1）
+        // 5つの選択肢なら3つ目（インデックス2）
+        // 6つの選択肢なら3つ目（インデックス2）
+        for (int id: new int[]{R.id.questionNumber, R.id.optionNumber}) {
+            Spinner spinner = (Spinner) dialogView.findViewById(id);
+            spinner.setSelection((spinner.getCount()-1)/2);
+        }
+
         // Create the AlertDialog object and return it
         return builder.create();
-
     }
 
     @Override
@@ -97,10 +107,11 @@ public class MarksheetConfigDialog extends DialogFragment {
         }
     }
 
-    private int optionValue(String stringValue, int defaultValue) {
-        if (stringValue==null || stringValue.trim().isEmpty()) {
-            return defaultValue;
+    private String optionValue(String value) {
+        if (value==null || value.trim().isEmpty()) {
+            SimpleDateFormat sdf = new SimpleDateFormat(Constant.DATE_PATTERN);
+            return sdf.format(new Date());
         }
-        return Integer.parseInt(stringValue);
+        return value;
     }
 }

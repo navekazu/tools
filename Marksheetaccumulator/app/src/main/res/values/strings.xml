@@ -10,9 +10,24 @@
 
     <string name="action_settings">Settings</string>
 
+    <string-array name="marksheet_config_question_numbers">
+        <item>10</item>
+        <item>30</item>
+        <item>50</item>
+        <item>100</item>
+        <item>300</item>
+        <item>500</item>
+    </string-array>
+
     <string-array name="marksheet_config_question_options">
         <item>A, B, C ...</item>
         <item>1, 2, 3 ...</item>
         <item>ア, イ, ウ ...</item>
+    </string-array>
+
+    <string-array name="marksheet_config_option_numbers">
+        <item>3</item>
+        <item>5</item>
+        <item>10</item>
     </string-array>
 </resources>
