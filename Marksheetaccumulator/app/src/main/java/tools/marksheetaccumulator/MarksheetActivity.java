@@ -4,6 +4,8 @@ import android.app.DialogFragment;
 import android.content.Context;
 import android.content.Intent;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Layout;
@@ -78,12 +80,15 @@ public class MarksheetActivity extends AppCompatActivity {
         }
     }
 
+    private static final int UNSELECTED_COLOR = Color.argb(0, 0, 0, 0);   // 透明
+    private static final int SELECTED_COLOR = Color.argb(20, 255, 0, 0);   // 若干赤（透明度のある赤）
+
     private class MarksheetRow {
         private int rowIndex;
         private QuestionEntity questionEntity;
         private TextView resultArea;
         private TextView[] choices;
-        private
+        private int selectedIndex = -1;
 
         public MarksheetRow(int rowIndex, QuestionEntity questionEntity) {
             this.rowIndex = rowIndex;
@@ -111,6 +116,7 @@ public class MarksheetActivity extends AppCompatActivity {
                         markClickEvent(choiceIndex);
                     }
                 });
+
                 row.addView(choices[i]);
             }
 
@@ -120,6 +126,7 @@ public class MarksheetActivity extends AppCompatActivity {
             TextView textView = new TextView(context);
             textView.setText(text);
             textView.setClickable(clickable);
+            textView.setBackgroundColor(UNSELECTED_COLOR);
 
             TableRow.LayoutParams layout = new TableRow.LayoutParams(
                     TableRow.LayoutParams.WRAP_CONTENT,
@@ -138,8 +145,26 @@ public class MarksheetActivity extends AppCompatActivity {
 
             return textView;
         }
-        private void markClickEvent(int index) {
 
+        private void markClickEvent(int index) {
+            if (selectedIndex==index) {
+                // 選択中のものをクリックしたら未選択に
+                setSelectedIndex(-1);
+                return ;
+            }
+            setSelectedIndex(index);
+        }
+
+        public void setSelectedIndex(int index) {
+            this.selectedIndex = index;
+
+            for (TextView text: choices) {
+                text.setBackgroundColor(UNSELECTED_COLOR);
+            }
+
+            if (index!=-1) {
+                choices[index].setBackgroundColor(SELECTED_COLOR);
+            }
         }
     }
 }
