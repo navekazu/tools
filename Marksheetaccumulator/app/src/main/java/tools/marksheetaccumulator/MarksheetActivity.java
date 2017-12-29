@@ -67,7 +67,7 @@ public class MarksheetActivity extends AppCompatActivity {
 
             TableLayout marksheetTable = (TableLayout) findViewById(R.id.questionTable);
             for (int i=0; i<marksheetEntity.questionNumber; i++) {
-                MarksheetRow marksheetRow = new MarksheetRow(i, marksheetEntity.questionEntityMap.get(i));
+                MarksheetRow marksheetRow = new MarksheetRow(i);
                 marksheetTable.addView(marksheetRow.createView(this), new TableLayout.LayoutParams(
                         ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
             }
@@ -85,14 +85,12 @@ public class MarksheetActivity extends AppCompatActivity {
 
     private class MarksheetRow {
         private int rowIndex;
-        private QuestionEntity questionEntity;
         private TextView resultArea;
         private TextView[] choices;
         private int selectedIndex = -1;
 
-        public MarksheetRow(int rowIndex, QuestionEntity questionEntity) {
+        public MarksheetRow(int rowIndex) {
             this.rowIndex = rowIndex;
-            this.questionEntity = questionEntity;
         }
 
         public View createView(Context context) {
@@ -156,6 +154,7 @@ public class MarksheetActivity extends AppCompatActivity {
         }
 
         public void setSelectedIndex(int index) {
+            // UI更新
             this.selectedIndex = index;
 
             for (TextView text: choices) {
@@ -164,6 +163,48 @@ public class MarksheetActivity extends AppCompatActivity {
 
             if (index!=-1) {
                 choices[index].setBackgroundColor(SELECTED_COLOR);
+            }
+
+            // DB更新
+            MarksheetDatabaseOpenHelper dbHelper = MarksheetDatabaseOpenHelper.getInstance();
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            try {
+                db.beginTransaction();
+                MarksheetDao dao = new MarksheetDao(db);
+
+                if (index == -1) {
+                    dao.deleteQuestion(rowIndex);
+                    marksheetEntity.questionEntityMap.remove(rowIndex);
+
+                } else {
+                    QuestionEntity questionEntity = marksheetEntity.questionEntityMap.get(rowIndex);
+
+                    if (questionEntity==null) {
+                        questionEntity = new QuestionEntity();
+                        questionEntity.questionNo = rowIndex;
+                        questionEntity.memberId;                           // メンバーID
+                        questionEntity.marksheetId;                        // マークシートID
+                        questionEntity.questionNo;                      // 質問番号
+                        questionEntity.choice;                          // 選択肢
+                        questionEntity.rightFlag = false ;
+                    }
+
+                    questionEntity.choice = index;
+
+                    // 更新件数0ならinsert
+                    if (dao.updateQuestion(questionEntity)==0) {
+                        dao.insertQuestion(questionEntity);
+                    }
+
+                }
+
+
+            } catch(Exception e) {
+                e.printStackTrace();
+
+            } finally {
+                db.endTransaction();
             }
         }
     }

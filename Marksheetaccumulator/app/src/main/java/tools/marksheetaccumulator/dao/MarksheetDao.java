@@ -139,4 +139,14 @@ public class MarksheetDao extends BaseDao {
                 , new String[]{Long.toString(id)}   // 条件値
         );
     }
+
+    public void insertQuestion(QuestionEntity questionEntity) {
+
+    }
+    public int updateQuestion(QuestionEntity questionEntity) {
+        return 0;
+    }
+    public void deleteQuestion(int rowIndex) {
+
+    }
 }
