@@ -183,11 +183,9 @@ public class MarksheetActivity extends AppCompatActivity {
                     if (questionEntity==null) {
                         questionEntity = new QuestionEntity();
                         questionEntity.questionNo = rowIndex;
-                        questionEntity.memberId;                           // メンバーID
-                        questionEntity.marksheetId;                        // マークシートID
-                        questionEntity.questionNo;                      // 質問番号
-                        questionEntity.choice;                          // 選択肢
-                        questionEntity.rightFlag = false ;
+                        questionEntity.memberId = marksheetEntity.memberId;
+                        questionEntity.marksheetId = marksheetEntity.id;
+                        questionEntity.rightFlag = false;
                     }
 
                     questionEntity.choice = index;

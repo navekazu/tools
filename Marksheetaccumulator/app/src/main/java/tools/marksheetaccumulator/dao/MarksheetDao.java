@@ -140,13 +140,40 @@ public class MarksheetDao extends BaseDao {
         );
     }
 
+    private ContentValues createContentValues(QuestionEntity questionEntity) {
+        ContentValues values = new ContentValues();
+
+        values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_MEMBER_ID, questionEntity.memberId);
+        values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_MAKRKSHEET_ID, questionEntity.marksheetId);
+        values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_QUESTION_NO, questionEntity.questionNo);
+        values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_CHOICE, questionEntity.choice);
+        values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_RIGHT_FLAG, questionEntity.rightFlag);
+
+        return values;
+    }
+
     public void insertQuestion(QuestionEntity questionEntity) {
+        ContentValues values = createContentValues(questionEntity);
 
+        long id = db.insert(QuestionReaderContract.QuestionEntry.TABLE_NAME, null, values);
+        questionEntity.id = id;
     }
+
     public int updateQuestion(QuestionEntity questionEntity) {
-        return 0;
-    }
-    public void deleteQuestion(int rowIndex) {
+        ContentValues values = createContentValues(questionEntity);
+        values.put(QuestionReaderContract.QuestionEntry._ID, questionEntity.id);
 
+        return db.update(QuestionReaderContract.QuestionEntry.TABLE_NAME
+                , values
+                , "_id = ?"
+                , new String[]{Long.toString(questionEntity.id)}
+         );
+    }
+
+    public int deleteQuestion(int rowIndex) {
+        return db.delete(QuestionReaderContract.QuestionEntry.TABLE_NAME
+                , QuestionReaderContract.QuestionEntry.COLUMN_NAME_QUESTION_NO+" = ?"
+                , new String[]{Long.toString(rowIndex)}
+        );
     }
 }
