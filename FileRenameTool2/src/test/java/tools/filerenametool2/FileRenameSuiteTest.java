@@ -1,4 +1,4 @@
-package tools.filerenametool;
+package tools.filerenametool2;
 
 public class FileRenameSuiteTest {
 }
