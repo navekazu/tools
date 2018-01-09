@@ -11,7 +11,6 @@ public class FileRenameSuite {
     }
 
     private void logging(String message, String ... args) {
-
     }
 
     public void execute(String[] args) {
