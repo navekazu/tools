@@ -118,6 +118,12 @@ public class MarksheetActivity extends AppCompatActivity {
                 row.addView(choices[i]);
             }
 
+            // 選択
+            QuestionEntity questionEntity = marksheetEntity.questionEntityMap.get(rowIndex);
+            if (questionEntity!=null) {
+                updateUI(questionEntity.choice);
+            }
+
             return row;
         }
         private TextView createTextView(Context context, String text, boolean clickable, float weight) {
@@ -155,15 +161,7 @@ public class MarksheetActivity extends AppCompatActivity {
 
         public void setSelectedIndex(int index) {
             // UI更新
-            this.selectedIndex = index;
-
-            for (TextView text: choices) {
-                text.setBackgroundColor(UNSELECTED_COLOR);
-            }
-
-            if (index!=-1) {
-                choices[index].setBackgroundColor(SELECTED_COLOR);
-            }
+            updateUI(index);
 
             // DB更新
             MarksheetDatabaseOpenHelper dbHelper = MarksheetDatabaseOpenHelper.getInstance();
@@ -193,16 +191,28 @@ public class MarksheetActivity extends AppCompatActivity {
                     // 更新件数0ならinsert
                     if (dao.updateQuestion(questionEntity)==0) {
                         dao.insertQuestion(questionEntity);
+                        marksheetEntity.questionEntityMap.put(rowIndex, questionEntity);
                     }
-
                 }
-
+                db.setTransactionSuccessful();
 
             } catch(Exception e) {
                 e.printStackTrace();
 
             } finally {
                 db.endTransaction();
+            }
+        }
+
+        private void updateUI(int index) {
+            this.selectedIndex = index;
+
+            for (TextView text: choices) {
+                text.setBackgroundColor(UNSELECTED_COLOR);
+            }
+
+            if (index!=-1) {
+                choices[index].setBackgroundColor(SELECTED_COLOR);
             }
         }
     }

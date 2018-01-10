@@ -160,6 +160,10 @@ public class MarksheetDao extends BaseDao {
     }
 
     public int updateQuestion(QuestionEntity questionEntity) {
+        if (questionEntity.id==null) {
+            return 0;
+        }
+
         ContentValues values = createContentValues(questionEntity);
         values.put(QuestionReaderContract.QuestionEntry._ID, questionEntity.id);
 
