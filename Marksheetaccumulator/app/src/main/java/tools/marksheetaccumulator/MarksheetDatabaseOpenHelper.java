@@ -1,6 +1,7 @@
 package tools.marksheetaccumulator;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
@@ -10,7 +11,7 @@ import tools.marksheetaccumulator.contract.MemberReaderContract;
 import tools.marksheetaccumulator.contract.QuestionReaderContract;
 
 public class MarksheetDatabaseOpenHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 1;
+    public static final int DATABASE_VERSION = 2;
     public static final String DATABASE_NAME = "MarksheetDatabase.db";
 
     private static MarksheetDatabaseOpenHelper helper = null;
@@ -35,12 +36,36 @@ public class MarksheetDatabaseOpenHelper extends SQLiteOpenHelper {
         db.execSQL(QuestionReaderContract.getCreateEntry());
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL(MarksheetReaderContract.getDropEntry());
-        db.execSQL(MemberReaderContract.getDropEntry());
-        db.execSQL(QuestionReaderContract.getDropEntry());
-        onCreate(db);
+        try {
+            if (oldVersion==1 && newVersion==2) {
+                // 1 -> 2: questionテーブル right_flagの削除、right_noの追加
+                db.execSQL("alter table " + QuestionReaderContract.QuestionEntry.TABLE_NAME +
+                        " rename to temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
+                db.execSQL(QuestionReaderContract.getCreateEntry());
+                db.execSQL("insert into " + QuestionReaderContract.QuestionEntry.TABLE_NAME +
+                        " select _id, member_id, marksheet_id, question_no, choice, null " +
+                        " from temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
+                db.execSQL("drop table temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
     public void onDowngrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         onUpgrade(db, oldVersion, newVersion);
+    }
+
+    private boolean existsColumn(SQLiteDatabase db, String table, String column) {
+        String query = "PRAGMA table_info("+table+")";
+        Cursor cursor = db.rawQuery(query, null);
+
+        while (cursor.moveToNext()) {
+            String name = cursor.getString(1);
+            if (column.equals(name)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

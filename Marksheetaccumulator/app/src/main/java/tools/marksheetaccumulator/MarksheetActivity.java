@@ -26,6 +26,12 @@ public class MarksheetActivity extends AppCompatActivity {
 
     private MarksheetEntity marksheetEntity;
     public static final long NEW_MARKSHEET_ID = -1;
+    private MODE mode = MODE.ANSWERING;
+
+    private enum MODE {
+        ANSWERING,      // 回答中
+        CHECKING,       // 答えの登録中
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,7 +87,9 @@ public class MarksheetActivity extends AppCompatActivity {
     }
 
     private static final int UNSELECTED_COLOR = Color.argb(0, 0, 0, 0);   // 透明
-    private static final int SELECTED_COLOR = Color.argb(20, 255, 0, 0);   // 若干赤（透明度のある赤）
+    private static final int SELECTED_COLOR = Color.argb(20, 0, 0, 255);   // 若干青（透明度のある青）
+    private static final int RIGHT_COLOR = Color.argb(20, 0, 255, 0);   // 若干緑（透明度のある緑）
+    private static final int WRONG_COLOR = Color.argb(20, 255, 0, 0);   // 若干赤（透明度のある赤）
 
     private class MarksheetRow {
         private int rowIndex;
@@ -143,7 +151,7 @@ public class MarksheetActivity extends AppCompatActivity {
             layout.topMargin = 10;
             layout.bottomMargin = 10;
 
-            layout.gravity = Gravity.CENTER;
+            textView.setGravity(Gravity.CENTER);
 
             textView.setLayoutParams(layout);
 
@@ -183,7 +191,7 @@ public class MarksheetActivity extends AppCompatActivity {
                         questionEntity.questionNo = rowIndex;
                         questionEntity.memberId = marksheetEntity.memberId;
                         questionEntity.marksheetId = marksheetEntity.id;
-                        questionEntity.rightFlag = false;
+                        questionEntity.rightNo = null;
                     }
 
                     questionEntity.choice = index;
@@ -196,7 +204,7 @@ public class MarksheetActivity extends AppCompatActivity {
                 }
                 db.setTransactionSuccessful();
 
-            } catch(Exception e) {
+            } catch (Exception e) {
                 e.printStackTrace();
 
             } finally {
@@ -207,13 +215,46 @@ public class MarksheetActivity extends AppCompatActivity {
         private void updateUI(int index) {
             this.selectedIndex = index;
 
+            // 一度クリア
             for (TextView text: choices) {
                 text.setBackgroundColor(UNSELECTED_COLOR);
             }
 
-            if (index!=-1) {
-                choices[index].setBackgroundColor(SELECTED_COLOR);
+            if (index==-1) {
+                return;
             }
+
+
+            int color = UNSELECTED_COLOR;
+
+            switch (mode) {
+                case ANSWERING:
+                    QuestionEntity questionEntity = marksheetEntity.questionEntityMap.get(rowIndex);
+                    if (questionEntity==null) {
+                        color = SELECTED_COLOR;
+                        break;
+                    }
+
+                    if (questionEntity.rightNo==null) {
+                        // 正解登録なし
+                        color = SELECTED_COLOR;
+                    } else {
+                        // 正解登録あり
+                        if (questionEntity.rightNo==index) {
+                            // 正解
+                            color = RIGHT_COLOR;
+                        } else {
+                            // 不正解
+                            color = WRONG_COLOR;
+                        }
+                    }
+                    break;
+                case CHECKING:
+                    color = SELECTED_COLOR;
+                    break;
+            }
+
+            choices[index].setBackgroundColor(color);
         }
     }
 }

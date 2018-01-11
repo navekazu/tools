@@ -8,5 +8,5 @@ public class QuestionEntity implements Serializable {
     public Long marksheetId;                        // マークシートID
     public Integer questionNo;                      // 質問番号
     public Integer choice;                          // 選択肢
-    public Boolean rightFlag;                       // 正解
+    public Integer rightNo;                         // 正解
 }

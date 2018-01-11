@@ -48,7 +48,7 @@ public class MarksheetDao extends BaseDao {
             values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_MAKRKSHEET_ID, marksheetId);                // マークシートID
             values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_QUESTION_NO, questionEntity.questionNo);    // 質問番号
             values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_CHOICE, questionEntity.choice);             // 選択肢
-            values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_RIGHT_FLAG, questionEntity.rightFlag);      // 正解
+            values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_RIGHT_NO, questionEntity.rightNo);          // 正解
             questionEntity.id = db.insert(QuestionReaderContract.QuestionEntry.TABLE_NAME, null, values);
         }
 
@@ -96,7 +96,7 @@ public class MarksheetDao extends BaseDao {
             questionEntity.marksheetId = cursor.getLong(2);
             questionEntity.questionNo = cursor.getInt(3);
             questionEntity.choice = cursor.getInt(4);
-            questionEntity.rightFlag = cursor.getInt(5)==1;
+            questionEntity.rightNo = cursor.isNull(5)? null: cursor.getInt(5);
 
             entity.questionEntityMap.put(questionEntity.questionNo, questionEntity);
         }
@@ -147,7 +147,7 @@ public class MarksheetDao extends BaseDao {
         values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_MAKRKSHEET_ID, questionEntity.marksheetId);
         values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_QUESTION_NO, questionEntity.questionNo);
         values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_CHOICE, questionEntity.choice);
-        values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_RIGHT_FLAG, questionEntity.rightFlag);
+        values.put(QuestionReaderContract.QuestionEntry.COLUMN_NAME_RIGHT_NO, questionEntity.rightNo);
 
         return values;
     }
