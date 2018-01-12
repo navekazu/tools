@@ -1,6 +1,7 @@
 package tools.marksheetaccumulator;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.LayoutRes;
 import android.support.annotation.NonNull;
 import android.view.LayoutInflater;
@@ -38,6 +39,9 @@ public class MarksheetAdapter extends ArrayAdapter<MarksheetEntity> {
 
         mainRowTitle.setText(value.title);
         mainRowUpdateDate.setText(sdf.format(value.updateDate));
+
+        mainRowTitle.setTextColor(Color.BLACK);
+        mainRowUpdateDate.setTextColor(Color.BLACK);
 
         return rowView;
     }
