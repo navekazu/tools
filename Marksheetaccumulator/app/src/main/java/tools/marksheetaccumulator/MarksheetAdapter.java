@@ -37,6 +37,8 @@ public class MarksheetAdapter extends ArrayAdapter<MarksheetEntity> {
         TextView mainRowTitle = (TextView) rowView.findViewById(R.id.mainRowTitle);
         TextView mainRowUpdateDate = (TextView) rowView.findViewById(R.id.mainRowUpdateDate);
 
+        mainRowTitle.setTextAppearance(getContext(), R.style.TextAppearance_AppCompat_Medium);
+
         mainRowTitle.setText(value.title);
         mainRowUpdateDate.setText(sdf.format(value.updateDate));
 
