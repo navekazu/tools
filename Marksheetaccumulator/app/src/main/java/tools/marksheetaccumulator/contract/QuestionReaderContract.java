@@ -14,9 +14,10 @@ public final class QuestionReaderContract extends BaseContract {
                 .column(QuestionEntry.COLUMN_NAME_MEMBER_ID, BaseContract.NUMBER_TYPE, true, null)
                 .column(QuestionEntry.COLUMN_NAME_MAKRKSHEET_ID, BaseContract.NUMBER_TYPE, true, null)
                 .column(QuestionEntry.COLUMN_NAME_QUESTION_NO, BaseContract.NUMBER_TYPE, true, null)
-                .column(QuestionEntry.COLUMN_NAME_CHOICE, BaseContract.NUMBER_TYPE, true, null)
+//                .column(QuestionEntry.COLUMN_NAME_CHOICE, BaseContract.NUMBER_TYPE, true, null)           // ver2:mod
+                .column(QuestionEntry.COLUMN_NAME_CHOICE, BaseContract.NUMBER_TYPE, false, null)            // ver2:mod
 //                .column(QuestionEntry.COLUMN_NAME_RIGHT_FLAG, BaseContract.NUMBER_TYPE, true, null)       // ver2:drop
-                .column(QuestionEntry.COLUMN_NAME_RIGHT_NO, BaseContract.NUMBER_TYPE, false, null)           // ver2:add
+                .column(QuestionEntry.COLUMN_NAME_RIGHT_NO, BaseContract.NUMBER_TYPE, false, null)          // ver2:add
                 .foreignKey("FK_"+QuestionEntry.TABLE_NAME,
                         QuestionEntry.COLUMN_NAME_MAKRKSHEET_ID,
                         MarksheetReaderContract.MarksheetEntry.TABLE_NAME,

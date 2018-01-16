@@ -11,7 +11,7 @@ import tools.marksheetaccumulator.contract.MemberReaderContract;
 import tools.marksheetaccumulator.contract.QuestionReaderContract;
 
 public class MarksheetDatabaseOpenHelper extends SQLiteOpenHelper {
-    public static final int DATABASE_VERSION = 2;
+    public static final int DATABASE_VERSION = 3;
     public static final String DATABASE_NAME = "MarksheetDatabase.db";
 
     private static MarksheetDatabaseOpenHelper helper = null;
@@ -37,7 +37,7 @@ public class MarksheetDatabaseOpenHelper extends SQLiteOpenHelper {
     }
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         try {
-            if (oldVersion==1 && newVersion==2) {
+            if (oldVersion==1) {
                 // 1 -> 2: questionテーブル right_flagの削除、right_noの追加
                 db.execSQL("alter table " + QuestionReaderContract.QuestionEntry.TABLE_NAME +
                         " rename to temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
@@ -46,6 +46,19 @@ public class MarksheetDatabaseOpenHelper extends SQLiteOpenHelper {
                         " select _id, member_id, marksheet_id, question_no, choice, null " +
                         " from temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
                 db.execSQL("drop table temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
+                oldVersion++;
+            }
+
+            if (oldVersion==2) {
+                // 2 -> 3: questionテーブル choiceをNULL不可からNULL許可に（未選択時はレコード削除ではなくNULLにする）
+                db.execSQL("alter table " + QuestionReaderContract.QuestionEntry.TABLE_NAME +
+                        " rename to temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
+                db.execSQL(QuestionReaderContract.getCreateEntry());
+                db.execSQL("insert into " + QuestionReaderContract.QuestionEntry.TABLE_NAME +
+                        " select _id, member_id, marksheet_id, question_no, choice, right_no " +
+                        " from temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
+                db.execSQL("drop table temp_" + QuestionReaderContract.QuestionEntry.TABLE_NAME);
+                oldVersion++;
             }
         } catch (Exception e) {
             e.printStackTrace();
