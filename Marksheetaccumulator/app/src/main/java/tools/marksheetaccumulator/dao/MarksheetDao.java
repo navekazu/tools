@@ -95,7 +95,7 @@ public class MarksheetDao extends BaseDao {
             questionEntity.memberId = cursor.getLong(1);
             questionEntity.marksheetId = cursor.getLong(2);
             questionEntity.questionNo = cursor.getInt(3);
-            questionEntity.choice = cursor.getInt(4);
+            questionEntity.choice = cursor.isNull(4)? null: cursor.getInt(4);
             questionEntity.rightNo = cursor.isNull(5)? null: cursor.getInt(5);
 
             entity.questionEntityMap.put(questionEntity.questionNo, questionEntity);

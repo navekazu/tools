@@ -129,7 +129,7 @@ public class MarksheetActivity extends AppCompatActivity {
             // 選択
             QuestionEntity questionEntity = marksheetEntity.questionEntityMap.get(rowIndex);
             if (questionEntity!=null) {
-                updateUI(questionEntity.choice);
+                updateUI(questionEntity.choice==null? -1: questionEntity.choice);
             }
 
             return row;
@@ -179,28 +179,22 @@ public class MarksheetActivity extends AppCompatActivity {
                 db.beginTransaction();
                 MarksheetDao dao = new MarksheetDao(db);
 
-                if (index == -1) {
-                    dao.deleteQuestion(rowIndex);
-                    marksheetEntity.questionEntityMap.remove(rowIndex);
+                QuestionEntity questionEntity = marksheetEntity.questionEntityMap.get(rowIndex);
 
-                } else {
-                    QuestionEntity questionEntity = marksheetEntity.questionEntityMap.get(rowIndex);
+                if (questionEntity==null) {
+                    questionEntity = new QuestionEntity();
+                    questionEntity.questionNo = rowIndex;
+                    questionEntity.memberId = marksheetEntity.memberId;
+                    questionEntity.marksheetId = marksheetEntity.id;
+                    questionEntity.rightNo = null;
+                }
 
-                    if (questionEntity==null) {
-                        questionEntity = new QuestionEntity();
-                        questionEntity.questionNo = rowIndex;
-                        questionEntity.memberId = marksheetEntity.memberId;
-                        questionEntity.marksheetId = marksheetEntity.id;
-                        questionEntity.rightNo = null;
-                    }
+                questionEntity.choice = (index == -1)? null: index;
 
-                    questionEntity.choice = index;
-
-                    // 更新件数0ならinsert
-                    if (dao.updateQuestion(questionEntity)==0) {
-                        dao.insertQuestion(questionEntity);
-                        marksheetEntity.questionEntityMap.put(rowIndex, questionEntity);
-                    }
+                // 更新件数0ならinsert
+                if (dao.updateQuestion(questionEntity)==0) {
+                    dao.insertQuestion(questionEntity);
+                    marksheetEntity.questionEntityMap.put(rowIndex, questionEntity);
                 }
                 db.setTransactionSuccessful();
 
