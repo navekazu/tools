@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AlertDialog;
+import android.view.ContextMenu;
 import android.view.View;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -73,15 +74,87 @@ public class MainActivity extends AppCompatActivity
                 onListViewItemClick(parent, view, position, id);
             }
         });
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-                return onListViewItemLongClick(parent, view, position, id);
-            }
-        });
+//        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+//            @Override
+//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+//                return onListViewItemLongClick(parent, view, position, id);
+//            }
+//        });
+        registerForContextMenu(listView);
 
         setTitle(getString(R.string.app_name));
-      }
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v,
+                                    ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+
+        switch(v.getId()){
+            case R.id.marksheetList:
+
+//                AdapterView.AdapterContextMenuInfo info =
+//                        (AdapterView.AdapterContextMenuInfo) menuInfo;
+//                String[] a = getBaseContext().getResources().
+//                        getStringArray(R.array.planets_array);
+//                String s = a[info.position];
+//                menu.setHeaderTitle(s);
+
+                getMenuInflater().inflate(R.menu.activity_main_marksheet, menu);
+
+                break;
+        }
+    }
+    @Override
+    public boolean onContextItemSelected(MenuItem item) {
+        AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo) item.getMenuInfo();
+        MarksheetEntity entity = marksheetList.get(info.position);
+
+        switch(item.getItemId()) {
+            case R.id.menu_ansert:
+                openMarksheetActivity(entity.id);
+                break;
+
+            case R.id.menu_register_answer:
+                break;
+
+            case R.id.menu_marksheet_config:
+                break;
+
+            case R.id.menu_delete:
+                final long marksheetId = entity.id;
+                final int listPosition = info.position;
+
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+
+                builder.setMessage("削除しますか？\n" + entity.title)
+                        .setTitle("削除確認");
+
+                builder.setPositiveButton(R.string.ok, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        MarksheetDatabaseOpenHelper dbHelper = MarksheetDatabaseOpenHelper.getInstance();
+                        SQLiteDatabase db = dbHelper.getWritableDatabase();
+                        try {
+                            db.beginTransaction();
+                            MarksheetDao dao = new MarksheetDao(db);
+                            dao.deleteMarksheet(marksheetId);
+                            db.setTransactionSuccessful();
+
+                            marksheetList.remove(listPosition);
+                            getMarksheetAdapter().notifyDataSetChanged();
+                        } finally {
+                            db.endTransaction();
+                        }
+                    }
+                });
+
+                AlertDialog dialog = builder.create();
+                dialog.show();
+                break;
+        }
+
+        return true;
+    }
 
     @Override
     protected void onStart() {
