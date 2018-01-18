@@ -128,9 +128,7 @@ public class MarksheetActivity extends AppCompatActivity {
 
             // 選択
             QuestionEntity questionEntity = marksheetEntity.questionEntityMap.get(rowIndex);
-            if (questionEntity!=null) {
-                updateUI(questionEntity.choice==null? -1: questionEntity.choice);
-            }
+            updateUI(questionEntity);
 
             return row;
         }
@@ -168,8 +166,6 @@ public class MarksheetActivity extends AppCompatActivity {
         }
 
         public void setSelectedIndex(int index) {
-            // UI更新
-            updateUI(index);
 
             // DB更新
             MarksheetDatabaseOpenHelper dbHelper = MarksheetDatabaseOpenHelper.getInstance();
@@ -188,15 +184,22 @@ public class MarksheetActivity extends AppCompatActivity {
                     questionEntity.marksheetId = marksheetEntity.id;
                     questionEntity.rightNo = null;
                 }
-
-                questionEntity.choice = (index == -1)? null: index;
+                if (mode==MODE.ANSWERING) {
+                    questionEntity.choice = (index == -1) ? null : index;
+                } else {
+                    questionEntity.rightNo = (index == -1) ? null : index;
+                }
 
                 // 更新件数0ならinsert
                 if (dao.updateQuestion(questionEntity)==0) {
                     dao.insertQuestion(questionEntity);
                     marksheetEntity.questionEntityMap.put(rowIndex, questionEntity);
                 }
+
                 db.setTransactionSuccessful();
+
+                // UI更新
+                updateUI(questionEntity);
 
             } catch (Exception e) {
                 e.printStackTrace();
@@ -206,15 +209,20 @@ public class MarksheetActivity extends AppCompatActivity {
             }
         }
 
-        private void updateUI(int index) {
-            this.selectedIndex = index;
+        private void updateUI(QuestionEntity entity) {
+            if (entity==null) {
+                return ;
+            }
+
+            Integer index = (mode==MODE.ANSWERING)? entity.choice: entity.rightNo;
+            this.selectedIndex = (index==null)? -1: index;
 
             // 一度クリア
             for (TextView text: choices) {
                 text.setBackgroundColor(UNSELECTED_COLOR);
             }
 
-            if (index==-1) {
+            if (index==null) {
                 return;
             }
 
