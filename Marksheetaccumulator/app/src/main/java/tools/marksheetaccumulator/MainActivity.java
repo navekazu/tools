@@ -74,12 +74,6 @@ public class MainActivity extends AppCompatActivity
                 onListViewItemClick(parent, view, position, id);
             }
         });
-//        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-//            @Override
-//            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
-//                return onListViewItemLongClick(parent, view, position, id);
-//            }
-//        });
         registerForContextMenu(listView);
 
         setTitle(getString(R.string.app_name));
@@ -92,16 +86,7 @@ public class MainActivity extends AppCompatActivity
 
         switch(v.getId()){
             case R.id.marksheetList:
-
-//                AdapterView.AdapterContextMenuInfo info =
-//                        (AdapterView.AdapterContextMenuInfo) menuInfo;
-//                String[] a = getBaseContext().getResources().
-//                        getStringArray(R.array.planets_array);
-//                String s = a[info.position];
-//                menu.setHeaderTitle(s);
-
                 getMenuInflater().inflate(R.menu.activity_main_marksheet, menu);
-
                 break;
         }
     }
