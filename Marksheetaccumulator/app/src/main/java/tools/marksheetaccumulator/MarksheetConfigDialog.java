@@ -114,4 +114,8 @@ public class MarksheetConfigDialog extends DialogFragment {
         }
         return value;
     }
+
+    public void setConfigMode(ConfigMode configMode) {
+        this.configMode = configMode;
+    }
 }
