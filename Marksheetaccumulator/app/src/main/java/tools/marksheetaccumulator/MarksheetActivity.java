@@ -28,7 +28,7 @@ public class MarksheetActivity extends AppCompatActivity {
     public static final long NEW_MARKSHEET_ID = -1;
     private MODE mode = MODE.ANSWERING;
 
-    private enum MODE {
+    public enum MODE {
         ANSWERING,      // 回答中
         CHECKING,       // 答えの登録中
     }

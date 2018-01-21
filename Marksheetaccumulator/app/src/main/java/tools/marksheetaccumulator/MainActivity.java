@@ -97,10 +97,11 @@ public class MainActivity extends AppCompatActivity
 
         switch(item.getItemId()) {
             case R.id.menu_ansert:
-                openMarksheetActivity(entity.id);
+                openMarksheetActivity(entity.id, MarksheetActivity.MODE.ANSWERING);
                 break;
 
             case R.id.menu_register_answer:
+                openMarksheetActivity(entity.id, MarksheetActivity.MODE.CHECKING);
                 break;
 
             case R.id.menu_marksheet_config:
@@ -237,18 +238,20 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void openNewMarksheetActivity() {
-        openMarksheetActivity(MarksheetActivity.NEW_MARKSHEET_ID);
+        openMarksheetActivity(MarksheetActivity.NEW_MARKSHEET_ID,
+                        MarksheetActivity.MODE.ANSWERING);
     }
 
-    private void openMarksheetActivity(Long id) {
+    private void openMarksheetActivity(Long id, MarksheetActivity.MODE mode) {
         Intent intent = new Intent(MainActivity.this, MarksheetActivity.class);
         intent.putExtra("marksheet_id", id);
+        intent.putExtra("mode", mode);
         startActivity(intent);
     }
 
     private void onListViewItemClick(AdapterView<?> parent, View view, int position, long id) {
         MarksheetEntity entity = marksheetList.get(position);
-        openMarksheetActivity(entity.id);
+        openMarksheetActivity(entity.id, MarksheetActivity.MODE.ANSWERING);
     }
 
     private boolean onListViewItemLongClick(AdapterView<?> parent, View view, int position, long id) {
