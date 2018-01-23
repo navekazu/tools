@@ -132,6 +132,7 @@ public class MarksheetActivity extends AppCompatActivity {
 
             return row;
         }
+
         private TextView createTextView(Context context, String text, boolean clickable, float weight) {
             TextView textView = new TextView(context);
             textView.setText(text);
