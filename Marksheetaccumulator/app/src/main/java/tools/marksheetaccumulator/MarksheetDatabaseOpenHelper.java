@@ -68,6 +68,7 @@ public class MarksheetDatabaseOpenHelper extends SQLiteOpenHelper {
         onUpgrade(db, oldVersion, newVersion);
     }
 
+/*
     private boolean existsColumn(SQLiteDatabase db, String table, String column) {
         String query = "PRAGMA table_info("+table+")";
         Cursor cursor = db.rawQuery(query, null);
@@ -81,4 +82,5 @@ public class MarksheetDatabaseOpenHelper extends SQLiteOpenHelper {
 
         return false;
     }
+*/
 }
