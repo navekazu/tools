@@ -86,6 +86,7 @@ public class MarksheetActivity extends AppCompatActivity {
         }
     }
 
+    // セルの色
     private static final int UNSELECTED_COLOR = Color.argb(0, 0, 0, 0);   // 透明
     private static final int SELECTED_COLOR = Color.argb(30, 0, 0, 255);   // 若干青（透明度のある青）
     private static final int RIGHT_COLOR = Color.argb(30, 0, 255, 0);   // 若干緑（透明度のある緑）
