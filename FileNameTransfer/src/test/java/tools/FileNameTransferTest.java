@@ -18,9 +18,11 @@ public class FileNameTransferTest {
     	Path testBaseDir = Paths.get(".\\test");
     	Path testTargetDir = Paths.get(testBaseDir.toString(), sdf.format(new Date()));
     	Path startDir = Paths.get(testTargetDir.toString(), "00_元");
+    	Path endDir = Paths.get(testTargetDir.toString(), "99_完了");
     	Files.createDirectories(startDir);
+    	Files.createDirectories(endDir);
 
-    	FileNameTransfer.main(new String[]{testTargetDir.toString(), startDir.toString()});
+    	FileNameTransfer.main(new String[]{startDir.toString(), testTargetDir.toString(), endDir.toString()});
     }
 
 }
