@@ -22,7 +22,12 @@ public class FileNameTransferTest {
     	Files.createDirectories(startDir);
     	Files.createDirectories(endDir);
 
-    	FileNameTransfer.main(new String[]{startDir.toString(), testTargetDir.toString(), endDir.toString()});
+        Files.createFile(Paths.get(startDir.toString(), "xxxxx(20180101-0001).ts"));
+        Files.createFile(Paths.get(startDir.toString(), "xxxxx yyyyy(20180101-0002).ts"));
+        Files.createFile(Paths.get(startDir.toString(), "xxxxx yyyyy zzzzz(20180101-0003).ts"));
+        Files.createFile(Paths.get(startDir.toString(), "ｘｘｘｘｘ　ｙｙｙｙｙ　ｚｚｚｚｚ(20180101-0004).ts"));
+
+    	FileNameTransfer.main(new String[]{startDir.toString(), endDir.toString(), testTargetDir.toString()});
     }
 
 }

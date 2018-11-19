@@ -8,7 +8,7 @@ public class SplitMainTitleAndSubTitle extends FileNameTransferBase {
 	}
 
 	@Override
-	public void process(String workDirectory, String toDirectory, String fileName) {
+	public void process(String workDirectory, String fileName) {
 		// TODO 自動生成されたメソッド・スタブ
 
 	}

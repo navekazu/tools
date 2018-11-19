@@ -6,9 +6,9 @@ import java.nio.file.Paths;
 
 public abstract class FileNameTransferBase {
 	protected String prefixName;
-	protected Path workDirectory;
+	protected String baseWorkDirectory;
 
-	public void setPrefixName(String prefixName) {
+    public void setPrefixName(String prefixName) {
 		this.prefixName = prefixName;
 	}
 
@@ -16,11 +16,15 @@ public abstract class FileNameTransferBase {
 		return prefixName==null? name: prefixName+"_"+name;
 	}
 
-	public String getWorkDirectory(String base) {
-		Path path = Paths.get(base, getName());
+    public void setBaseWorkDirectory(String baseWorkDirectory) {
+        this.baseWorkDirectory = baseWorkDirectory;
+    }
+
+	public String getWorkDirectory() {
+		Path path = Paths.get(this.baseWorkDirectory, getName());
 		return path.toString();
 	}
 
 	public abstract String getName();
-	public abstract void process(String workDirectory, String toDirectory, String fileName) throws IOException ;
+	public abstract void process(String workDirectory, String fileName) throws IOException ;
 }
