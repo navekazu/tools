@@ -50,6 +50,10 @@ public class FileNameTransfer {
         NopTransfer lastTransfer = new NopTransfer();
         lastTransfer.setBaseWorkDirectory(toDirectory);
         transferList.add(lastTransfer);
+
+        // 初期化
+        transferList.stream()
+            .forEach(t->t.initialize());
     }
 
     private void run() throws IOException {

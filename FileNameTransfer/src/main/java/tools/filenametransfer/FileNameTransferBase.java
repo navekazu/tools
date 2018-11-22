@@ -25,6 +25,9 @@ public abstract class FileNameTransferBase {
 		return path.toString();
 	}
 
-	public abstract String getName();
+    protected void initialize() {
+    }
+
+    public abstract String getName();
 	public abstract void process(String workDirectory, String fileName) throws IOException ;
 }
