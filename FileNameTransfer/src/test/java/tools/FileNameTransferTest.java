@@ -29,7 +29,7 @@ public class FileNameTransferTest {
         Files.createFile(Paths.get(startDir.toString(), "xxxxx yyyyy(20180101-0002).ts"));
         Files.createFile(Paths.get(startDir.toString(), "xxxxx yyyyy zzzzz(20180101-0003).ts"));
         Files.createFile(Paths.get(startDir.toString(), "ｘｘｘｘｘ　ｙｙｙｙｙ　ｚｚｚｚｚ(20180101-0004).ts"));
-        Files.createFile(Paths.get(startDir.toString(), "あいうえおかきくけこ (20180101-0005).ts"));
+        Files.createFile(Paths.get(startDir.toString(), "あいうえお【かきくけこ】 (20180101-0005).ts"));
         Files.createFile(Paths.get(startDir.toString(), "特定の名前あいうえお (20180101-0006).ts"));
 
     	FileNameTransfer.main(new String[]{startDir.toString(), endDir.toString(), testTargetDir.toString()});
@@ -38,7 +38,7 @@ public class FileNameTransferTest {
     	assertThat(Files.exists(Paths.get(endDir.toString(), "xxxxx (20180101-0002) yyyyy.ts")), is(true));
     	assertThat(Files.exists(Paths.get(endDir.toString(), "xxxxx (20180101-0003) yyyyy zzzzz.ts")), is(true));
     	assertThat(Files.exists(Paths.get(endDir.toString(), "xxxxx (20180101-0004) yyyyy zzzzz.ts")), is(true));
-        assertThat(Files.exists(Paths.get(endDir.toString(), "あいうえお (20180101-0005) かきくけこ.ts")), is(true));
+        assertThat(Files.exists(Paths.get(endDir.toString(), "あいうえお (20180101-0005) 【かきくけこ】.ts")), is(true));
         assertThat(Files.exists(Paths.get(endDir.toString(), "特定の名前 (20180101-0005) あいうえお.ts")), is(true));
     }
 
