@@ -1,0 +1,17 @@
+{
+  "manifest_version": 3,
+  "name": "Backlog Textarea Resizer",
+  "version": "1.0",
+  "description": "Backlogのチケット作成時の説明欄を広げる",
+  "permissions": ["scripting", "activeTab"],
+  "content_scripts": [
+    {
+      "matches": ["https://*.backlog.jp/view/*/edit"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ],
+  "icons": {
+    "48": "icon.png"
+  }
+}
